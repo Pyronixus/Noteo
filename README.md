@@ -1,4 +1,4 @@
-# Noteo - Application de Gestion de Notes Académiques ✨
+# Noteo - Application de Gestion de Notes ✨
 ![Noteo-logo](Source/Assets/Img/logo.png)
 
 ## Description
