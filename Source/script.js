@@ -1,4 +1,16 @@
-        // --- AUDIO ENGINE (ASMR) ---
+      /*
+Noteo
+Copyright (C) 2026 Pyro
+
+This file is part of Noteo.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+*/
+
+// --- AUDIO ENGINE (ASMR) ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContext();
         
