@@ -77,11 +77,11 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
 
 ## Auteur
 
-  - \[Pyro\](\[https://github.com/Pyronixus\]) ✍️
+  - \Pyro\(\https://github.com/Pyronixus\) ✍️
 
 ## Licence
 
-Ce projet est sous licence \[Licence MIT\](\[URL de la licence MIT\]). 📜
+Ce projet est sous licence \Licence MIT\(\URL\). 📜
 
 ## Structure du Code
 
