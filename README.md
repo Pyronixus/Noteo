@@ -1,5 +1,5 @@
 # Noteo - Application de Gestion de Notes Académiques ✨
-![Noteo-logo](Source/Assets/Img/logo.png =50x50)
+![Noteo-logo](Source/Assets/Img/logo.png | width=100)
 
 ## Description
 
