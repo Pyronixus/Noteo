@@ -1,6 +1,6 @@
 # Noteo - Application de Gestion de Notes Académiques
  ✨
-![Noteo-logo](Assets/Noteo-logo.png)
+![Noteo-logo](Assets/Img/Noteo-logo.png)
 
 ## Description
 
@@ -65,19 +65,20 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
    - Entrer le code PIN si le compte est protégé.
 
 3. **Gérer les matières et les notes:**
-   - Utiliser le formulaire de calcul pour ajouter des matières et des notes.
+   - Utiliser le formulaire d'ajout de matière pour en ajouter une et le site calcule les notes et moyenne automatiquement.
    - Les notes sont affichées dans des cartes avec la moyenne calculée.
 
 4. **Explorer les graphiques:**
-   - Naviguer vers l'onglet "Graphiques" pour visualiser les données.
+   - Naviguer vers l'onglet "Analyses" pour visualiser les données.
    - Sélectionner les matières à afficher et choisir un type de graphique.
+   - Les graphiques gardent les moyennes selectionnées sauf si vous cliquez sur Mettre à jour.
 
 5. **Personnaliser l'application:**
    - Ouvrir les paramètres pour modifier le thème, les sons, etc.
 
 ## Auteur
 
-  - \[Votre Nom\](\[Votre URL GitHub\]) ✍️
+  - \[Pyro\](\[https://github.com/Pyronixus\]) ✍️
 
 ## Licence
 
@@ -85,9 +86,9 @@ Ce projet est sous licence \[Licence MIT\](\[URL de la licence MIT\]). 📜
 
 ## Structure du Code
 
-  - `index.html`: Structure principale de l'application.
-  - `style.css`: Styles CSS pour l'apparence de l'application. 🎨
-  - `script.js`: Logique JavaScript de l'application.
+  - `index.html`: Structure principale de l'application. (dans `Source/`)
+  - `style.css`: Styles CSS pour l'apparence de l'application. 🎨 (dans `Source/`)
+  - `script.js`: Logique JavaScript de l'application. (dans `Source/`)
   - `assets/`: Dossier contenant les ressources (images, polices, etc.).
 
 ## Configuration
