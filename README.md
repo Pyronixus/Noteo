@@ -1,6 +1,6 @@
 # Noteo - Application de Gestion de Notes Académiques
-
-![Noteo Interface](https://via.placeholder.com/800x400?text=Noteo+Interface+Screenshot)
+ ✨
+![Noteo-logo](Assets/Noteo-logo.png)
 
 ## Description
 
@@ -8,7 +8,7 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
 
 ## Fonctionnalités Principales
 
-- **Gestion des matières:**
+- **Gestion des matières:** 📚
   - Création, modification et suppression de matières.
   - Définition de la couleur pour chaque matière.
 
@@ -18,18 +18,18 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
   - Affichage des notes avec la date.
 
 - **Visualisation des données:**
-  - Graphiques interactifs pour analyser les performances (moyennes, distribution des notes, etc.).
+  - Graphiques interactifs 📊 pour analyser les performances (moyennes, distribution des notes, etc.).
   - Différents types de graphiques disponibles (barres, lignes, radar, etc.).
   - Mode plein écran pour les graphiques.
 
 - **Gestion des périodes:**
-  - Organisation des notes par périodes (semestres ou trimestres).
+  - Organisation des notes par périodes 📅 (semestres ou trimestres).
   - Ajout, suppression et renommage des périodes.
 
 - **Authentification:**
-  - Protection des comptes par code PIN (4, 6 ou 8 chiffres).
+  - Protection des comptes par code PIN 🔒 (4, 6 ou 8 chiffres).
   - Possibilité de réinitialiser le code PIN via un email de récupération simulé.
-
+ 🎨
 - **Personnalisation:**
   - Thèmes clair et sombre avec option de thème système.
   - Options de configuration pour le son, les animations, le flou, etc.
@@ -37,7 +37,7 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
   - Police dyslexique pour améliorer la lisibilité.
 
 - **Import/Export des données:**
-  - Export complet du compte (profil, notes, paramètres).
+  - Export complet du compte 📤 (profil, notes, paramètres).
   - Export sélectif des données par période.
   - Import des données à partir de fichiers JSON.
 
@@ -47,25 +47,15 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
 
 ## Technologies Utilisées
 
-- **HTML:** Structure de la page web.
+- **HTML:** Structure de la page web. 🌐
 - **CSS:** Style visuel de l'application avec glassmorphism.
 - **JavaScript:** Logique de l'application, gestion des données et interactivité.
 - **Chart.js:** Bibliothèque JavaScript pour la création de graphiques.
 - **LocalStorage:** Stockage des données utilisateur dans le navigateur.
-
-## Installation
-
-1. **Cloner le dépôt GitHub:**
-   ```bash
-   git clone [URL du dépôt]
-   cd Noteo
-   ```
-
-2. **Ouvrir le fichier `index.html` dans un navigateur web:** L'application est entièrement statique et ne nécessite pas de serveur pour fonctionner.
-
+  
 ## Utilisation
 
-1. **Créer un nouveau compte:**
+1. **Créer un nouveau compte:** ➕
    - Remplir le formulaire avec le prénom, le nom et le type de période (semestres ou trimestres).
    - Cliquer sur "Créer un compte".
 
@@ -87,16 +77,16 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
 
 ## Auteur
 
-  - \[Votre Nom\](\[Votre URL GitHub\])
+  - \[Votre Nom\](\[Votre URL GitHub\]) ✍️
 
 ## Licence
 
-Ce projet est sous licence \[Licence MIT\](\[URL de la licence MIT\]).
+Ce projet est sous licence \[Licence MIT\](\[URL de la licence MIT\]). 📜
 
 ## Structure du Code
 
   - `index.html`: Structure principale de l'application.
-  - `style.css`: Styles CSS pour l'apparence de l'application.
+  - `style.css`: Styles CSS pour l'apparence de l'application. 🎨
   - `script.js`: Logique JavaScript de l'application.
   - `assets/`: Dossier contenant les ressources (images, polices, etc.).
 
@@ -118,4 +108,4 @@ incluent:
 
 Cette application est conçue pour être simple à maintenir. Les données sont
 stockées localement dans le navigateur, ce qui signifie qu'il n'y a pas de base
-de données à gérer.
+de données à gérer. ✅
