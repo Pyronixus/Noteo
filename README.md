@@ -77,7 +77,7 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
 
 ## Auteur
 
-  - Créé par \*Pyro*\ ( profil : https://github.com/Pyronixus) ✍️
+  - Créé par /*Pyro*/ ( profil : https://github.com/Pyronixus) ✍️
 
 ## Licence
 
