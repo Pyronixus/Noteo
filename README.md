@@ -85,9 +85,9 @@ Ce projet est sous licence Licence MIT (URL). 📜
 
 ## Structure du Code
 
-  - `index.html`: Structure principale de l'application. (dans `Source/`)
-  - `style.css`: Styles CSS pour l'apparence de l'application. 🎨 (dans `Source/`)
-  - `script.js`: Logique JavaScript de l'application. (dans `Source/`)
+  - `index.html`: Structure principale de l'application.
+  - `style.css`: Styles CSS pour l'apparence de l'application. 🎨
+  - `script.js`: Logique JavaScript de l'application. (accessibles dans `Source/`)
   - `assets/`: Dossier contenant les ressources (images, polices, etc.).
 
 ## Configuration
