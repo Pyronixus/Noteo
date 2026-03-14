@@ -36,9 +36,10 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
   - Police dyslexique pour améliorer la lisibilité.
 
 - **Import/Export des données:**
-  - Export complet du compte 📤 (profil, notes, paramètres).
-  - Export sélectif des données par période.
-  - Import des données à partir de fichiers JSON.
+  - Copie complète du compte 📤 (profil, notes, paramètres).
+  - Copie sélective des données (notes) par période (semestres/trimestres).
+  - Import des données à partir de fichiers JSON (exportés depuis le site).
+  - Le tout à but de *souvenir*.
 
 - **Interface utilisateur:**
   - Design moderne avec glassmorphism.
