@@ -5,6 +5,19 @@
 
 Noteo est une application web conçue pour aider les étudiants à gérer leurs notes académiques de manière efficace. Elle offre une interface utilisateur intuitive et des fonctionnalités complètes pour suivre les moyennes, organiser les matières et analyser les performances scolaires. L'application utilise un design moderne avec glassmorphism et propose des options de personnalisation pour améliorer l'expérience utilisateur.
 
+## Version
+
+Version actuelle : 1.6
+
+### Changelog
+
+- **1.0 (beta)** : Application de base
+- **1.2** : Ajout des couleurs et paramètres
+- **1.3** : Ajout du code PIN, changement rapide de compte, enrichissement des paramètres
+- **1.4** : Ajout des sons, mise à jour de l'interface pour intégrer du glassmorphism
+- **1.5** : Correction d'une multitude de bugs
+- **1.6 (actuelle)** : Ajout d'un footer, option de tri, correction d'une multitude de bugs
+
 ## Fonctionnalités Principales
 
 - **Gestion des matières:** 📚
@@ -82,7 +95,7 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
 
 ## Licence
 
-Ce projet est sous licence Licence MIT (URL). 📜
+Ce projet est sous licence GPL-3.0. 📜
 
 ## Structure du Code
 
