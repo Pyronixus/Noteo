@@ -94,8 +94,11 @@
                 styleEl.id = 'dynamic-app-styles';
                 document.head.appendChild(styleEl);
             }
-            const allColors = [...new Set(subjects.map(s => s.color).filter(Boolean))];
-            styleEl.innerHTML = allColors.map(color => `.hover-border-${color.substring(1)}:hover { border-color: ${color} !important; }`).join('\n');
+                    const allColors = [...new Set(subjects.map(s => s.color).filter(Boolean))];
+                    const key = allColors.join(',');
+                    if (updateDynamicStyles._lastKey === key) return; // no change
+                    updateDynamicStyles._lastKey = key;
+                    styleEl.innerHTML = allColors.map(color => `.hover-border-${color.substring(1)}:hover { border-color: ${color} !important; }`).join('\n');
         }
 
         // --- NOTIFICATIONS ---
@@ -126,9 +129,23 @@
             mainCardCollapsed: true,
             defaultSort: 'noteCount',
             sortOrder: 'desc',
+            tagColors: {},
+            manualGeneralAverage: null,
             autoReload: false
         };
         let appSettings = { ...defaultSettings };
+        const sortOptions = [
+            { value: 'date', label: "Date d'ajout", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M7 21h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" />' },
+            { value: 'noteCount', label: "Nombre de notes", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />' },
+            { value: 'average', label: "Moyenne", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l4 8 4-4 4 10 4-8" />' },
+            { value: 'alpha', label: "Alphabétique", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h7" />' },
+            { value: 'highestNote', label: "Meilleure note", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L12 15.347l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.957a1 1 0 00-.364-1.118L4.643 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L11.049 2.927z" />' },
+            { value: 'lowestNote', label: "Plus faible note", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v13m0 0l4-4m-4 4l-4-4" />' },
+            { value: 'stdDev', label: "Écart type", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16l4-8 4 4 4-10 4 8" />' },
+            { value: 'coefWeightedAvg', label: "Moyenne pondérée", icon: '<rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2" stroke="currentColor" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h.01M12 7h.01M16 7h.01M8 11h8M8 15h8" />' },
+            { value: 'lastModified', label: "Dernière modification", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20z" />' },
+            { value: 'customTag', label: "Tag", icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.59 13.41L13.41 20.59a2 2 0 01-2.83 0L3.41 13.41a2 2 0 010-2.83L10.59 3.41a2 2 0 012.83 0L20.59 10.59a2 2 0 010 2.82z" />' }
+        ];
         let selectedColor = "#6366f1";
         let pinState = {
             mode: 'check', // 'check', 'set', 'confirm', 'verify'
@@ -207,6 +224,9 @@
                     }
                 }, 800); // This must match the loader's transition time
             }, 1000); // This is the minimum loading display time
+
+            // Cache important DOM elements for faster access
+            cacheDom();
 
             // Add event listeners for the duplicate subject modal
             document.getElementById('duplicate-opt-update').onclick = () => {
@@ -420,6 +440,7 @@
     renderGrades();
     updateSemesterUI();
     applyMainCardState();
+    updateSortButtonUI();
         }
 
         // --- NOUVEAUX MENUS (MODALS) ---
@@ -572,6 +593,36 @@
             document.getElementById('tuto-modal').classList.add('open');
         }
 
+        function openVersionModal() {
+            playSound('swoosh');
+            document.body.classList.add('modal-open');
+            document.getElementById('version-modal').classList.add('open');
+        }
+
+        function openHelpModal() {
+            playSound('swoosh');
+            document.body.classList.add('modal-open');
+            document.getElementById('help-modal').classList.add('open');
+        }
+
+        function openLegalModal() {
+            playSound('swoosh');
+            document.body.classList.add('modal-open');
+            document.getElementById('legal-modal').classList.add('open');
+        }
+
+        function openAverageInfoModal() {
+            playSound('swoosh');
+            document.body.classList.add('modal-open');
+            document.getElementById('average-info-modal').classList.add('open');
+        }
+
+        function openPyroModal() {
+            playSound('swoosh');
+            document.body.classList.add('modal-open');
+            document.getElementById('pyro-modal').classList.add('open');
+        }
+
         function openDuplicateSubjectModal(data) {
             pendingSubjectData = data;
             document.getElementById('duplicate-subject-name').textContent = data.name;
@@ -624,12 +675,20 @@
             document.getElementById('setting-reduceMotion').checked = appSettings.reduceMotion;
             document.getElementById('setting-dyslexicFont').checked = appSettings.dyslexicFont;
             document.getElementById('setting-periodType').value = user.periodType || 'semesters';
-            document.getElementById('setting-defaultSort').value = appSettings.defaultSort;
+            const defaultSortEl = document.getElementById('setting-defaultSort');
+            if (defaultSortEl) defaultSortEl.value = appSettings.defaultSort;
             
-            // Sort Toggle UI
+            // Sort Toggle UI removed from settings (handled in main UI)
             const sortContainer = document.getElementById('sort-order-container');
-            sortContainer.classList.remove('hidden'); // Always show for flexibility, or filter by type if needed
+            if (sortContainer) sortContainer.classList.add('hidden');
             updateSortButtonUI();
+
+            // Moyenne générale manuelle (Override)
+            const manualAvgInput = document.getElementById('manual-general-average-input');
+            if (manualAvgInput) {
+                const override = appSettings.manualGeneralAverage !== null && !isNaN(parseFloat(appSettings.manualGeneralAverage)) ? parseFloat(appSettings.manualGeneralAverage) : '';
+                manualAvgInput.value = override !== '' ? override.toFixed(2) : '';
+            }
 
             // --- PIN Management ---
             const pinArea = document.getElementById('pin-management-area');
@@ -680,13 +739,71 @@ if (fullscreenChart) {
                 return;
             }
 
-            subjects.forEach(sub => {
+            const computedGeneralAverage = subjects.reduce((sum, s) => sum + s.avg, 0) / subjects.length;
+            const overrideAvg = appSettings.manualGeneralAverage !== null && !isNaN(parseFloat(appSettings.manualGeneralAverage)) ? parseFloat(appSettings.manualGeneralAverage) : null;
+            const displayedGeneralAverage = overrideAvg !== null ? overrideAvg : computedGeneralAverage;
+
+            notesList.innerHTML = `
+                <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)] space-y-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h4 class="font-bold text-[var(--text-main)]">Moyenne générale</h4>
+                            <p class="text-xs text-[var(--text-muted)]">La moyenne générale est calculée sans coefficients, donc elle peut différer de celle affichée sur Pronote. Vous pouvez la modifier manuellement ici.</p>
+                        </div>
+                        <button onclick="openAverageInfoModal()" class="text-sm font-bold text-indigo-500 hover:underline">?</button>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+                        <input id="manual-general-average-input" type="number" step="0.01" min="0" max="20" value="${displayedGeneralAverage.toFixed(2)}" oninput="updateManualGeneralAverage(this.value)" class="w-full sm:w-52 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-body)] text-[var(--text-main)]">
+                        <button onclick="resetManualGeneralAverage()" class="mt-2 sm:mt-0 w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-500 text-white font-bold hover:bg-indigo-400 transition-all">Réinitialiser</button>
+                    </div>
+                </div>
+            `;
+
+            // Tags management UI
+            const allTags = getAllTags();
+            const tagOverviewHtml = `
+                <div class="mt-4 p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-bold text-[var(--text-main)]">Gérer les tags</h4>
+                        <button onclick="addGlobalTagPrompt()" class="px-3 py-1 rounded-lg bg-indigo-500 text-white text-sm font-bold">Ajouter un tag</button>
+                    </div>
+                    <div id="tags-overview" class="space-y-2">
+                        ${allTags.length ? allTags.map(t => `<div class="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-body)] border border-[var(--border)]"><div class="flex items-center gap-3"><input type="color" value="${appSettings.tagColors?.[t] || '#6366f1'}" onchange="setTagColor('${t}', this.value)" class="w-8 h-8 rounded-lg border-0"><span class="font-bold">${t}</span><span class="text-xs text-[var(--text-muted)]">(${subjects.filter(s=>Array.isArray(s.tags)&&s.tags.includes(t)).length})</span></div><div><button onclick="deleteTag('${t}')" class="px-2 py-1 rounded-lg text-rose-500 border border-rose-200 text-sm">Supprimer</button></div></div>`).join('') : '<p class="text-sm text-[var(--text-muted)]">Aucun tag défini.</p>'}
+                    </div>
+                </div>
+            `;
+            notesList.insertAdjacentHTML('beforeend', tagOverviewHtml);
+
+            // Tri des matières dans l'édition rapide (même logique que l'affichage principal)
+            const sortedSubjects = [...subjects];
+            switch (appSettings.defaultSort) {
+                case 'average':
+                    sortedSubjects.sort((a, b) => appSettings.sortOrder === 'asc' ? a.avg - b.avg : b.avg - a.avg);
+                    break;
+                case 'alpha':
+                    sortedSubjects.sort((a, b) => appSettings.sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+                    break;
+                case 'noteCount':
+                    sortedSubjects.sort((a, b) => appSettings.sortOrder === 'asc' ? a.history.length - b.history.length : b.history.length - a.history.length);
+                    break;
+                case 'date':
+                default:
+                    sortedSubjects.sort((a, b) => appSettings.sortOrder === 'asc' ? a.id - b.id : b.id - a.id);
+                    break;
+            }
+
+            sortedSubjects.forEach(sub => {
                 const subDiv = document.createElement('div');
                 subDiv.className = "bg-[var(--input-bg)] rounded-2xl border border-[var(--border)] overflow-hidden";
-                let inner = `<div class="p-4 font-black flex justify-between items-center gap-2" style="background-color: ${hex2rgba(sub.color, 0.1)};">
-                                <input type="color" value="${sub.color}" onchange="changeSubjectColor(${sub.id}, this.value)" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent">
-                                <span class="flex-grow" style="color:${sub.color}">${sub.name}</span>
-                                <span class="text-xs bg-white/50 px-2 py-1 rounded-lg" style="color:${sub.color}">${sub.history.length} notes</span>
+                let inner = `<div class="p-4 font-black flex flex-col md:flex-row md:items-center justify-between items-start gap-2" style="background-color: ${hex2rgba(sub.color, 0.1)};">
+                                <div class="flex items-center gap-3 w-full md:w-auto">
+                                    <input type="color" value="${sub.color}" onchange="changeSubjectColor(${sub.id}, this.value)" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent">
+                                    <span class="flex-grow font-bold" style="color:${sub.color}">${sub.name}</span>
+                                </div>
+                                <div class="w-full md:w-auto mt-3 md:mt-0 flex items-center gap-3">
+                                    <input type="text" value="${Array.isArray(sub.tags)?sub.tags.join(', '):''}" onchange="updateSubjectTags(${sub.id}, this.value)" placeholder="Tags (séparés par des virgules)" class="px-3 py-2 rounded-xl border border-[var(--border)] w-full md:w-64 bg-[var(--bg-body)]">
+                                    <span class="text-xs bg-white/50 px-2 py-1 rounded-lg" style="color:${sub.color}">${sub.history.length} notes</span>
+                                </div>
                              </div><div class="p-2 space-y-1">`;
                 sub.history.forEach(n => {
                     inner += `
@@ -722,6 +839,52 @@ if (fullscreenChart) {
                 `;
                 accList.appendChild(div);
             });
+        }
+
+        // Tag management helpers
+        function addGlobalTagPrompt() {
+            const tag = prompt('Entrez le nom du nouveau tag :');
+            if (!tag) return;
+            const t = tag.trim();
+            // ensure tagColors entry
+            appSettings.tagColors = appSettings.tagColors || {};
+            if (!appSettings.tagColors[t]) appSettings.tagColors[t] = '#6366f1';
+            // Assign to no subjects by default
+            markTagCacheDirty();
+            scheduleSaveSettings();
+            renderSettingsDataList();
+        }
+
+        function setTagColor(tag, color) {
+            if (!tag) return;
+            appSettings.tagColors = appSettings.tagColors || {};
+            appSettings.tagColors[tag] = color;
+            scheduleSaveSettings();
+            scheduleRenderGrades();
+            renderSettingsDataList();
+        }
+
+        function deleteTag(tag) {
+            if (!confirm(`Supprimer le tag "${tag}" de toutes les matières ?`)) return;
+            // remove tag mapping
+            if (appSettings.tagColors) delete appSettings.tagColors[tag];
+            // remove tag from all subjects
+            subjects.forEach(s => { if (Array.isArray(s.tags)) s.tags = s.tags.filter(t => t !== tag); });
+            markTagCacheDirty();
+            scheduleSave(); scheduleSaveSettings(); scheduleRenderGrades(); renderSettingsDataList();
+            playSound('delete');
+        }
+
+        function updateSubjectTags(subjectId, value) {
+            const sub = subjects.find(s => s.id === subjectId);
+            if (!sub) return;
+            const tags = value.split(',').map(t => t.trim()).filter(t => t.length > 0);
+            sub.tags = Array.from(new Set(tags));
+            // ensure tagColors entries exist for new tags
+            appSettings.tagColors = appSettings.tagColors || {};
+            sub.tags.forEach(t => { if (!appSettings.tagColors[t]) appSettings.tagColors[t] = '#6366f1'; });
+            markTagCacheDirty();
+            scheduleSave(); scheduleSaveSettings(); scheduleRenderGrades(); renderSettingsDataList(); playSound('success');
         }
 
         async function submitPin() {
@@ -846,8 +1009,8 @@ if (fullscreenChart) {
                 } else {
                     recalculateSubjectAverage(sub);
                 }
-                save();
-                renderGrades();
+                scheduleSave();
+                scheduleRenderGrades();
                 playSound('delete');
                 const dataTab = document.getElementById('settings-tab-content-data');
                 if (!dataTab.classList.contains('hidden')) {
@@ -858,7 +1021,7 @@ if (fullscreenChart) {
         
         function changeSubjectColor(subId, newColor) {
             const sub = subjects.find(s => s.id === subId);
-            if(sub) { sub.color = newColor; save(); renderGrades(); updateDynamicStyles(); }
+            if(sub) { sub.color = newColor; scheduleSave(); scheduleRenderGrades(); updateDynamicStyles(); }
             playSound('click');
         }
 
@@ -978,7 +1141,40 @@ if (fullscreenChart) {
             const saved = JSON.parse(localStorage.getItem('noteo_v9_settings'));
             appSettings = { ...defaultSettings, ...saved };
         }
-        function saveSettings() { localStorage.setItem('noteo_v9_settings', JSON.stringify(appSettings)); }
+                function saveSettings() { localStorage.setItem('noteo_v9_settings', JSON.stringify(appSettings)); }
+
+                // --- Performance helpers: debounced saves and render batching ---
+                function debounce(fn, wait) {
+                    let t = null;
+                    return function(...args) {
+                        if (t) clearTimeout(t);
+                        t = setTimeout(() => { t = null; fn.apply(this, args); }, wait);
+                    };
+                }
+
+                const scheduleSave = debounce(() => save(), 200);
+                const scheduleSaveSettings = debounce(() => saveSettings(), 200);
+                // Use rAF-based scheduling for renders to align with paint and avoid setTimeout churn
+                let _renderRaf = null;
+                function scheduleRenderGrades() {
+                    if (_renderRaf) cancelAnimationFrame(_renderRaf);
+                    _renderRaf = requestAnimationFrame(() => { _renderRaf = null; renderGrades(); });
+                }
+
+                // DOM cache and tag memoization
+                const DOM_CACHE = {};
+                function cacheDom() {
+                    DOM_CACHE.gradesContainer = document.getElementById('grades-container');
+                    DOM_CACHE.gradesActions = document.getElementById('grades-actions');
+                    DOM_CACHE.sortMenu = document.getElementById('sort-menu');
+                    DOM_CACHE.tabCharts = document.getElementById('tab-charts');
+                    DOM_CACHE.chartsGrid = document.getElementById('charts-grid');
+                }
+
+                // Tag cache to avoid recomputing tags repeatedly during sorting/rendering
+                const tagCache = { version: 0, tags: [] };
+                function markTagCacheDirty() { tagCache.version++; }
+
 
         function toggleSortOrder() {
             const newOrder = appSettings.sortOrder === 'asc' ? 'desc' : 'asc';
@@ -999,6 +1195,80 @@ if (fullscreenChart) {
                 label.textContent = 'Décroissant';
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>';
             }
+            // Mini UI in the sort menu
+            const mini = document.getElementById('sort-order-btn-mini');
+            if (mini) {
+                const miniLabel = mini.querySelector('span');
+                const miniIcon = mini.querySelector('svg');
+                if (appSettings.sortOrder === 'asc') {
+                    miniLabel.textContent = 'Croissant';
+                    miniIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>';
+                } else {
+                    miniLabel.textContent = 'Décroissant';
+                    miniIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>';
+                }
+            }
+            // Update main sort button label/icon
+            const labelMain = document.getElementById('sort-menu-btn-label');
+            const iconMain = document.getElementById('sort-menu-btn-icon');
+            const current = sortOptions.find(o => o.value === appSettings.defaultSort) || sortOptions[0];
+            if (labelMain) labelMain.textContent = current ? current.label : 'Trier';
+            if (iconMain && current) iconMain.innerHTML = current.icon;
+        }
+
+        function toggleSortMenu(e) {
+            e.stopPropagation(); playSound('swoosh');
+            const menu = document.getElementById('sort-menu');
+            if (!menu) return;
+            const showing = menu.style.display === 'block';
+            document.querySelectorAll('.dropdown-menu').forEach(m => { if (m !== menu) m.classList.remove('show'); m.style.display = 'none'; });
+            if (!showing) {
+                renderSortMenu();
+                menu.style.display = 'block';
+                setTimeout(() => menu.classList.add('show'), 10);
+            } else {
+                menu.classList.remove('show');
+                setTimeout(() => menu.style.display = 'none', 200);
+            }
+        }
+
+        function renderSortMenu() {
+            const list = document.getElementById('sort-options-list');
+            if (!list) return;
+            list.innerHTML = '';
+            sortOptions.forEach(opt => {
+                if (opt.value === 'customTag' && getAllTags().length === 0) return; // don't show Tag option when no tags exist
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--input-bg)] flex items-center gap-3';
+                btn.dataset.value = opt.value;
+                btn.innerHTML = `<svg class="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">${opt.icon}</svg><span class="font-bold">${opt.label}</span>`;
+                if (appSettings.defaultSort === opt.value) btn.classList.add('bg-indigo-500/10', 'text-indigo-600');
+                btn.onclick = (ev) => {
+                    ev.stopPropagation();
+                    setSortCriterion(opt.value);
+                    document.getElementById('sort-menu').classList.remove('show');
+                    setTimeout(() => document.getElementById('sort-menu').style.display = 'none', 200);
+                };
+                list.appendChild(btn);
+            });
+        }
+
+        function getAllTags() {
+            // Use cached value when possible
+            const currentVersion = subjects.map(s => (Array.isArray(s.tags) ? s.tags.join('|') : '')).join('||');
+            if (tagCache._lastVersion === currentVersion && tagCache.tags.length) return tagCache.tags;
+            const all = new Set();
+            subjects.forEach(s => { if (Array.isArray(s.tags)) s.tags.forEach(t => { const tt = (t||'').toString().trim(); if (tt) all.add(tt); }); });
+            tagCache.tags = Array.from(all);
+            tagCache._lastVersion = currentVersion;
+            return tagCache.tags;
+        }
+
+        function setSortCriterion(value) {
+            updateSetting('defaultSort', value);
+            updateSortButtonUI();
+            renderGrades();
+            playSound('click');
         }
 
         function requestReload() {
@@ -1056,7 +1326,7 @@ if (fullscreenChart) {
                         }
                     }
 
-                    save(); // Save academicData changes
+                    scheduleSave(); // Save academicData changes (debounced)
                     saveUserProfile(); // Save user profile change
                     requestReload(); // Ask for reload to ensure clean state
                     playSound('success');
@@ -1087,8 +1357,21 @@ if (fullscreenChart) {
                 case 'reduceMotion': bodyClassList.toggle('no-animations', value); break; // Alias for animations
                 case 'dyslexicFont': bodyClassList.toggle('dyslexic-font', value); break;
                 case 'showNoteDate': renderGrades(); break;
-                case 'defaultSort': case 'sortOrder': renderGrades(); updateSettingsUI(); break;
+                case 'defaultSort': case 'sortOrder': case 'manualGeneralAverage': renderGrades(); updateSettingsUI(); break;
             }
+        }
+
+        function updateManualGeneralAverage(value) {
+            const parsed = parseFloat(value);
+            if (value === '' || isNaN(parsed)) {
+                updateSetting('manualGeneralAverage', null);
+            } else {
+                updateSetting('manualGeneralAverage', Math.min(20, Math.max(0, parsed)));
+            }
+        }
+
+        function resetManualGeneralAverage() {
+            updateSetting('manualGeneralAverage', null);
         }
 
         function applyAllSettings() {
@@ -1210,7 +1493,7 @@ if (fullscreenChart) {
                             academicData = data.academicData;
                             const currentSemester = academicData.semesters.find(s => s.id === academicData.currentSemesterId) || academicData.semesters[0];
                             subjects = currentSemester.subjects;
-                            save(); renderGrades(); updateSemesterUI(); playSound('success');
+                            scheduleSave(); scheduleRenderGrades(); updateSemesterUI(); playSound('success');
                         }
                     } 
                     // 3. Check for Old (single semester) format
@@ -1222,7 +1505,7 @@ if (fullscreenChart) {
                                 currentSemester.subjects = data.subjects;
                                 subjects = currentSemester.subjects;
                             }
-                            save(); renderGrades(); updateSemesterUI(); playSound('success');
+                            scheduleSave(); scheduleRenderGrades(); updateSemesterUI(); playSound('success');
                         }
                     }
                     else { throw new Error("Format de fichier non reconnu."); }
@@ -1234,7 +1517,7 @@ if (fullscreenChart) {
 
         function clearCurrentUserNotes() {
             if(!appSettings.confirmDelete || confirm("Voulez-vous vraiment supprimer toutes les notes pour la période actuelle ? Cette action est irréversible.")) {
-                subjects = []; save(); renderGrades(); playSound('delete'); updateSettingsUI();
+                subjects = []; scheduleSave(); scheduleRenderGrades(); playSound('delete'); updateSettingsUI();
             }
         }
 
@@ -1346,12 +1629,12 @@ if (fullscreenChart) {
                 
                 let sub;
                 if (mode === 'create') {
-                    sub = { id: Date.now(), name, color: finalColor, history: [] };
+                    sub = { id: Date.now(), name, color: finalColor, history: [], tags: [] };
                     subjects.push(sub);
                 } else { // mode === 'update'
                     sub = subjects.find(s => s.name.toLowerCase() === name.toLowerCase());
                     if (!sub) { // Fallback
-                        sub = { id: Date.now(), name, color: finalColor, history: [] };
+                        sub = { id: Date.now(), name, color: finalColor, history: [], tags: [] };
                         subjects.push(sub);
                     } else {
                         sub.color = finalColor; // Update color on existing
@@ -1379,7 +1662,7 @@ if (fullscreenChart) {
                 });
                 if(addedCount > 0) {
                     recalculateSubjectAverage(sub);
-                    save(); renderGrades(); playSound('success');
+                    scheduleSave(); scheduleRenderGrades(); playSound('success');
                     document.getElementById('calc-form').reset();
                     document.getElementById('calc-top').focus();
                 } else { throw new Error("Aucune note valide n'a été ajoutée."); }
@@ -1390,12 +1673,31 @@ if (fullscreenChart) {
             pendingSubjectData = null;
         }
 
+        // Close sort menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('sort-menu');
+            if (!menu) return;
+            if (menu.classList.contains('show')) {
+                // If click is inside the menu or the button, ignore
+                const btn = document.getElementById('sort-menu-btn');
+                if (btn && (btn.contains(e.target) || menu.contains(e.target))) return;
+                menu.classList.remove('show');
+                setTimeout(() => { menu.style.display = 'none'; }, 200);
+            }
+        });
+
         function renderGrades() {
-            const cont = document.getElementById('grades-container');
-            const actions = document.getElementById('grades-actions');
-            
-            cont.innerHTML = '';
-            cont.className = "flex items-start gap-8";
+            try {
+                const cont = document.getElementById('grades-container');
+                const actions = document.getElementById('grades-actions');
+
+                if (!cont) {
+                    console.error('renderGrades: #grades-container introuvable');
+                    return;
+                }
+
+                cont.innerHTML = '';
+                cont.className = "flex items-start gap-8";
 
             // Configuration des colonnes (Masonry JS)
             const isLg = window.matchMedia('(min-width: 1024px)').matches;
@@ -1417,7 +1719,9 @@ if (fullscreenChart) {
             if(actions) actions.classList.remove('hidden');
 
             const genTotal = subjects.reduce((sum, s) => sum + s.avg, 0);
-            const generalAverage = subjects.length > 0 ? genTotal / subjects.length : 0;
+            const computedGeneralAverage = subjects.length > 0 ? genTotal / subjects.length : 0;
+            const overrideAvg = appSettings.manualGeneralAverage !== null && !isNaN(parseFloat(appSettings.manualGeneralAverage)) ? parseFloat(appSettings.manualGeneralAverage) : null;
+            const generalAverage = overrideAvg !== null ? overrideAvg : computedGeneralAverage;
 
             const generalAverageSubject = {
                 id: 'general',
@@ -1433,7 +1737,39 @@ if (fullscreenChart) {
             };
 
             let sortedSubjects = [...subjects];
-            switch (appSettings.defaultSort) {
+            // If sorting by Tag: group by tag frequency (most-common tags first), subjects without tags at the bottom
+            if (appSettings.defaultSort === 'customTag') {
+                const allTags = getAllTags();
+                if (allTags.length === 0) {
+                    // fallback to date
+                    sortedSubjects.sort((a, b) => appSettings.sortOrder === 'asc' ? a.id - b.id : b.id - a.id);
+                } else {
+                    // count occurrences (use trimmed tag keys to avoid mismatch)
+                    const counts = {};
+                    allTags.forEach(t => counts[t] = 0);
+                    subjects.forEach(s => { if (Array.isArray(s.tags)) s.tags.forEach(t => { const tt = (t || '').toString().trim(); if (tt) counts[tt] = (counts[tt] || 0) + 1; }); });
+                    // sort tags by frequency
+                    const tagsSorted = Object.keys(counts).sort((a, b) => appSettings.sortOrder === 'asc' ? counts[a] - counts[b] : counts[b] - counts[a]);
+                    const added = new Set();
+                    const grouped = [];
+                    tagsSorted.forEach(tag => {
+                        const tagKey = tag.toString().trim();
+                        // collect subjects with this tag (compare trimmed)
+                        const group = subjects.filter(s => Array.isArray(s.tags) && s.tags.map(x => (x||'').toString().trim()).includes(tagKey) && !added.has(s.id));
+                        // sort within group by number of tags (more tags first) then name
+                        group.sort((a, b) => {
+                            const diff = (b.tags?.length || 0) - (a.tags?.length || 0);
+                            if (diff !== 0) return diff;
+                            return a.name.localeCompare(b.name);
+                        });
+                        group.forEach(s => { added.add(s.id); grouped.push(s); });
+                    });
+                    // then append those without tags
+                    subjects.forEach(s => { if (!added.has(s.id)) grouped.push(s); });
+                    sortedSubjects = grouped;
+                }
+            } else {
+                switch (appSettings.defaultSort) {
                 case 'average':
                     sortedSubjects.sort((a, b) => appSettings.sortOrder === 'asc' ? a.avg - b.avg : b.avg - a.avg);
                     break;
@@ -1451,13 +1787,28 @@ if (fullscreenChart) {
                     });
                     break;
             }
+            }
+            
 
             const allSubjectsToRender = [generalAverageSubject, ...sortedSubjects];
 
             const fragment = document.createDocumentFragment();
 
+            function getDisplayColorForSubject(sub) {
+                if (!sub) return null;
+                if (Array.isArray(sub.tags) && sub.tags.length) {
+                    // choose first tag with assigned color
+                    for (const t of sub.tags) {
+                        const c = appSettings.tagColors?.[t];
+                        if (c) return c;
+                    }
+                }
+                return sub.color || null;
+            }
+
             allSubjectsToRender.forEach((s, idx) => {
-                const bgColor = hex2rgba(s.color, 0.1);
+                const displayColor = getDisplayColorForSubject(s) || s.color || '#6366f1';
+                const bgColor = hex2rgba(displayColor, 0.1);
 
                 const card = document.createElement('div');
                 card.className = "glass-card p-6 rounded-[2rem] animate-entrance w-full";
@@ -1491,17 +1842,18 @@ if (fullscreenChart) {
                 card.innerHTML = `
                     <div class="flex items-start justify-between mb-4 z-10 relative">
                         <div class="flex items-center gap-4 cursor-pointer flex-grow group" onclick="toggleAcc('${s.id}')">
-                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" style="background:${s.color}; box-shadow: 0 4px 15px ${hex2rgba(s.color, 0.4)}">${s.id === 'general' ? 'G' : s.name[0].toUpperCase()}</div>
+                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" style="background:${displayColor}; box-shadow: 0 4px 15px ${hex2rgba(displayColor, 0.4)}">${s.id === 'general' ? 'G' : s.name[0].toUpperCase()}</div>
                             <div>
                                 <h4 class="text-lg font-black text-[var(--text-main)] leading-tight">${s.name}</h4>
-                                <p class="text-xs font-bold text-[var(--text-muted)] flex items-center gap-1 mt-1">
-                                    <span style="color:${s.color}">${s.history.length}</span> ${s.id === 'general' ? 'matières' : 'notes'}
+                                <p class="text-xs font-bold text-[var(--text-muted)] flex items-center gap-2 mt-1">
+                                    <span style="color:${displayColor}">${s.history.length}</span> ${s.id === 'general' ? 'matières' : 'notes'}
                                     <svg class="w-3 h-3 transition-transform duration-300" id="icon-${s.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </p>
+                                ${Array.isArray(s.tags) && s.tags.length ? `<div class="mt-2 flex items-center gap-2">${s.tags.map(t => `<span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-[var(--input-bg)] border border-[var(--border)]" style="color:${appSettings.tagColors?.[t] || displayColor}">${t}</span>`).join('')}</div>` : ''}
                             </div>
                         </div>
                         <div class="flex flex-col items-end gap-2">
-                            <div class="px-3 py-1 rounded-xl font-black text-xl hover:scale-110 transition-transform cursor-default" style="background:${bgColor}; color:${s.color}">${s.avg.toFixed(2)}</div>
+                            <div class="px-3 py-1 rounded-xl font-black text-xl hover:scale-110 transition-transform cursor-default" style="background:${bgColor}; color:${displayColor}">${s.avg.toFixed(2)}</div>
                         </div>
                     </div>
                     <div id="acc-${s.id}" class="history-content">
@@ -1513,7 +1865,13 @@ if (fullscreenChart) {
                 cols[idx % colCount].appendChild(card);
             });
             updateDynamicStyles();
-            if (!document.getElementById('tab-charts').classList.contains('hidden')) renderChartControls();
+            const tabChartsEl = document.getElementById('tab-charts');
+            if (tabChartsEl && !tabChartsEl.classList.contains('hidden')) renderChartControls();
+        } catch (err) {
+            console.error('Erreur dans renderGrades:', err);
+            const cont = document.getElementById('grades-container');
+            if (cont) cont.innerHTML = `<div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-bold">Erreur lors du rendu des cartes: ${err.message}</div>`;
+        }
         }
 
         function toggleAcc(id) {
@@ -1587,6 +1945,10 @@ if (fullscreenChart) {
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         Renommer la période active
                     </button>
+                    <button onclick="swapSemesterWith()" class="w-full text-left px-3 py-2 text-xs font-bold text-[var(--text-main)] hover:bg-[var(--input-bg)] rounded-xl transition-all flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10"></path></svg>
+                        Intervertir avec une autre période
+                    </button>
                     <button onclick="deleteSemester()" class="w-full text-left px-3 py-2 text-xs font-bold text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         Supprimer la période active
@@ -1647,6 +2009,41 @@ if (fullscreenChart) {
                 switchSemester(academicData.semesters[0].id);
                 playSound('delete');
             }
+        }
+
+        function swapSemesterWith() {
+            if (academicData.semesters.length < 2) {
+                alert("Il faut au moins deux périodes pour pouvoir les intervertir.");
+                playSound('error');
+                return;
+            }
+
+            const currentSemester = academicData.semesters.find(s => s.id === academicData.currentSemesterId);
+            const others = academicData.semesters.filter(s => s.id !== academicData.currentSemesterId);
+            const list = others.map((s, i) => `${i + 1}. ${s.name}`).join('\n');
+            const choice = prompt(`Sélectionnez le numéro de la période à intervertir avec "${currentSemester.name}":\n\n${list}`);
+            if (!choice) return;
+
+            const idx = parseInt(choice.trim(), 10) - 1;
+            if (isNaN(idx) || idx < 0 || idx >= others.length) {
+                alert('Choix invalide.');
+                playSound('error');
+                return;
+            }
+
+            const target = others[idx];
+            const temp = currentSemester.subjects;
+            currentSemester.subjects = target.subjects;
+            target.subjects = temp;
+
+            // Ensure the currently active semester data is kept in sync
+            subjects = currentSemester.subjects;
+
+            save();
+            renderGrades();
+            renderSettingsDataList();
+            playSound('success');
+            alert(`Contenu interverti entre "${currentSemester.name}" et "${target.name}".`);
         }
 
         function updateSemesterUI() {
@@ -2018,16 +2415,3 @@ if (fullscreenChart) {
                 }
             }
         });
-
-        window.onclick = (e) => {
-            const userMenu = document.getElementById('user-menu');
-            if (userMenu && !userMenu.contains(e.target) && !e.target.closest('button[onclick="toggleUserMenu(event)"]')) userMenu.classList.remove('show');
-            
-            const semesterMenu = document.getElementById('semester-menu');
-            if (semesterMenu && !semesterMenu.contains(e.target) && !e.target.closest('button[onclick="toggleSemesterMenu(event)"]')) semesterMenu.classList.remove('show');
-
-            const colorMenu = document.getElementById('color-menu');
-            if (colorMenu && !colorMenu.contains(e.target) && !e.target.closest('button[onclick="toggleColorMenu(event)"]')) colorMenu.classList.remove('show');
-
-            if (e.target.classList.contains('modal-overlay')) closeModals();
-        };
