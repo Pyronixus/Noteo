@@ -257,7 +257,24 @@
                         
                         <!-- Grades List -->
                         <div class="space-y-4">
-                            <div id="grades-actions" class="flex justify-end z-10 relative hidden">
+                            <div id="grades-actions" class="flex justify-end z-10 relative">
+                                <div class="relative mr-auto">
+                                    <button id="sort-menu-btn" onclick="toggleSortMenu(event)" title="Trier les matières" class="text-xs font-black uppercase tracking-widest text-[var(--text-main)] bg-[var(--input-bg)] px-3 py-2 rounded-xl border border-[var(--border)] flex items-center gap-3">
+                                        <svg id="sort-menu-btn-icon" class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                        <span id="sort-menu-btn-label" class="text-xs font-black">Trier</span>
+                                        <svg class="w-3 h-3 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div id="sort-menu" class="dropdown-menu absolute left-0 mt-3 w-64 glass-card rounded-[1.25rem] p-3 z-50" style="display:none;">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <strong class="text-sm">Trier les matières</strong>
+                                            <button onclick="toggleSortOrder()" id="sort-order-btn-mini" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 bg-indigo-500/10 px-2 py-1 rounded-lg transition-all flex items-center gap-2">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                                <span>Décroissant</span>
+                                            </button>
+                                        </div>
+                                        <div id="sort-options-list" class="grid grid-cols-1 gap-1"></div>
+                                    </div>
+                                </div>
                                 <button onclick="toggleAllAccordions()" class="text-xs font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-600 bg-indigo-500/10 px-4 py-2 rounded-xl transition-all hover:scale-105">
                                     Tout déplier / replier
                                 </button>
@@ -295,6 +312,15 @@
                 </div>
             </section>
         </main>
+
+        <footer class="mt-auto p-4 text-center text-[var(--text-muted)] text-sm">
+            <div class="flex items-center justify-center gap-6">
+                <span>Noteo <button onclick="openVersionModal()" class="hover:text-indigo-500 transition-colors font-bold">v1.6</button></span>
+                <span>Copyright © <button onclick="openPyroModal()" class="hover:text-purple-500 transition-colors"><strong>Pyro</strong></button></span>
+                <button onclick="openLegalModal()" class="hover:text-blue-500 transition-colors">Légal</button>
+                <button onclick="openHelpModal()" class="hover:text-green-500 transition-colors">Aide</button>
+            </div>
+        </footer>
     </div>
 
     <!-- Modal: Switch User -->
@@ -428,13 +454,11 @@
                     </div>
                     <h3 class="text-lg font-bold text-[var(--text-main)] pt-4">Affichage des listes</h3>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
-                        <label for="setting-defaultSort"><div><h4 class="font-bold text-[var(--text-main)]">Tri par défaut des matières</h4><p class="text-xs text-[var(--text-muted)]">Ordre d'affichage des cartes de matières.</p></div></label>
-                        <select id="setting-defaultSort" title="Tri par défaut" onchange="updateSetting('defaultSort', this.value)" class="bg-[var(--bg-body)] border border-[var(--border)] rounded-lg px-3 py-1 font-bold">
-                            <option value="date" title="Trier par date d'ajout">Date d'ajout</option>
-                            <option value="noteCount">Nombre de notes</option>
-                            <option value="average">Moyenne</option>
-                            <option value="alpha">Alphabétique</option>
-                        </select>
+                        <div>
+                            <h4 class="font-bold text-[var(--text-main)]">Tri des matières</h4>
+                            <p class="text-xs text-[var(--text-muted)]">Le tri se gère via le bouton "Trier" à gauche de la liste des matières.</p>
+                        </div>
+                        <div class="text-xs font-bold text-[var(--text-muted)]">Déplacé vers le menu principal</div>
                     </div>
                     <div id="sort-order-container" class="hidden px-4 flex justify-end -mt-2">
                         <button onclick="toggleSortOrder()" id="sort-order-btn" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-2">
@@ -638,6 +662,384 @@
             <label class="flex items-center justify-center gap-2 cursor-pointer text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><input type="checkbox" title="Recharger automatiquement" onchange="updateSetting('autoReload', this.checked); if(this.checked) window.location.reload();" class="styled-checkbox w-4 h-4"><span class="font-bold">Ne plus afficher et recharger automatiquement</span></label>
         </div>
     </div>
+
+    <!-- Modal: Version -->
+    <div id="version-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-lg relative">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-6 tracking-tight flex items-center gap-3">
+                <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Version et Changelog
+            </h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-lg font-bold text-[var(--text-main)] mb-2">Version actuelle</h3>
+                    <p class="text-[var(--text-muted)]">1.6</p>
+                </div>
+                <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-lg font-bold text-[var(--text-main)] mb-4">Changelog</h3>
+                    <div class="space-y-2">
+                        <details class="group">
+                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
+                                <span>1.6 (actuelle)</span>
+                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </summary>
+                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Ajout d'un footer avec liens vers les politiques de confidentialité et la licence</li>
+                                    <li>Implémentation d'une option de tri pour les matières (par moyenne, alphabétique, nombre de notes, date)</li>
+                                    <li>Correction de nombreux bugs liés à l'affichage et à la sauvegarde des données</li>
+                                    <li>Amélioration de la stabilité de l'application</li>
+                                    <li>Optimisation des performances pour les grands volumes de données</li>
+                                </ul>
+                            </div>
+                        </details>
+                        <details class="group">
+                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
+                                <span>1.5</span>
+                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </summary>
+                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Correction de bugs critiques dans le calcul des moyennes</li>
+                                    <li>Résolution de problèmes d'affichage sur différents navigateurs</li>
+                                    <li>Amélioration de la gestion des erreurs lors de l'import/export</li>
+                                    <li>Correction de fuites mémoire dans les graphiques</li>
+                                    <li>Stabilisation de la synchronisation des données localStorage</li>
+                                </ul>
+                            </div>
+                        </details>
+                        <details class="group">
+                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
+                                <span>1.4</span>
+                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </summary>
+                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Ajout d'effets sonores pour améliorer l'expérience utilisateur</li>
+                                    <li>Refonte complète de l'interface avec intégration du glassmorphism</li>
+                                    <li>Amélioration de l'accessibilité avec options de contraste et réduction des mouvements</li>
+                                    <li>Optimisation de la responsivité pour les appareils mobiles</li>
+                                    <li>Ajout de transitions fluides et d'animations subtiles</li>
+                                </ul>
+                            </div>
+                        </details>
+                        <details class="group">
+                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
+                                <span>1.3</span>
+                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </summary>
+                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Implémentation d'un système de code PIN pour sécuriser les comptes</li>
+                                    <li>Ajout de la fonctionnalité de changement rapide de compte</li>
+                                    <li>Enrichissement des paramètres avec thèmes sombre/clair/système</li>
+                                    <li>Ajout du mode Zen pour une interface minimaliste</li>
+                                    <li>Amélioration de la gestion des périodes (semestres/trimestres)</li>
+                                </ul>
+                            </div>
+                        </details>
+                        <details class="group">
+                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
+                                <span>1.2</span>
+                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </summary>
+                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Ajout de la personnalisation des couleurs pour chaque matière</li>
+                                    <li>Implémentation d'un système de paramètres complet</li>
+                                    <li>Ajout d'options de configuration pour les sons et animations</li>
+                                    <li>Amélioration de l'interface utilisateur avec des indicateurs visuels</li>
+                                    <li>Optimisation de la navigation entre les onglets</li>
+                                </ul>
+                            </div>
+                        </details>
+                        <details class="group">
+                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
+                                <span>1.0 (beta)</span>
+                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </summary>
+                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Lancement de l'application de base avec gestion des notes</li>
+                                    <li>Interface simple pour ajouter des matières et des notes</li>
+                                    <li>Calcul automatique des moyennes par matière et générale</li>
+                                    <li>Stockage des données en localStorage</li>
+                                    <li>Design responsive adapté aux navigateurs modernes</li>
+                                </ul>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Help -->
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-2xl relative max-h-[80vh] overflow-y-auto">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-6 tracking-tight flex items-center gap-3">
+                <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Centre d'Aide
+            </h2>
+            <div class="space-y-6">
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🚀 Premiers pas - Créer un compte</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Pour commencer :</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Cliquez sur "Créer un nouveau compte" 📝</li>
+                            <li>Remplissez votre prénom et nom ✍️</li>
+                            <li>Choisissez semestres ou trimestres 📅</li>
+                            <li>Cliquez sur "Créer un compte" ✅</li>
+                        </ol>
+                        <p class="mt-2 text-sm">Astuce : Vos données sont sauvegardées automatiquement ! 💾</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📚 Ajouter des matières et notes</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Comment ajouter vos notes :</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Allez dans l'onglet "Saisie" 📝</li>
+                            <li>Cliquez sur "Ajouter une matière" ➕</li>
+                            <li>Entrez le nom de la matière (ex: Mathématiques) 📖</li>
+                            <li>Collez vos notes depuis Pronote (ex: 15/20 + 12/20) 📋</li>
+                            <li>Cliquez sur "Ajouter" ✅</li>
+                        </ol>
+                        <p class="mt-2 text-sm">💡 Utilisez le format : note/dénominateur (ex: 15/20). Ajoutez plusieurs notes avec + !</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📊 Analyser vos résultats</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Découvrez vos performances :</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Cliquez sur l'onglet "Analyses" 📈</li>
+                            <li>Sélectionnez les matières à afficher 📋</li>
+                            <li>Choisissez un type de graphique (barres, lignes, etc.) 📊</li>
+                            <li>Cliquez sur "Mettre à jour" 🔄</li>
+                        </ol>
+                        <p class="mt-2 text-sm">🎯 Mode plein écran disponible pour une meilleure vue !</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🔒 Sécuriser votre compte</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Protégez vos données :</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Allez dans les paramètres ⚙️</li>
+                            <li>Cliquez sur "Sécurité" 🔐</li>
+                            <li>Choisissez un code PIN (4, 6 ou 8 chiffres) 🔢</li>
+                            <li>Confirmez votre PIN ✅</li>
+                        </ol>
+                        <p class="mt-2 text-sm">🛡️ Votre compte sera verrouillé automatiquement après 15 minutes d'inactivité.</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🎨 Personnaliser l'application</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Rendez-la à votre goût :</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Ouvrez les paramètres ⚙️</li>
+                            <li>Choisissez votre thème (clair, sombre, système) 🌙☀️</li>
+                            <li>Ajustez le volume des sons 🔊</li>
+                            <li>Activez le mode Zen pour une interface épurée 🧘</li>
+                        </ol>
+                        <p class="mt-2 text-sm">🎭 Essayez la police dyslexique dans l'accessibilité pour une meilleure lisibilité !</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>💾 Sauvegarder et restaurer</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Protégez vos données :</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Allez dans paramètres > Données 📁</li>
+                            <li>Cliquez "Exporter le compte" 💾</li>
+                            <li>Sauvegardez le fichier JSON 📄</li>
+                            <li>Pour restaurer : "Importer un fichier" ⬆️</li>
+                        </ol>
+                        <p class="mt-2 text-sm">🔄 Export sélectif par période disponible !</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🔄 Changer de compte</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Gérer plusieurs comptes :</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Cliquez sur votre avatar en haut à droite 👤</li>
+                            <li>Sélectionnez "Changer d'utilisateur" 🔄</li>
+                            <li>Choisissez un compte existant ou créez-en un nouveau ➕</li>
+                        </ol>
+                        <p class="mt-2 text-sm">📱 Idéal pour gérer les notes de plusieurs enfants !</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>❓ Dépannage</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
+                        <p class="mb-2">Problèmes courants :</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>🔄 Rechargez la page si les données ne s'affichent pas</li>
+                            <li>🗑️ Videz le cache du navigateur si nécessaire</li>
+                            <li>📱 Assurez-vous d'utiliser un navigateur moderne</li>
+                            <li>💾 Vérifiez que JavaScript est activé</li>
+                        </ul>
+                        <p class="mt-2 text-sm">🚨 En cas de problème persistant, contactez le support !</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Moyenne Générale -->
+    <div id="average-info-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-lg relative">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-6 tracking-tight flex items-center gap-3">
+                <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Moyenne générale
+            </h2>
+            <div class="space-y-4 text-[var(--text-muted)]">
+                <p>Noteo calcule la moyenne générale en faisant la moyenne simple des moyennes de chaque matière, sans tenir compte des coefficients.</p>
+                <p>Sur Pronote, la moyenne est souvent calculée avec des coefficients (plus ou moins de poids par matière), ce qui peut donner une valeur différente.</p>
+                <p>Si vous souhaitez que Noteo affiche une moyenne qui correspond à celle de votre établissement, vous pouvez saisir votre moyenne manuellement dans les paramètres.</p>
+            </div>
+            <button onclick="closeModals()" class="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all">J'ai compris</button>
+        </div>
+    </div>
+
+    <!-- Modal: Legal -->
+    <div id="legal-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-2xl relative max-h-[80vh] overflow-y-auto">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-6 tracking-tight flex items-center gap-3">
+                <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Informations Légales
+            </h2>
+            <div class="space-y-4">
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>Politique de confidentialité</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)] text-sm leading-relaxed">
+                        <h4 class="font-bold mb-2">Préambule</h4>
+                        <p class="mb-3">La présente politique de confidentialité définit et vous informe de la manière dont Noteo utilise et protège les informations que vous nous transmettez, le cas échéant, lorsque vous utilisez la présente application. Noteo s'engage à ce que la collecte et le traitement de vos données soient conformes au Règlement Général sur la Protection des Données (RGPD).</p>
+                        
+                        <h4 class="font-bold mb-2">1. Introduction</h4>
+                        <p class="mb-3">Bienvenue sur Noteo. Nous nous engageons à protéger vos données personnelles et à assurer la transparence de nos services.</p>
+                        
+                        <h4 class="font-bold mb-2">2. Collecte des Données</h4>
+                        <p class="mb-3">Nous collectons uniquement les informations nécessaires au bon fonctionnement de l'application : informations de compte (nom, email si code pin configuré), contenu généré par l'utilisateur (notes, documents), données techniques (logs, type d'appareil).</p>
+                        
+                        <h4 class="font-bold mb-2">3. Utilisation des Données</h4>
+                        <p class="mb-3">Vos données sont utilisées pour stocker vos préférences et vos notes localement sur votre appareil via le localStorage, garantissant un accès rapide et une utilisation hors ligne.</p>
+                        
+                        <h4 class="font-bold mb-2">4. Protection des Données</h4>
+                        <p class="mb-3">Nous mettons en œuvre des mesures de sécurité robustes pour empêcher tout accès non autorisé, modification ou divulgation de vos informations.</p>
+                        
+                        <h4 class="font-bold mb-2">5. Partage avec des Tiers</h4>
+                        <p class="mb-3">Noteo ne vend jamais vos données personnelles. Le partage ne s'effectue que dans les cas suivants : conformité légale, prestataires de services tiers (hébergement, analyses) sous contrats stricts de confidentialité.</p>
+                        
+                        <h4 class="font-bold mb-2">6. Vos Droits</h4>
+                        <p class="mb-3">Vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles directement via les paramètres de votre compte ou en nous contactant.</p>
+                        
+                        <h4 class="font-bold mb-2">7. Modifications</h4>
+                        <p>Nous nous réservons le droit de modifier ces politiques à tout moment. Les utilisateurs seront informés de tout changement majeur via l'application.</p>
+                        <p class="text-xs mt-2 italic">Dernière mise à jour : 14 Mars 2026</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>Licence</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)] text-sm leading-relaxed">
+                        <p class="mb-3">Copyright (C) 2026 Pyro</p>
+                        <p class="mb-3">This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
+                        <p class="mb-3">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
+                        <p>You should have received a copy of the GNU General Public License along with this program. If not, see <a href="https://www.gnu.org/licenses/" target="_blank" class="text-indigo-500 hover:underline">https://www.gnu.org/licenses/</a>.</p>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>Politique de gestion de données</span>
+                        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)] text-sm leading-relaxed">
+                        <h4 class="font-bold mb-2">Stockage des Données</h4>
+                        <p class="mb-3">Toutes vos données (notes, paramètres, comptes) sont stockées localement dans votre navigateur via le localStorage. Aucune donnée n'est transmise à des serveurs externes.</p>
+                        
+                        <h4 class="font-bold mb-2">Sauvegarde et Export</h4>
+                        <p class="mb-3">Vous pouvez exporter vos données à tout moment via les paramètres. Les exports sont au format JSON et peuvent être réimportés pour restaurer vos données.</p>
+                        
+                        <h4 class="font-bold mb-2">Suppression des Données</h4>
+                        <p class="mb-3">Vous pouvez supprimer vos données individuellement ou en totalité via les paramètres. La suppression est immédiate et irréversible.</p>
+                        
+                        <h4 class="font-bold mb-2">Sécurité</h4>
+                        <p class="mb-3">Les données sont chiffrées localement si vous utilisez un code PIN. Sans PIN, les données sont accessibles à quiconque utilisant votre appareil.</p>
+                        
+                        <h4 class="font-bold mb-2">Responsabilité</h4>
+                        <p>Vous êtes responsable de la sauvegarde de vos données. Noteo ne peut être tenu responsable de la perte de données due à des problèmes techniques ou à une utilisation incorrecte.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Pyro -->
+    <div id="pyro-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-md relative">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-6 tracking-tight flex items-center gap-3">
+                <svg class="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                À propos de Pyro
+            </h2>
+            <div class="text-center">
+                <p class="text-[var(--text-muted)] mb-4">Développeur de Noteo, une application web moderne pour gérer vos notes scolaires avec style et simplicité.</p>
+                <a href="https://github.com/Pyronixus" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </div>
     <script src="Source/script.js"></script>
 </body>
 </html>
+    
