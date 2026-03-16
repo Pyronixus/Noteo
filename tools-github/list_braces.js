@@ -1,0 +1,5 @@
+const fs = require('fs'); const path=require('path'); const src=fs.readFileSync(path.join(__dirname,'script.js'),'utf8');
+let line=1; let col=0; let inSingle=false,inDouble=false,inTemplate=false,inLineComment=false,inBlockComment=false; let entries=[];
+for(let i=0;i<src.length;i++){const ch=src[i]; col++; if(ch==='\n'){line++; col=0; inLineComment=false;} if(inLineComment||inBlockComment){ if(inBlockComment && ch==='*' && src[i+1]==='/'){inBlockComment=false;i++;col++;} continue;} if(!inSingle && !inDouble && !inTemplate){ if(ch==='/' && src[i+1]==='/'){inLineComment=true;i++;col++;continue;} if(ch==='/' && src[i+1]==='*'){inBlockComment=true;i++;col++;continue;} } if(!inLineComment && !inBlockComment){ if(ch==="'" && !inDouble && !inTemplate){inSingle=!inSingle; continue} if(ch==='"' && !inSingle && !inTemplate){inDouble=!inDouble; continue} if(ch==='`' && !inSingle && !inDouble){inTemplate=!inTemplate; continue} } if(inSingle||inDouble||inTemplate) continue; if(ch==='{'||ch==='}') entries.push({ch,line,col}); }
+entries.forEach(e=>console.log(e.ch, 'line', e.line, 'col', e.col));
+console.log('Total braces:', entries.length);

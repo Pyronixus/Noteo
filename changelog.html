@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Noteo.</title>
+    <link rel="icon" type="image/png" href="Source/Assets/Img/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Source/code/style.css">
+</head>
+<body class="antialiased light-mode">
+    <div class="blobs-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="sticky top-0 z-40 h-20 bg-[var(--bg-body)]/40 backdrop-blur-md border-b border-[var(--border)]">
+            <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center shadow-lg">
+                        <span class="text-white text-xl font-black">N.</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black italic text-[var(--text-main)] tracking-tighter">Noteo.</h1>
+                        <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Historique complet des versions</p>
+                    </div>
+                </div>
+                <a href="https://pyronixus.github.io/Noteo" class="px-4 py-2 rounded-xl text-sm font-bold text-indigo-500 hover:bg-indigo-500/10 transition-all">← Retour</a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full">
+            <div class="mb-12">
+                <h2 class="text-4xl font-black text-[var(--text-main)] mb-4">Changelog Complet</h2>
+                <div class="glass-card p-4 rounded-xl mb-8 text-sm">
+                    <p class="text-[var(--text-muted)]"><strong>🚀 <span class="text-red-500">X</span>.x.x</strong> = Mise à jour majeure | <strong>⭐ x.<span class="text-blue-500">X</span>.x</strong> = Mise à jour importante | <strong>🔧 x.x.<span class="text-purple-500">X</span></strong> = Correctif/petites améliorations</p>
+                </div>
+
+                <!-- Sort & Expand Options -->
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-[var(--text-muted)]">Trier par :</span>
+                    </div>
+                    <button onclick="sortChangelog('newest')" class="sort-btn active px-4 py-2 rounded-xl text-sm font-bold bg-indigo-500/20 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-all">
+                        Plus récent
+                    </button>
+                    <button onclick="sortChangelog('oldest')" class="sort-btn px-4 py-2 rounded-xl text-sm font-bold text-[var(--text-muted)] hover:bg-[var(--input-bg)] transition-all">
+                        Plus ancien
+                    </button>
+                    <button onclick="sortChangelog('major')" class="sort-btn px-4 py-2 rounded-xl text-sm font-bold text-[var(--text-muted)] hover:bg-[var(--input-bg)] transition-all">
+                        🚀 Majeur
+                    </button>
+                    <button onclick="sortChangelog('important')" class="sort-btn px-4 py-2 rounded-xl text-sm font-bold text-[var(--text-muted)] hover:bg-[var(--input-bg)] transition-all">
+                        ⭐ Important
+                    </button>
+                    <button onclick="sortChangelog('bugfix')" class="sort-btn px-4 py-2 rounded-xl text-sm font-bold text-[var(--text-muted)] hover:bg-[var(--input-bg)] transition-all">
+                        🔧 Correctif
+                    </button>
+                    <div class="flex-1 md:flex-none"></div>
+                    <button onclick="toggleAllVersions()" id="toggle-all-btn" class="px-4 py-2 rounded-xl text-sm font-bold bg-purple-500/20 text-purple-500 hover:bg-purple-500 hover:text-white transition-all">
+                        📖 Tout dérouler
+                    </button>
+                </div>
+            </div>
+
+            <div id="versions-container"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 p-6 text-center text-[var(--text-muted)] text-sm border-t border-[var(--border)]">
+            <p>Noteo © 2024 - Créé par <a href="https://github.com/Pyronixus" class="hover:text-purple-500 transition-colors font-bold">Pyro</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const versionsData = [
+            {
+                number: "2.0",
+                type: "major",
+                color: "indigo",
+                label: "Mise à jour majeure",
+                icon: "🚀",
+                current: true,
+                content: `
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-indigo-500 mb-3">✨ Nouvelles Fonctionnalités</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3">
+                                <span class="text-indigo-500 font-bold">→</span>
+                                <span><strong>Intégration Cloud</strong> - Sauvegarde et synchronisation des données via lien partageable</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-indigo-500 font-bold">→</span>
+                                <span><strong>Expérience Mobile Améliorée</strong> - Pop-up fluides, boutons haut/bas, modals compactes</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-indigo-500 font-bold">→</span>
+                                <span><strong>Optimisation Interface Mobile</strong> - Responsive design perfectionné</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-indigo-500 mb-3">🔧 Améliorations</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3">
+                                <span class="text-indigo-500 font-bold">→</span>
+                                <span>Performance générale du Cloud optimisée</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-indigo-500 font-bold">→</span>
+                                <span>Animations et transitions fluides</span>
+                            </li>
+                        </ul>
+                    </div>
+                `
+            },
+            { number: "1.9.2", type: "bugfix", color: "purple", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-purple-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-purple-500 font-bold'>→</span><span>Correction d'un bug critique du Cloud lors de la synchronisation</span></li><li class='flex gap-3'><span class='text-purple-500 font-bold'>→</span><span>Optimisation du chiffrement des données</span></li></ul>" },
+            { number: "1.9.1", type: "bugfix", color: "purple", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-purple-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-purple-500 font-bold'>→</span><span>Correction de l'export Cloud sur mobile</span></li><li class='flex gap-3'><span class='text-purple-500 font-bold'>→</span><span>Amélioration de la validation du lien de partage</span></li></ul>" },
+            { number: "1.9", type: "important", color: "purple", label: "Mise à jour importante", icon: "⭐", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-purple-500 mb-3'>✨ Nouvelles Fonctionnalités</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-purple-500 font-bold'>→</span><span><strong>Base Cloud</strong> - Infrastructure de base pour Cloud</span></li><li class='flex gap-3'><span class='text-purple-500 font-bold'>→</span><span><strong>Synchronisation Multi-appareil</strong> - Accès sur plusieurs appareils</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-purple-500 mb-3'>🔧 Améliorations</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-purple-500 font-bold'>→</span><span>Architecture préparée pour le Cloud</span></li></ul></div>" },
+            { number: "1.8.1", type: "bugfix", color: "blue", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-blue-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Correction des modals sur écrans petits</span></li><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Amélioration de la performance sur mobile faible</span></li></ul>" },
+            { number: "1.8", type: "important", color: "blue", label: "Mise à jour importante", icon: "⭐", content: "<h4 class='font-bold text-lg text-blue-500 mb-3'>🎨 Améliorations Interface</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Optimisations complètes de l'interface mobile</span></li><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Amélioration des performances générales</span></li><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Gestion avancée des modals</span></li></ul>" },
+            { number: "1.7.2", type: "bugfix", color: "rose", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-rose-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-rose-500 font-bold'>→</span><span>Correction de la sauvegarde locale sur Safari</span></li><li class='flex gap-3'><span class='text-rose-500 font-bold'>→</span><span>Gestion des erreurs de sauvegarde améliorée</span></li></ul>" },
+            { number: "1.7.1", type: "bugfix", color: "rose", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-rose-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-rose-500 font-bold'>→</span><span>Correction du mode mobile restreint sur certains appareils</span></li></ul>" },
+            { number: "1.7", type: "important", color: "rose", label: "Mise à jour importante", icon: "⭐", content: "<h4 class='font-bold text-lg text-rose-500 mb-3'>📱 Corrections & Stabilité</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-rose-500 font-bold'>→</span><span>Amélioration du mode mobile restreint</span></li><li class='flex gap-3'><span class='text-rose-500 font-bold'>→</span><span>Stabilisation complète de la sauvegarde locale</span></li><li class='flex gap-3'><span class='text-rose-500 font-bold'>→</span><span>Corrections de bugs mineurs</span></li></ul>" },
+            { number: "1.6.2", type: "bugfix", color: "amber", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-amber-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span>Correction de l'option de tri sur mobile</span></li><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span>Amélioration du responsive du footer</span></li></ul>" },
+            { number: "1.6.1", type: "bugfix", color: "amber", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-amber-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span>Correction d'une multitude de bugs critiques</span></li><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span>Stabilité générale améliorée</span></li></ul>" },
+            { number: "1.6", type: "important", color: "amber", label: "Mise à jour importante", icon: "⭐", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-amber-500 mb-3'>✨ Nouvelles Fonctionnalités</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span><strong>Footer Ajouté</strong> - Pied de page avec informations légales et liens utiles</span></li><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span><strong>Option de Tri</strong> - Tri personnalisé des matières par nom, moyenne, ou date</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-amber-500 mb-3'>🐛 Corrections de Bugs</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span>Correction d'une multitude de bugs critiques et mineurs</span></li><li class='flex gap-3'><span class='text-amber-500 font-bold'>→</span><span>Stabilité générale améliorée</span></li></ul></div>" },
+            { number: "1.5.1", type: "bugfix", color: "green", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-green-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-green-500 font-bold'>→</span><span>Correction export PDF sur certains navigateurs</span></li><li class='flex gap-3'><span class='text-green-500 font-bold'>→</span><span>Amélioration de la sélection multiple</span></li></ul>" },
+            { number: "1.5", type: "important", color: "green", label: "Mise à jour importante", icon: "⭐", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-green-500 mb-3'>✨ Nouvelles Fonctionnalités</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-green-500 font-bold'>→</span><span><strong>Sélection Multiple</strong> - Sélectionner plusieurs matières pour les analyser ensemble</span></li><li class='flex gap-3'><span class='text-green-500 font-bold'>→</span><span><strong>Export PDF</strong> - Exporter les notes et analyses en PDF</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-green-500 mb-3'>🔧 Améliorations</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-green-500 font-bold'>→</span><span>Interface de calcul optimisée</span></li><li class='flex gap-3'><span class='text-green-500 font-bold'>→</span><span>Temps de chargement réduit de 20%</span></li></ul></div>" },
+            { number: "1.4.1", type: "bugfix", color: "cyan", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-cyan-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-cyan-500 font-bold'>→</span><span>Correction des raccourcis clavier sur Mac</span></li><li class='flex gap-3'><span class='text-cyan-500 font-bold'>→</span><span>Amélioration des notifications</span></li></ul>" },
+            { number: "1.4", type: "important", color: "cyan", label: "Mise à jour importante", icon: "⭐", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-cyan-500 mb-3'>✨ Nouvelles Fonctionnalités</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-cyan-500 font-bold'>→</span><span><strong>Notification des Dépassements</strong> - Alertes quand une note dépasse le barème</span></li><li class='flex gap-3'><span class='text-cyan-500 font-bold'>→</span><span><strong>Raccourcis Clavier</strong> - Ctrl+A pour ajouter, Ctrl+D pour supprimer</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-cyan-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-cyan-500 font-bold'>→</span><span>Correction du calcul de moyenne avec coefficients</span></li></ul></div>" },
+            { number: "1.3.1", type: "bugfix", color: "teal", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-teal-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-teal-500 font-bold'>→</span><span>Correction du thème sombre sur certains appareils</span></li><li class='flex gap-3'><span class='text-teal-500 font-bold'>→</span><span>Amélioration de la police dyslexique</span></li></ul>" },
+            { number: "1.3", type: "important", color: "teal", label: "Mise à jour importante", icon: "⭐", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-teal-500 mb-3'>✨ Nouvelles Fonctionnalités</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-teal-500 font-bold'>→</span><span><strong>Thème Sombre</strong> - Mode sombre complet avec respect circadien</span></li><li class='flex gap-3'><span class='text-teal-500 font-bold'>→</span><span><strong>Police Dyslexique</strong> - Support pour Open Dyslexic</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-teal-500 mb-3'>🔧 Améliorations</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-teal-500 font-bold'>→</span><span>Accessibilité globale améliorée</span></li><li class='flex gap-3'><span class='text-teal-500 font-bold'>→</span><span>Support des lecteurs d'écran</span></li></ul></div>" },
+            { number: "1.2.2", type: "bugfix", color: "blue", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-blue-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Correction des graphiques radar sur mobile</span></li><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Amélioration du rendu des graphiques</span></li></ul>" },
+            { number: "1.2.1", type: "bugfix", color: "blue", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-blue-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Correction de la comparaison de périodes</span></li></ul>" },
+            { number: "1.2", type: "important", color: "blue", label: "Mise à jour importante", icon: "⭐", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-blue-500 mb-3'>✨ Nouvelles Fonctionnalités</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span><strong>Graphiques Avancés</strong> - Types de graphiques supplémentaires (radar, box-plot)</span></li><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span><strong>Comparaison de Périodes</strong> - Comparer les performances entre semestres</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-blue-500 mb-3'>🔧 Améliorations</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-blue-500 font-bold'>→</span><span>Performance des graphiques optimisée</span></li></ul></div>" },
+            { number: "1.1.2", type: "bugfix", color: "fuchsia", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-fuchsia-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-fuchsia-500 font-bold'>→</span><span>Correction du PIN sur certains navigateurs</span></li><li class='flex gap-3'><span class='text-fuchsia-500 font-bold'>→</span><span>Amélioration de la sécurité des données</span></li></ul>" },
+            { number: "1.1.1", type: "bugfix", color: "fuchsia", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-fuchsia-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-fuchsia-500 font-bold'>→</span><span>Correction du système de récupération de compte</span></li></ul>" },
+            { number: "1.1", type: "important", color: "fuchsia", label: "Mise à jour importante", icon: "⭐", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-fuchsia-500 mb-3'>✨ Nouvelles Fonctionnalités</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-fuchsia-500 font-bold'>→</span><span><strong>Protection par Code PIN</strong> - Sécurisez vos comptes avec un PIN 4-8 chiffres</span></li><li class='flex gap-3'><span class='text-fuchsia-500 font-bold'>→</span><span><strong>Récupération de Compte</strong> - Système de récupération par email simulé</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-fuchsia-500 mb-3'>🔧 Améliorations</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-fuchsia-500 font-bold'>→</span><span>LocalStorage sécurisé</span></li><li class='flex gap-3'><span class='text-fuchsia-500 font-bold'>→</span><span>Validation des données côté client améliorée</span></li></ul></div>" },
+            { number: "1.0.2", type: "bugfix", color: "pink", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-pink-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span>Correction du bug d'affichage des graphiques</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span>Amélioration du calcul de moyenne</span></li></ul>" },
+            { number: "1.0.1", type: "bugfix", color: "pink", label: "Correctif", icon: "🔧", content: "<h4 class='font-bold text-lg text-pink-500 mb-3'>🐛 Corrections</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span>Correction du bug d'import JSON</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span>Amélioration de la stabilité générale</span></li></ul>" },
+            { number: "1.0", type: "major", color: "pink", label: "Lancement initial - Mise à jour majeure", icon: "🚀", content: "<div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-pink-500 mb-3'>✨ Fonctionnalités de Base</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Gestion des Matières</strong> - Création, modification, suppression de matières avec couleurs</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Gestion des Notes</strong> - Ajout de notes avec coefficients et calcul automatique</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Gestion des Périodes</strong> - Organisation par semestres ou trimestres</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Graphiques Interactifs</strong> - Visualisation des données avec Chart.js</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Import/Export JSON</strong> - Sauvegarde et restauration des données</span></li></ul></div><div class='space-y-3 mb-6'><h4 class='font-bold text-lg text-pink-500 mb-3'>🎨 Interface & Design</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Design Glassmorphism</strong> - Interface moderne avec effet verre</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Responsive Design</strong> - Compatible mobile, tablette et desktop</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span><strong>Thème Clair</strong> - Interface par défaut claire et épurée</span></li></ul></div><div class='space-y-3'><h4 class='font-bold text-lg text-pink-500 mb-3'>💾 Stockage & Performance</h4><ul class='space-y-2 ml-4'><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span>LocalStorage pour la persistance des données</span></li><li class='flex gap-3'><span class='text-pink-500 font-bold'>→</span><span>Application web progressive (PWA-ready)</span></li></ul></div>" }
+        ];
+
+        function parseVersion(versionStr) {
+            return versionStr.split('.').map(num => parseInt(num, 10));
+        }
+
+        function compareVersions(a, b) {
+            const aParts = parseVersion(a);
+            const bParts = parseVersion(b);
+            const maxLen = Math.max(aParts.length, bParts.length);
+            for (let i = 0; i < maxLen; i++) {
+                const aPart = aParts[i] || 0;
+                const bPart = bParts[i] || 0;
+                if (aPart !== bPart) return aPart - bPart;
+            }
+            return 0;
+        }
+
+        function renderVersionCard(version) {
+            const sizeClass = version.type === 'major' || version.type === 'important' ? 'text-3xl' : 'text-2xl';
+            const colorBg = `border-${version.color}-${version.type === 'bugfix' ? '400' : '500'}`;
+            const colorText = `text-${version.color}-${version.type === 'bugfix' ? '400' : '500'}`;
+            const currentBadge = version.current ? `<span class='px-4 py-2 rounded-xl bg-${version.color}-500/20 text-${version.color}-500 font-bold text-sm'>Actuelle</span>` : '';
+            
+            return `
+                <div class="version-card glass-card rounded-[2rem] mb-4 border-l-4 border-${version.color}-${version.type === 'bugfix' ? '400' : '500'} overflow-hidden" data-version="${version.number}" data-type="${version.type}">
+                    <button onclick="toggleVersion(this)" class="version-header w-full p-8 flex items-start justify-between hover:bg-[var(--input-bg)] transition-all cursor-pointer text-left">
+                        <div>
+                            <h3 class="${sizeClass} font-black text-[var(--text-main)] mb-2">Version ${version.number}</h3>
+                            <p class="text-sm font-bold text-${version.color}-${version.type === 'bugfix' ? '400' : '500'} uppercase tracking-widest">${version.icon} ${version.label}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            ${currentBadge}
+                            <svg class="version-toggle w-6 h-6 text-[var(--text-muted)] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="version-content hidden px-8 pb-8 border-t border-[var(--border)]">
+                        ${version.content}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVersions(sortType = 'newest') {
+            let sortedVersions = [...versionsData];
+
+            if (sortType === 'newest') {
+                sortedVersions.sort((a, b) => compareVersions(b.number, a.number));
+            } else if (sortType === 'oldest') {
+                sortedVersions.sort((a, b) => compareVersions(a.number, b.number));
+            } else if (sortType === 'major') {
+                sortedVersions.sort((a, b) => {
+                    if (a.type === 'major' && b.type !== 'major') return -1;
+                    if (a.type !== 'major' && b.type === 'major') return 1;
+                    return compareVersions(b.number, a.number);
+                });
+            } else if (sortType === 'important') {
+                sortedVersions.sort((a, b) => {
+                    const aIsPriority = a.type === 'major' || a.type === 'important';
+                    const bIsPriority = b.type === 'major' || b.type === 'important';
+                    if (aIsPriority && !bIsPriority) return -1;
+                    if (!aIsPriority && bIsPriority) return 1;
+                    return compareVersions(b.number, a.number);
+                });
+            } else if (sortType === 'bugfix') {
+                sortedVersions.sort((a, b) => {
+                    if (a.type === 'bugfix' && b.type !== 'bugfix') return -1;
+                    if (a.type !== 'bugfix' && b.type === 'bugfix') return 1;
+                    return compareVersions(b.number, a.number);
+                });
+            }
+
+            const container = document.getElementById('versions-container');
+            container.innerHTML = sortedVersions.map(v => renderVersionCard(v)).join('');
+        }
+
+        function toggleVersion(button) {
+            const card = button.closest('.version-card');
+            const content = card.querySelector('.version-content');
+            const toggle = card.querySelector('.version-toggle');
+            
+            content.classList.toggle('hidden');
+            toggle.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+
+        function toggleAllVersions() {
+            const btn = document.getElementById('toggle-all-btn');
+            const allCards = document.querySelectorAll('.version-card');
+            const allExpanded = Array.from(allCards).every(card => !card.querySelector('.version-content').classList.contains('hidden'));
+
+            allCards.forEach(card => {
+                const content = card.querySelector('.version-content');
+                const toggle = card.querySelector('.version-toggle');
+                
+                if (allExpanded) {
+                    content.classList.add('hidden');
+                    toggle.style.transform = '';
+                } else {
+                    content.classList.remove('hidden');
+                    toggle.style.transform = 'rotate(180deg)';
+                }
+            });
+
+            btn.textContent = allExpanded ? '📖 Tout dérouler' : '📖 Tout replier';
+        }
+
+        function sortChangelog(sortType) {
+            renderVersions(sortType);
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active', 'bg-indigo-500/20', 'text-indigo-500'));
+            event.target.classList.add('active', 'bg-indigo-500/20', 'text-indigo-500');
+        }
+
+        // Initial render
+        renderVersions();
+    </script>
+    <script src="Source/code/script.js"></script>
+</body>
+</html>

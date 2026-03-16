@@ -1,4 +1,5 @@
 # Noteo - Application de Gestion de Notes ✨
+
 ![Noteo-logo](Source/Assets/Img/logo.png)
 
 ## Description
@@ -7,17 +8,16 @@ Noteo est une application web conçue pour aider les étudiants à gérer leurs 
 
 ## Version
 
-Version actuelle : 1.6
+Version actuelle : Noteo 2.0
 
 ### Changelog
 
-- **1.0 (beta)** : Application de base
-- **1.2** : Ajout des couleurs et paramètres
-- **1.3** : Ajout du code PIN, changement rapide de compte, enrichissement des paramètres
-- **1.4** : Ajout des sons, mise à jour de l'interface pour intégrer du glassmorphism
-- **1.5** : Correction d'une multitude de bugs
-- **1.6 (actuelle)** : Ajout d'un footer, option de tri, correction d'une multitude de bugs
+- [**2.0 (mise à jour majeure)**] : Intégration du Cloud (synchronisation via lien), expérience mobile améliorée (pop‑up, bouton haut/bas, modals compactes), et optimisation de l'interface mobile.
+- [**1.8**] : Optimisations de l'UI mobile, performances et gestion des modals.
+- [**1.7**] : Amélioration du mode mobile restreint et stabilisation de la sauvegarde locale.
+- [**1.6**] : Ajout d'un footer, option de tri, correction d'une multitude de bugs
 
+**[📋 Voir le changelog complet →](changelog.html)**
 ## Fonctionnalités Principales
 
 - **Gestion des matières:** 📚
@@ -41,7 +41,7 @@ Version actuelle : 1.6
 - **Authentification:**
   - Protection des comptes par code PIN 🔒 (4, 6 ou 8 chiffres).
   - Possibilité de réinitialiser le code PIN via un email de récupération simulé.
- 🎨
+    🎨
 - **Personnalisation:**
   - Thèmes clair et sombre avec option de thème système.
   - Options de configuration pour le son, les animations, le flou, etc.
@@ -52,7 +52,7 @@ Version actuelle : 1.6
   - Copie complète du compte 📤 (profil, notes, paramètres).
   - Copie sélective des données (notes) par période (semestres/trimestres).
   - Import des données à partir de fichiers JSON (exportés depuis le site).
-  - Le tout à but de *souvenir*.
+  - Le tout à but de _souvenir_.
 
 - **Interface utilisateur:**
   - Design moderne avec glassmorphism.
@@ -65,7 +65,7 @@ Version actuelle : 1.6
 - **JavaScript:** Logique de l'application, gestion des données et interactivité.
 - **Chart.js:** Bibliothèque JavaScript pour la création de graphiques.
 - **LocalStorage:** Stockage des données utilisateur dans le navigateur.
-  
+
 ## Utilisation
 
 1. **Créer un nouveau compte:** ➕
@@ -91,7 +91,7 @@ Version actuelle : 1.6
 
 ## Auteur
 
-  - Créé par **Pyro** ( profil : https://github.com/Pyronixus) ✍️
+- Créé par **Pyro** ( profil : https://github.com/Pyronixus) ✍️
 
 ## Licence
 
@@ -99,24 +99,24 @@ Ce projet est sous licence GPL-3.0. 📜
 
 ## Structure du Code
 
-  - `index.html`: Structure principale de l'application.
-  - `style.css`: Styles CSS pour l'apparence de l'application. 🎨
-  - `script.js`: Logique JavaScript de l'application. (accessibles dans `Source/`)
-  - `assets/`: Dossier contenant les ressources (images, polices, etc.).
+- `index.html`: Structure principale de l'application.
+- `style.css`: Styles CSS pour l'apparence de l'application. 🎨
+- `script.js`: Logique JavaScript de l'application. (accessibles dans `Source/`)
+- `assets/`: Dossier contenant les ressources (images, polices, etc.).
 
 ## Configuration
 
 L'application peut être configurée via le menu des paramètres. Les options
 incluent:
 
-  - **Thème:**
-      - Clair
-      - Sombre
-      - Système (détection automatique du thème du système d'exploitation)
-  - **Sons:** Activation/désactivation des effets sonores.
-  - **Volume des sons:** Ajustement du volume des effets sonores.
-  - **Autres options:** Mode Zen, navigation fixe, affichage de l'avatar,
-    animations, etc.
+- **Thème:**
+  - Clair
+  - Sombre
+  - Système (détection automatique du thème du système d'exploitation)
+- **Sons:** Activation/désactivation des effets sonores.
+- **Volume des sons:** Ajustement du volume des effets sonores.
+- **Autres options:** Mode Zen, navigation fixe, affichage de l'avatar,
+  animations, etc.
 
 ## Maintenance
 

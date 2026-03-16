@@ -33,6 +33,9 @@
         <div class="blob blob-3"></div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
     <!-- Login Screen -->
     <div id="login-screen" class="hidden min-h-screen flex items-center justify-center p-6">
         <div class="glass-card p-12 rounded-[3rem] w-full max-w-md animate-entrance text-center relative overflow-hidden">
@@ -51,6 +54,17 @@
                     <option value="semesters">Organisation en Semestres</option>
                     <option value="trimesters">Organisation en Trimestres</option>
                 </select>
+                <div class="mt-2 text-left text-sm text-[var(--text-muted)] space-y-2">
+                    <p class="font-bold text-[var(--text-main)]">Sauvegarde des données</p>
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="storage-mode" value="local" checked class="form-radio" />
+                        <span>Local (sur cet appareil)</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="storage-mode" value="cloud" class="form-radio" />
+                        <span>Cloud (synchronisation via lien partageable)</span>
+                    </label>
+                </div>
                 <button type="submit" title="Accéder à mon espace" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] active:scale-95 transition-all">Accéder</button>
             </form>
             
@@ -94,6 +108,7 @@
                             <span class="text-white text-xl font-black">N.</span>
                         </div>
                         <span class="text-2xl font-black italic text-[var(--text-main)] tracking-tighter hidden sm:block">Noteo.</span>
+                        <span id="mobile-semester-label" class="hidden phone-xp:flex items-center gap-2 text-sm font-bold text-[var(--text-muted)]">Semestre 1</span>
                     </div>
                     
                     <nav class="flex gap-2 bg-[var(--input-bg)] p-1.5 rounded-2xl border border-[var(--card-border)]">
@@ -316,14 +331,18 @@
                 </div>
                 <!-- Phone switch button -->
                 <div class="phone-switch-btn mt-8 text-center phone-xp:block hidden">
-                    <button onclick="switchTab('notes')" class="glass-card px-8 py-4 rounded-2xl font-bold text-[var(--text-main)] hover:scale-105 transition-all">Ajouter Notes</button>
+                    <button onclick="switchTab('notes')" class="glass-card px-8 py-4 rounded-2xl font-bold text-[var(--text-main)] hover:scale-105 transition-all">Voie Notes</button>
                 </div>
             </section>
         </main>
 
+        <button id="scroll-toggle-btn" class="fixed bottom-6 right-4 z-50 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-500 transition-all hidden" title="Aller en haut / bas">
+            <svg id="scroll-toggle-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path id="scroll-toggle-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+        </button>
+
         <footer class="mt-auto p-4 text-center text-[var(--text-muted)] text-sm">
             <div class="flex items-center justify-center gap-6">
-                <span>Noteo <button onclick="openVersionModal()" class="hover:text-indigo-500 transition-colors font-bold">v1.6</button></span>
+                <span>Noteo <button onclick="openVersionModal()" class="hover:text-indigo-500 transition-colors font-bold">v2.0</button></span>
                 <span>Copyright © <button onclick="openPyroModal()" class="hover:text-purple-500 transition-colors"><strong>Pyro</strong></button></span>
                 <button onclick="openLegalModal()" class="hover:text-blue-500 transition-colors">Légal</button>
                 <button onclick="openHelpModal()" class="hover:text-green-500 transition-colors">Aide</button>
@@ -490,6 +509,16 @@
                             <button onclick="document.getElementById('import-input').click()" title="Importer un fichier JSON" class="col-span-full p-3 bg-[var(--bg-body)] rounded-lg font-bold hover:bg-emerald-500/10 hover:text-emerald-500 transition-all border border-[var(--border)]">Importer un fichier (JSON)</button>
                             <input type="file" id="import-input" title="Choisir un fichier JSON à importer" placeholder="Importer un fichier" class="hidden" accept=".json" onchange="importData(event)">
                         </div>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-[var(--text-main)] pt-4">Cloud (synchronisation)</h3>
+                    <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)] space-y-3">
+                        <p class="text-sm text-[var(--text-muted)]">Générez un lien pour synchroniser vos données entre plusieurs appareils ou importez un lien reçu.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <button onclick="generateCloudLink()" class="p-3 bg-[var(--bg-body)] rounded-lg font-bold hover:bg-indigo-500/10 hover:text-indigo-500 transition-all border border-[var(--border)]">Générer un lien de synchronisation</button>
+                            <button onclick="importCloudLinkPrompt()" class="p-3 bg-[var(--bg-body)] rounded-lg font-bold hover:bg-emerald-500/10 hover:text-emerald-500 transition-all border border-[var(--border)]">Importer un lien de synchronisation</button>
+                        </div>
+                        <textarea id="cloud-link-output" class="w-full mt-2 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-body)] text-xs text-[var(--text-main)] hidden" rows="3" readonly placeholder="Le lien s'affichera ici..."></textarea>
                     </div>
 
                     <h3 class="text-lg font-bold text-[var(--text-main)] pt-4">Édition rapide des notes</h3>
@@ -671,6 +700,36 @@
         </div>
     </div>
 
+    <!-- Modal: Phone Experience Warning -->
+    <div id="phone-warning-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-6 rounded-[2.5rem] w-full max-w-md relative text-center">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-4">Expérience mobile restreinte</h2>
+            <p class="text-[var(--text-muted)] text-sm mb-6">Vous utilisez une version simplifiée sur mobile. Pour une expérience complète, il est recommandé d'utiliser un PC.</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="closeModals()" class="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-all">J'ai compris</button>
+                <button onclick="dismissPhoneWarning()" class="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-400 transition-all">Ne plus afficher</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Safari Warning -->
+    <div id="safari-warning-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-6 rounded-[2.5rem] w-full max-w-md relative text-center">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-4">Version Safari optimisée</h2>
+            <p class="text-[var(--text-muted)] text-sm mb-6">Safari a un rendu un peu différent. Cette version est optimisée pour Safari, mais il est conseillé d'utiliser un autre navigateur pour une expérience complète.</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="closeModals()" class="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-all">J'ai compris</button>
+                <button onclick="dismissSafariWarning()" class="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-400 transition-all">Ne plus afficher</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Version -->
     <div id="version-modal" class="modal-overlay">
         <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-lg relative">
@@ -684,103 +743,125 @@
             <div class="space-y-4">
                 <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                     <h3 class="text-lg font-bold text-[var(--text-main)] mb-2">Version actuelle</h3>
-                    <p class="text-[var(--text-muted)]">1.6</p>
+                    <p class="text-[var(--text-muted)]">2.0 (mise à jour majeure)</p>
                 </div>
                 <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                     <h3 class="text-lg font-bold text-[var(--text-main)] mb-4">Changelog</h3>
-                    <div class="space-y-2">
-                        <details class="group">
-                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
-                                <span>1.6 (actuelle)</span>
-                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </summary>
-                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>Ajout d'un footer avec liens vers les politiques de confidentialité et la licence</li>
-                                    <li>Implémentation d'une option de tri pour les matières (par moyenne, alphabétique, nombre de notes, date)</li>
-                                    <li>Correction de nombreux bugs liés à l'affichage et à la sauvegarde des données</li>
-                                    <li>Amélioration de la stabilité de l'application</li>
-                                    <li>Optimisation des performances pour les grands volumes de données</li>
-                                </ul>
-                            </div>
-                        </details>
-                        <details class="group">
-                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
-                                <span>1.5</span>
-                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </summary>
-                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>Correction de bugs critiques dans le calcul des moyennes</li>
-                                    <li>Résolution de problèmes d'affichage sur différents navigateurs</li>
-                                    <li>Amélioration de la gestion des erreurs lors de l'import/export</li>
-                                    <li>Correction de fuites mémoire dans les graphiques</li>
-                                    <li>Stabilisation de la synchronisation des données localStorage</li>
-                                </ul>
-                            </div>
-                        </details>
-                        <details class="group">
-                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
-                                <span>1.4</span>
-                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </summary>
-                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>Ajout d'effets sonores pour améliorer l'expérience utilisateur</li>
-                                    <li>Refonte complète de l'interface avec intégration du glassmorphism</li>
-                                    <li>Amélioration de l'accessibilité avec options de contraste et réduction des mouvements</li>
-                                    <li>Optimisation de la responsivité pour les appareils mobiles</li>
-                                    <li>Ajout de transitions fluides et d'animations subtiles</li>
-                                </ul>
-                            </div>
-                        </details>
-                        <details class="group">
-                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
-                                <span>1.3</span>
-                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </summary>
-                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>Implémentation d'un système de code PIN pour sécuriser les comptes</li>
-                                    <li>Ajout de la fonctionnalité de changement rapide de compte</li>
-                                    <li>Enrichissement des paramètres avec thèmes sombre/clair/système</li>
-                                    <li>Ajout du mode Zen pour une interface minimaliste</li>
-                                    <li>Amélioration de la gestion des périodes (semestres/trimestres)</li>
-                                </ul>
-                            </div>
-                        </details>
-                        <details class="group">
-                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
-                                <span>1.2</span>
-                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </summary>
-                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>Ajout de la personnalisation des couleurs pour chaque matière</li>
-                                    <li>Implémentation d'un système de paramètres complet</li>
-                                    <li>Ajout d'options de configuration pour les sons et animations</li>
-                                    <li>Amélioration de l'interface utilisateur avec des indicateurs visuels</li>
-                                    <li>Optimisation de la navigation entre les onglets</li>
-                                </ul>
-                            </div>
-                        </details>
-                        <details class="group">
-                            <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-card)]">
-                                <span>1.0 (beta)</span>
-                                <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </summary>
-                            <div class="mt-2 p-3 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>Lancement de l'application de base avec gestion des notes</li>
-                                    <li>Interface simple pour ajouter des matières et des notes</li>
-                                    <li>Calcul automatique des moyennes par matière et générale</li>
-                                    <li>Stockage des données en localStorage</li>
-                                    <li>Design responsive adapté aux navigateurs modernes</li>
-                                </ul>
-                            </div>
-                        </details>
-                    </div>
+                    <p class="text-[var(--text-muted)] mb-4">Toutes les versions et leurs détails sont disponibles dans la fenêtre ci-dessous.</p>
+                    <a href="changelog.html" target="_blank" class="inline-flex items-center gap-2 text-indigo-500 hover:text-indigo-400 font-bold">
+                        Voir toutes les mises à jour
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Changelog -->
+    <div id="changelog-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-8 rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-y-auto relative">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-6 tracking-tight flex items-center gap-3">
+                <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Historique des mises à jour
+            </h2>
+            <div class="space-y-6">
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 2.0 (mise à jour majeure)</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Intégration du Cloud (synchronisation via lien partageable) pour retrouver ses données sur plusieurs appareils.</li>
+                        <li>Nouvelle expérience mobile améliorée (pop‑up de restriction, navigation haut/bas, UI plus compacte).</li>
+                        <li>Modals plus petites et adaptées aux écrans mobiles.</li>
+                        <li>Ajout d'un message dédié pour Safari, indiquant que l'expérience peut être différente.</li>
+                        <li>Refonte du système de versioning et mise à jour des informations d'interface.</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.8</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Optimisations de l'interface mobile et des performances.</li>
+                        <li>Meilleure gestion des modals et des transitions.</li>
+                        <li>Ajout d'un bouton de navigation haut/bas sur mobile.</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.7</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Ajout d'un mode d'expérience restreinte pour téléphones.</li>
+                        <li>Amélioration des performances de chargement et de l'enregistrement local.</li>
+                        <li>Correction de bugs mineurs et stabilisation générale.</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.6</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Ajout d'un footer avec liens vers les politiques de confidentialité et la licence.</li>
+                        <li>Implémentation d'une option de tri pour les matières (par moyenne, alphabétique, nombre de notes, date).</li>
+                        <li>Correction de nombreux bugs liés à l'affichage et à la sauvegarde des données.</li>
+                        <li>Amélioration de la stabilité de l'application.</li>
+                        <li>Optimisation des performances pour les grands volumes de données.</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.5</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Correction de bugs critiques dans le calcul des moyennes.</li>
+                        <li>Résolution de problèmes d'affichage sur différents navigateurs.</li>
+                        <li>Amélioration de la gestion des erreurs lors de l'import/export.</li>
+                        <li>Correction de fuites mémoire dans les graphiques.</li>
+                        <li>Stabilisation de la synchronisation des données localStorage.</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.4</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Ajout d'effets sonores pour améliorer l'expérience utilisateur.</li>
+                        <li>Refonte complète de l'interface avec intégration du glassmorphism.</li>
+                        <li>Amélioration de l'accessibilité avec options de contraste et réduction des mouvements.</li>
+                        <li>Optimisation de la responsivité pour les appareils mobiles.</li>
+                        <li>Ajout de transitions fluides et d'animations subtiles.</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.3</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Implémentation d'un système de code PIN pour sécuriser les comptes.</li>
+                        <li>Ajout de la fonctionnalité de changement rapide de compte.</li>
+                        <li>Enrichissement des paramètres avec thèmes sombre/clair/système.</li>
+                        <li>Ajout du mode Zen pour une interface minimaliste.</li>
+                        <li>Amélioration de la gestion des périodes (semestres/trimestres).</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.2</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Ajout de la personnalisation des couleurs pour chaque matière.</li>
+                        <li>Implémentation d'un système de paramètres complet.</li>
+                        <li>Ajout d'options de configuration pour les sons et animations.</li>
+                        <li>Amélioration de l'interface utilisateur avec des indicateurs visuels.</li>
+                        <li>Optimisation de la navigation entre les onglets.</li>
+                    </ul>
+                </article>
+
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 1.0 (beta)</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Lancement de l'application de base avec gestion des notes.</li>
+                        <li>Interface simple pour ajouter des matières et des notes.</li>
+                        <li>Calcul automatique des moyennes par matière et générale.</li>
+                        <li>Stockage des données en localStorage.</li>
+                        <li>Design responsive adapté aux navigateurs modernes.</li>
+                    </ul>
+                </article>
             </div>
         </div>
     </div>

@@ -301,6 +301,11 @@ function applyPhoneExperience() {
   // Make main input and analysis more compact via CSS class
   document.documentElement.classList.add("phone-xp");
 
+  // Ensure mobile semester label is visible
+  const mobileSemLabel = document.getElementById("mobile-semester-label");
+  if (mobileSemLabel) mobileSemLabel.classList.remove("hidden");
+  updateMobileSemesterLabel();
+
   // Remove arrows around semester controls (if present)
   document
     .querySelectorAll(
@@ -382,10 +387,18 @@ window.onload = () => {
   cacheDom();
   // Detect and apply phone-restricted experience when appropriate
   try {
-    if (detectPhoneXP()) applyPhoneExperience();
+    if (detectPhoneXP()) {
+      applyPhoneExperience();
+      initScrollToggleButton();
+    }
   } catch (e) {
     console.warn("Phone XP detection error", e);
   }
+
+  // Show warnings and cloud import prompt if needed
+  maybeShowPhoneWarning();
+  maybeShowSafariWarning();
+  checkCloudImportFromUrl();
 
   // Add event listeners for the duplicate subject modal
   document.getElementById("duplicate-opt-update").onclick = () => {
@@ -576,6 +589,15 @@ function loginAs(session, forceUnlock = false) {
     );
   }
 
+  // Ensure cloudId is present when using cloud mode
+  if (session.storageMode === "cloud" && !session.cloudId) {
+    session.cloudId = crypto?.randomUUID?.() || `cloud_${Date.now()}`;
+    localStorage.setItem(
+      `noteo_profile_${session.id}`,
+      JSON.stringify(session),
+    );
+  }
+
   const pinSkipExpiry = JSON.parse(
     localStorage.getItem(`noteo_pin_unlock_expiry_${session.id}`),
   );
@@ -595,6 +617,13 @@ document.getElementById("login-form").onsubmit = (e) => {
   const prenom = document.getElementById("prenom").value.trim();
   const nom = document.getElementById("nom").value.trim();
   const periodType = document.getElementById("new-account-period-type").value;
+  const storageMode =
+    document.querySelector('input[name="storage-mode"]:checked')?.value ||
+    "local";
+  const cloudId =
+    storageMode === "cloud"
+      ? crypto?.randomUUID?.() || `cloud_${Date.now()}`
+      : null;
   const id = (prenom + nom).toLowerCase().replace(/\s/g, "");
 
   if (localStorage.getItem(`noteo_profile_${id}`)) {
@@ -604,7 +633,14 @@ document.getElementById("login-form").onsubmit = (e) => {
     return;
   }
 
-  const newProfile = { id, prenom, nom, periodType: periodType };
+  const newProfile = {
+    id,
+    prenom,
+    nom,
+    periodType: periodType,
+    storageMode,
+    cloudId,
+  };
   localStorage.setItem(`noteo_profile_${id}`, JSON.stringify(newProfile));
 
   // Create initial data for this new user
@@ -855,6 +891,12 @@ function openVersionModal() {
   document.getElementById("version-modal").classList.add("open");
 }
 
+function openChangelogModal() {
+  playSound("swoosh");
+  document.body.classList.add("modal-open");
+  document.getElementById("changelog-modal").classList.add("open");
+}
+
 function openHelpModal() {
   playSound("swoosh");
   document.body.classList.add("modal-open");
@@ -995,9 +1037,13 @@ function updateSettingsUI() {
 
 function closeModals() {
   playSound("click");
-  document
-    .querySelectorAll(".modal-overlay")
-    .forEach((m) => m.classList.remove("open"));
+  if (DOM_CACHE.modalOverlays) {
+    DOM_CACHE.modalOverlays.forEach((m) => m.classList.remove("open"));
+  } else {
+    document
+      .querySelectorAll(".modal-overlay")
+      .forEach((m) => m.classList.remove("open"));
+  }
   document.body.classList.remove("modal-open");
   if (fullscreenChart) {
     fullscreenChart.destroy();
@@ -1549,6 +1595,9 @@ function cacheDom() {
   DOM_CACHE.gradesContainer = document.getElementById("grades-container");
   DOM_CACHE.gradesActions = document.getElementById("grades-actions");
   DOM_CACHE.sortMenu = document.getElementById("sort-menu");
+  DOM_CACHE.sortMenuBtn = document.getElementById("sort-menu-btn");
+  DOM_CACHE.dropdownMenus = document.querySelectorAll(".dropdown-menu");
+  DOM_CACHE.modalOverlays = document.querySelectorAll(".modal-overlay");
   DOM_CACHE.tabCharts = document.getElementById("tab-charts");
   DOM_CACHE.chartsGrid = document.getElementById("charts-grid");
 }
@@ -1608,10 +1657,12 @@ function updateSortButtonUI() {
 function toggleSortMenu(e) {
   e.stopPropagation();
   playSound("swoosh");
-  const menu = document.getElementById("sort-menu");
+  const menu = DOM_CACHE.sortMenu || document.getElementById("sort-menu");
   if (!menu) return;
   const showing = menu.style.display === "block";
-  document.querySelectorAll(".dropdown-menu").forEach((m) => {
+  const dropdowns =
+    DOM_CACHE.dropdownMenus || document.querySelectorAll(".dropdown-menu");
+  dropdowns.forEach((m) => {
     if (m !== menu) m.classList.remove("show");
     m.style.display = "none";
   });
@@ -2016,6 +2067,148 @@ function importData(event) {
   reader.readAsText(file);
 }
 
+function encodeCloudPayload(payload) {
+  try {
+    const json = JSON.stringify(payload);
+    return btoa(encodeURIComponent(json));
+  } catch (e) {
+    console.warn("Cloud encode error", e);
+    return null;
+  }
+}
+
+function decodeCloudPayload(payload) {
+  try {
+    const json = decodeURIComponent(atob(payload));
+    return JSON.parse(json);
+  } catch (e) {
+    console.warn("Cloud decode error", e);
+    return null;
+  }
+}
+
+function generateCloudLink() {
+  if (!user) return;
+  const payload = {
+    profile: user,
+    academicData,
+    settings: appSettings,
+    timestamp: Date.now(),
+  };
+  const encoded = encodeCloudPayload(payload);
+  if (!encoded) {
+    showToast("Impossible de générer le lien Cloud.", "error");
+    return;
+  }
+
+  const url = `${window.location.origin}${window.location.pathname}?cloud=${encoded}`;
+  const output = document.getElementById("cloud-link-output");
+  if (output) {
+    output.value = url;
+    output.classList.remove("hidden");
+    output.select();
+    try {
+      navigator.clipboard.writeText(url);
+      showToast("✓ Lien copié", "success");
+    } catch (e) {
+      showToast("Impossible de copier le lien", "error");
+    }
+  }
+}
+
+function importCloudLinkPrompt() {
+  const raw = prompt(
+    "Collez le lien de synchronisation Cloud (ou uniquement le code 'cloud=...') :",
+  );
+  if (!raw) return;
+  let cloud = raw.trim();
+  try {
+    const url = new URL(raw);
+    cloud = url.searchParams.get("cloud") || cloud;
+  } catch (e) {
+    // Not a URL, use as-is
+  }
+  if (!cloud) {
+    showToast("Le lien Cloud est invalide.", "error");
+    return;
+  }
+  importCloudData(cloud);
+}
+
+function importCloudData(cloudPayload) {
+  const payload = decodeCloudPayload(cloudPayload);
+  if (!payload || !payload.profile) {
+    showToast(
+      "Impossible d'importer les données Cloud. Format invalide.",
+      "error",
+    );
+    return;
+  }
+
+  const proceed = confirm(
+    `Importer les données depuis le Cloud pour ${payload.profile.prenom} ${payload.profile.nom} ? Cela écrasera les données actuelles de l'utilisateur.`,
+  );
+  if (!proceed) return;
+
+  // Persist profile and data
+  localStorage.setItem(
+    `noteo_profile_${payload.profile.id}`,
+    JSON.stringify(payload.profile),
+  );
+  localStorage.setItem(
+    `noteo_v8_data_${payload.profile.id}`,
+    JSON.stringify(payload.academicData),
+  );
+  appSettings = payload.settings || appSettings;
+  saveSettings();
+  applyAllSettings();
+
+  showToast("✓ Données importées", "success");
+  setTimeout(() => window.location.reload(), 300);
+}
+
+function checkCloudImportFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const cloud = params.get("cloud");
+  if (!cloud) return;
+  history.replaceState(null, "", window.location.pathname);
+  if (
+    confirm(
+      "Un lien Cloud a été détecté dans l'URL. Voulez-vous importer ces données ?",
+    )
+  ) {
+    importCloudData(cloud);
+  }
+}
+
+function showToast(message, type = "info", duration = 3000) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  toast.style.animation = "slideInToast 0.3s ease-out forwards";
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = "slideOutToast 0.3s ease-out forwards";
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, duration);
+}
+
+function hideToast(toastEl) {
+  if (toastEl) {
+    toastEl.style.animation = "slideOutToast 0.3s ease-out forwards";
+    setTimeout(() => {
+      toastEl.remove();
+    }, 300);
+  }
+}
+
 function clearCurrentUserNotes() {
   if (
     !appSettings.confirmDelete ||
@@ -2045,6 +2238,25 @@ function deleteAllData() {
 
 // --- CALCULATIONS & RENDER ---
 function loadUserData() {
+  // If cloud mode is active and we have a mirrored cloud store, try to load from it.
+  if (user.storageMode === "cloud" && user.cloudId) {
+    try {
+      const cloudRaw = localStorage.getItem(`noteo_cloud_${user.cloudId}`);
+      if (cloudRaw) {
+        const cloudData = JSON.parse(cloudRaw);
+        if (cloudData && cloudData.academicData) {
+          academicData = cloudData.academicData;
+          subjects = academicData.semesters.find(
+            (s) => s.id === academicData.currentSemesterId,
+          )?.subjects;
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur lors du chargement des données Cloud", e);
+    }
+  }
+
   const data = localStorage.getItem(`noteo_v8_data_${user.id}`);
   let parsedData = data ? JSON.parse(data) : null;
 
@@ -2119,6 +2331,19 @@ function save() {
     `noteo_v8_data_${user.id}`,
     JSON.stringify(academicData),
   );
+
+  // Cloud backup mirror (local, pour partage via lien)
+  if (user.storageMode === "cloud" && user.cloudId) {
+    localStorage.setItem(
+      `noteo_cloud_${user.cloudId}`,
+      JSON.stringify({
+        profile: user,
+        academicData,
+        settings: appSettings,
+        timestamp: Date.now(),
+      }),
+    );
+  }
 }
 
 function recalculateSubjectAverage(sub) {
@@ -2236,11 +2461,12 @@ function processSubjectAddition(data, mode) {
 
 // Close sort menu when clicking outside
 document.addEventListener("click", (e) => {
-  const menu = document.getElementById("sort-menu");
+  const menu = DOM_CACHE.sortMenu || document.getElementById("sort-menu");
   if (!menu) return;
   if (menu.classList.contains("show")) {
     // If click is inside the menu or the button, ignore
-    const btn = document.getElementById("sort-menu-btn");
+    const btn =
+      DOM_CACHE.sortMenuBtn || document.getElementById("sort-menu-btn");
     if (btn && (btn.contains(e.target) || menu.contains(e.target))) return;
     menu.classList.remove("show");
     setTimeout(() => {
@@ -2251,8 +2477,10 @@ document.addEventListener("click", (e) => {
 
 function renderGrades() {
   try {
-    const cont = document.getElementById("grades-container");
-    const actions = document.getElementById("grades-actions");
+    if (!DOM_CACHE.gradesContainer || !DOM_CACHE.gradesActions) cacheDom();
+
+    const cont = DOM_CACHE.gradesContainer;
+    const actions = DOM_CACHE.gradesActions;
 
     if (!cont) {
       console.error("renderGrades: #grades-container introuvable");
@@ -2707,9 +2935,91 @@ function updateSemesterUI() {
     (s) => s.id === academicData.currentSemesterId,
   );
   if (currentSemester) {
-    document.getElementById("current-semester-name").textContent =
-      currentSemester.name;
+    const semesterNameEl = document.getElementById("current-semester-name");
+    if (semesterNameEl) semesterNameEl.textContent = currentSemester.name;
+    updateMobileSemesterLabel();
   }
+}
+
+function updateMobileSemesterLabel() {
+  const el = document.getElementById("mobile-semester-label");
+  if (!el) return;
+  const currentSemester =
+    academicData && Array.isArray(academicData.semesters)
+      ? academicData.semesters.find(
+          (s) => s.id === academicData.currentSemesterId,
+        )
+      : null;
+  if (currentSemester) {
+    el.textContent = currentSemester.name;
+  }
+}
+
+function initScrollToggleButton() {
+  const btn = document.getElementById("scroll-toggle-btn");
+  const iconPath = document.getElementById("scroll-toggle-path");
+  if (!btn || !iconPath) return;
+
+  const update = () => {
+    if (!isPhoneXP) {
+      btn.classList.add("hidden");
+      return;
+    }
+    const atTop = window.scrollY < 120;
+    btn.classList.remove("hidden");
+    if (atTop) {
+      iconPath.setAttribute("d", "M5 9l7 7 7-7");
+      btn.title = "Aller en bas";
+    } else {
+      iconPath.setAttribute("d", "M19 15l-7-7-7 7");
+      btn.title = "Aller en haut";
+    }
+  };
+
+  btn.addEventListener("click", () => {
+    if (window.scrollY < 120) {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+
+  window.addEventListener("scroll", update);
+  update();
+}
+
+function openPhoneWarningModal() {
+  playSound("swoosh");
+  document.body.classList.add("modal-open");
+  document.getElementById("phone-warning-modal").classList.add("open");
+}
+
+function dismissPhoneWarning() {
+  localStorage.setItem("noteo_phone_warning_dismissed", "1");
+  closeModals();
+}
+
+function maybeShowPhoneWarning() {
+  if (!isPhoneXP) return;
+  if (localStorage.getItem("noteo_phone_warning_dismissed")) return;
+  openPhoneWarningModal();
+}
+
+function openSafariWarningModal() {
+  playSound("swoosh");
+  document.body.classList.add("modal-open");
+  document.getElementById("safari-warning-modal").classList.add("open");
+}
+
+function dismissSafariWarning() {
+  localStorage.setItem("noteo_safari_warning_dismissed", "1");
+  closeModals();
+}
+
+function maybeShowSafariWarning() {
+  if (!document.body.classList.contains("is-safari")) return;
+  if (localStorage.getItem("noteo_safari_warning_dismissed")) return;
+  openSafariWarningModal();
 }
 
 function switchTab(tab) {
