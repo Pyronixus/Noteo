@@ -246,3 +246,7 @@ body.modal-open {
 .phone-xp footer { display: none !important; }
 .phone-xp .theme-icon-wrapper { display: none !important; }
 .phone-xp .pin-btn { height: 3.25rem !important; }
+.phone-xp nav { display: none !important; }
+.phone-switch-btn { display: none; }
+.phone-xp .phone-switch-btn { display: block; }
+.phone-xp nav { display: none !important; }
