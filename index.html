@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/antijingo/open-dyslexic@1.0/src/open-dyslexic.css" rel="stylesheet">
-    <link rel="stylesheet" href="Source/style.css">
+    <link rel="stylesheet" href="Source//code/style.css">
 </head>
 <body class="antialiased light-mode">
     
@@ -71,7 +71,7 @@
             </div>
             <div class="mt-8">
                 <label class="flex items-center justify-center gap-3 cursor-pointer text-sm">
-                        <input type="checkbox" id="stay-logged-in-checkbox" title="Rester connecté" class="styled-checkbox">
+                        <input type="checkbox" id="stay-logged-in-checkbox" title="Rester connecté" placeholder="Rester connecté" class="styled-checkbox">
                     <span class="font-bold text-[var(--text-muted)]">Rester connecté (2h)</span>
                 </label>
             </div>
@@ -152,7 +152,7 @@
                             </div>
                             <div class="space-y-1">
                                 <button id="lock-session-btn" onclick="lockSession()" class="w-full text-left px-3 py-2 text-xs font-bold text-[var(--text-main)] hover:bg-[var(--input-bg)] rounded-xl transition-all flex items-center justify-between" style="display: none;">
-                                    <span class="flex items-center gap-2">
+                                    <span class="flex items-center gap-2" title="Verrouiller la session">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                                         Verrouiller
                                     </span>
@@ -200,7 +200,7 @@
                                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                     <div class="space-y-3 flex-grow">
                                         <label class="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest pl-2">Matière</label>
-                                <input type="text" id="subject-name" required title="Nom de la matière" placeholder="Ex: Mathématiques" aria-label="Nom de la matière" class="w-full px-6 py-4 rounded-2xl text-xl font-extrabold focus:ring-2 focus:ring-indigo-500/50">
+                                <input type="text" id="subject-name" required title="Nom de la matière" placeholder="Ex: Mathématiques" aria-label="Nom de la matière" class="w-full px-6 py-4 rounded-2xl text-xl font-extrabold focus:ring-2 focus:ring-indigo-500/50 bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)]">
                                     </div>
                                     <div class="relative">
                                         <label class="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest pl-2">Couleur</label>
@@ -233,7 +233,7 @@
                                                 <div class="color-dot bg-zinc-400 text-zinc-400" data-color="#a1a1aa" data-name="Gris" onclick="selectColor(this)"></div>
                                             </div>
                                             <div class="mt-4 pt-4 border-t border-[var(--border)]"><button type="button" onclick="document.getElementById('custom-color-picker').click()" class="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl font-bold bg-[var(--input-bg)] border border-[var(--border)] hover:border-indigo-400 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>Couleur personnalisée</button></div>
-                                            <input type="color" id="custom-color-picker" class="hidden" onchange="setCustomColor(this.value)">
+                                            <input title="Couleur personnalisée" type="color" id="custom-color-picker" class="hidden" onchange="setCustomColor(this.value)">
                                         </div>
                                     </div>
                                 </div>
@@ -373,11 +373,11 @@
                         <form id="profile-form" class="space-y-4 max-w-md">
                             <div>
                                 <label for="settings-prenom" class="text-xs font-bold text-[var(--text-muted)]">Prénom</label>
-                                <input type="text" id="settings-prenom" required title="Prénom" placeholder="Votre prénom" class="w-full mt-1 px-4 py-3 rounded-xl font-bold text-[var(--text-main)]">
+                                <input type="text" id="settings-prenom" required title="Prénom" placeholder="Votre prénom" class="w-full mt-1 px-4 py-3 rounded-xl font-bold text-[var(--text-main)] bg-[var(--input-bg)] border border-[var(--border)]">
                             </div>
                             <div>
                                 <label for="settings-nom" class="text-xs font-bold text-[var(--text-muted)]">Nom</label>
-                                <input type="text" id="settings-nom" required title="Nom" placeholder="Votre nom" class="w-full mt-1 px-4 py-3 rounded-xl font-bold text-[var(--text-main)]">
+                                <input type="text" id="settings-nom" required title="Nom" placeholder="Votre nom" class="w-full mt-1 px-4 py-3 rounded-xl font-bold text-[var(--text-main)] bg-[var(--input-bg)] border border-[var(--border)]">
                             </div>
                             <div>
                                 <label for="setting-periodType" class="text-xs font-bold text-[var(--text-muted)]">Organisation de l'année</label>
@@ -408,28 +408,28 @@
                     <h3 class="text-lg font-bold text-[var(--text-main)] pt-4">Affichage</h3>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Barre de navigation fixe</h4><p class="text-xs text-[var(--text-muted)]">Garder le menu visible au défilement.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-fixedNav" title="Barre de navigation fixe" onchange="updateSetting('fixedNav', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-fixedNav" title="Barre de navigation fixe" placeholder="Barre de navigation fixe" onchange="updateSetting('fixedNav', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Mode Zen</h4><p class="text-xs text-[var(--text-muted)]">Masquer les éléments décoratifs pour plus de concentration.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-zenMode" title="Mode Zen" onchange="updateSetting('zenMode', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-zenMode" title="Mode Zen" placeholder="Mode Zen" onchange="updateSetting('zenMode', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Afficher l'avatar</h4><p class="text-xs text-[var(--text-muted)]">Montrer votre photo de profil dans l'en-tête.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-showAvatar" title="Afficher l'avatar" onchange="updateSetting('showAvatar', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-showAvatar" title="Afficher l'avatar" placeholder="Afficher l'avatar" onchange="updateSetting('showAvatar', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <h3 class="text-lg font-bold text-[var(--text-main)] pt-4">Effets Visuels</h3>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Activer les animations</h4><p class="text-xs text-[var(--text-muted)]">Active ou désactive les animations de l'interface.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-animations" title="Activer les animations" onchange="updateSetting('animations', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-animations" title="Activer les animations" placeholder="Activer les animations" onchange="updateSetting('animations', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Activer le flou</h4><p class="text-xs text-[var(--text-muted)]">Effet de verre dépoli sur les cartes.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-blur" title="Activer le flou" onchange="updateSetting('blur', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-blur" title="Activer le flou" placeholder="Activer le flou" onchange="updateSetting('blur', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Afficher les blobs</h4><p class="text-xs text-[var(--text-muted)]">Affiche les formes colorées en arrière-plan.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-blobs" title="Afficher les blobs" onchange="updateSetting('blobs', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-blobs" title="Afficher les blobs" placeholder="Afficher les blobs" onchange="updateSetting('blobs', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                 </div>
 
@@ -439,7 +439,7 @@
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <label for="sound-toggle" id="label-sound-toggle" class="font-bold text-[var(--text-main)]">Activer les sons de l'interface</label>
                         <label class="relative">
-                            <input type="checkbox" id="sound-toggle" title="Activer les sons" class="sr-only peer" onchange="toggleSounds(this.checked)">
+                            <input type="checkbox" id="sound-toggle" title="Activer les sons" placeholder="Activer les sons" class="sr-only peer" onchange="toggleSounds(this.checked)">
                             <div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div>
                             <div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                         </label>
@@ -450,7 +450,7 @@
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Confirmer avant suppression</h4><p class="text-xs text-[var(--text-muted)]">Affiche une alerte avant toute suppression.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-confirmDelete" title="Confirmer avant suppression" onchange="updateSetting('confirmDelete', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-confirmDelete" title="Confirmer avant suppression" placeholder="Confirmer avant suppression" onchange="updateSetting('confirmDelete', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <h3 class="text-lg font-bold text-[var(--text-main)] pt-4">Affichage des listes</h3>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
@@ -468,7 +468,7 @@
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Afficher la date des notes</h4><p class="text-xs text-[var(--text-muted)]">Affiche la date à côté de chaque note.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-showNoteDate" title="Afficher la date des notes" onchange="updateSetting('showNoteDate', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-showNoteDate" title="Afficher la date des notes" placeholder="Afficher la date des notes" onchange="updateSetting('showNoteDate', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                 </div>
 
@@ -509,15 +509,15 @@
                 <div id="settings-tab-content-accessibility" class="settings-tab-content hidden space-y-6">
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Texte à fort contraste</h4><p class="text-xs text-[var(--text-muted)]">Améliore la lisibilité du texte.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-highContrast" title="Texte à fort contraste" onchange="updateSetting('highContrast', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-highContrast" title="Texte à fort contraste" placeholder="Texte à fort contraste" onchange="updateSetting('highContrast', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Réduire les mouvements</h4><p class="text-xs text-[var(--text-muted)]">Désactive la plupart des animations de l'interface.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-reduceMotion" title="Réduire les mouvements" onchange="updateSetting('reduceMotion', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-reduceMotion" title="Réduire les mouvements" placeholder="Réduire les mouvements" onchange="updateSetting('reduceMotion', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Police pour dyslexiques</h4><p class="text-xs text-[var(--text-muted)]">Utilise une police de caractères adaptée.</p></div>
-                        <label class="relative"><input type="checkbox" id="setting-dyslexicFont" title="Police pour dyslexiques" onchange="updateSetting('dyslexicFont', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
+                        <label class="relative"><input type="checkbox" id="setting-dyslexicFont" title="Police pour dyslexiques" placeholder="Police pour dyslexiques" onchange="updateSetting('dyslexicFont', this.checked)" class="sr-only peer"><div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div><div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div></label>
                     </div>
                 </div>
             </div>
@@ -567,8 +567,8 @@
             </div>
             <div class="mt-6">
                 <label class="flex items-center justify-center gap-3 cursor-pointer">
-                    <input type="checkbox" id="skip-pin-checkbox" title="Ne plus demander pendant 15 min" class="styled-checkbox">
-                    <span class="text-sm font-bold text-[var(--text-muted)]">Ne plus demander pendant 15 min</span>
+                    <input type="checkbox" id="skip-pin-checkbox" title="Ne plus demander pendant 15 min" placeholder="Ne plus demander pendant 15 min" class="styled-checkbox">
+                    <span class="text-sm font-bold text-[var(--text-muted)]" title="Option de délai de grâce PIN">Ne plus demander pendant 15 min</span>
                 </label>
             </div>
             <button id="forgot-pin-btn" onclick="forgotPin()" class="hidden mt-4 text-sm font-bold text-indigo-500 hover:underline">Code PIN oublié ?</button>
@@ -628,7 +628,7 @@
             </div>
             <div class="mt-6 pt-6 border-t border-[var(--border)]">
                 <label for="recovery-email-input" class="text-xs font-bold text-[var(--text-muted)]">Email de récupération (Optionnel)</label>
-                <input type="email" id="recovery-email-input" title="Email de récupération" placeholder="vous@email.com" class="w-full mt-1 px-4 py-3 rounded-xl font-bold text-[var(--text-main)]">
+                <input type="email" id="recovery-email-input" title="Email de récupération" placeholder="vous@email.com" class="w-full mt-1 px-4 py-3 rounded-xl font-bold text-[var(--text-main)] bg-[var(--input-bg)] border border-[var(--border)]">
                 <p class="text-xs text-[var(--text-muted)] mt-2" title="Information sur l'email de récupération">Utilisé uniquement si vous oubliez votre code PIN. Laissez vide si vous ne souhaitez pas en définir.</p>
             </div>
         </div>
@@ -659,7 +659,7 @@
             <h2 class="text-2xl font-black text-[var(--text-main)] mb-2">Rechargement requis</h2>
             <p class="text-[var(--text-muted)] text-sm mb-6 font-medium">Pour appliquer ce changement, l'application doit être rechargée. Pas d'inquiétude, vos données sont sauvegardées en temps réel.</p>
             <button onclick="window.location.reload()" class="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-all mb-4 shadow-lg shadow-indigo-500/30">Recharger la page</button>
-            <label class="flex items-center justify-center gap-2 cursor-pointer text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><input type="checkbox" title="Recharger automatiquement" onchange="updateSetting('autoReload', this.checked); if(this.checked) window.location.reload();" class="styled-checkbox w-4 h-4"><span class="font-bold">Ne plus afficher et recharger automatiquement</span></label>
+            <label class="flex items-center justify-center gap-2 cursor-pointer text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><input type="checkbox" title="Recharger automatiquement" placeholder="Recharger automatiquement" onchange="updateSetting('autoReload', this.checked); if(this.checked) window.location.reload();" class="styled-checkbox w-4 h-4"><span class="font-bold">Ne plus afficher et recharger automatiquement</span></label>
         </div>
     </div>
 
@@ -1039,7 +1039,7 @@
             </div>
         </div>
     </div>
-    <script src="Source/script.js"></script>
+    <script src="Source/code/script.js"></script>
 </body>
 </html>
     
