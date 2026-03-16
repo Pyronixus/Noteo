@@ -1,0 +1,150 @@
+Politique de confidentialité
+===========================
+
+Dernière mise à jour : 16 mars 2026
+
+Introduction
+------------
+
+La présente politique de confidentialité décrit les traitements de données personnelles mis en œuvre par [Nom de la société / éditeur] dans le cadre de l'exploitation du site [URL du site]. Elle précise quelles données sont collectées, dans quel but, sur quelle base légale, avec qui elles sont partagées, et comment les personnes concernées peuvent exercer leurs droits.
+
+1) Responsable du traitement
+----------------------------
+
+- Responsable du traitement : [Nom de la société ou personne physique]
+- Adresse : [adresse complète]
+- Email : [email@example.com]
+- Téléphone : [numéro]
+- Délégué à la protection des données (DPO) : [nom et contact] (si applicable)
+
+2) Données collectées
+---------------------
+
+Selon les fonctionnalités du site et les interactions, les catégories de données suivantes peuvent être collectées :
+
+- Données d'identification : nom, prénom, raison sociale
+- Coordonnées : adresse e-mail, numéro de téléphone, adresse postale
+- Données de connexion : adresse IP, logs serveur, type et version du navigateur, pages consultées
+- Données de paiement : (si traitement) données nécessaires à la facturation (stockées via prestataire de paiement)
+- Contenu fourni par l'utilisateur : messages, commentaires, fichiers téléchargés
+- Données de localisation : lorsqu'elles sont fournies par l'utilisateur ou dérivées d'une adresse IP
+- Données issues des cookies et traceurs : identifiants de cookie, préférences, analytics
+
+3) Finalités du traitement et bases légales
+-----------------------------------------
+
+Les données sont traitées pour les finalités suivantes, avec leurs bases légales :
+
+- Gestion des contacts et demandes d'information : exécution d'une obligation contractuelle / intérêt légitime / consentement
+- Prestation de services et facturation : exécution du contrat
+- Amélioration de l'expérience utilisateur et statistiques : intérêt légitime / consentement pour certains traceurs
+- Marketing et communication (newsletters, offres) : consentement préalable ou intérêt légitime selon le cas
+- Sécurité, prévention des fraudes et respect des obligations juridiques : intérêt légitime et conformité légale
+
+4) Durées de conservation
+-------------------------
+
+Les durées de conservation varient selon la nature des données et la finalité :
+
+- Données de contact pour support : conservées pendant la durée nécessaire au traitement + 3 ans
+- Données liées à la facturation : 10 ans (conformément aux obligations légales)
+- Données de navigation et logs : 6 à 24 mois selon usage
+- Données marketing (consentement) : conservation jusqu'à retrait du consentement + preuve du retrait
+
+Remplacez ces durées par celles applicables à votre activité et conformes aux lois locales.
+
+5) Destinataires des données
+----------------------------
+
+Les destinataires peuvent inclure :
+
+- Les employés et prestataires techniques nécessaires à l'exploitation du site
+- Les sous-traitants hébergeant, sauvegardant ou analysant les données (hébergeur, CRM, solution d'emailing, outil d'analytics)
+- Les autorités compétentes en cas d'obligation légale
+
+Les sous-traitants sont contractuellement tenus d'assurer la confidentialité et la sécurité des données.
+
+6) Transferts hors UE
+----------------------
+
+Si des transferts de données hors de l'Union européenne ont lieu (ex. hébergeur ou services tiers), ils sont encadrés par des garanties appropriées (clauses contractuelles types, décision d'adéquation, etc.). Les transferts sont documentés.
+
+7) Cookies et traceurs
+---------------------
+
+Le site utilise des cookies et autres traceurs, classés généralement comme :
+
+- Cookies strictement nécessaires : exigés pour le fonctionnement du site
+- Cookies de performance / analytics : pour mesurer l'audience (ex. Google Analytics)
+- Cookies fonctionnels : pour mémoriser des choix et préférences
+- Cookies publicitaires / de ciblage : pour proposer des contenus/publicités ciblées
+
+Le recueil du consentement préalable est effectué lorsque la loi l'exige. L'utilisateur peut gérer ses préférences via la bannière cookie et les paramètres de son navigateur.
+
+8) Droits des personnes
+-----------------------
+
+Conformément à la réglementation applicable (ex. RGPD), toute personne concernée dispose des droits suivants :
+
+- Droit d'accès : obtenir la confirmation et une copie des données traitées
+- Droit de rectification : demander la correction de données inexactes
+- Droit à l'effacement (droit à l'oubli) : sous réserve des obligations légales
+- Droit à la limitation du traitement
+- Droit d'opposition : s'opposer à certains traitements (marketing, profilage)
+- Droit à la portabilité : obtenir et réutiliser ses données dans un format structuré
+- Droit de retirer le consentement : lorsque le traitement est fondé sur le consentement
+- Droit d'introduire une réclamation auprès d'une autorité de contrôle (ex. CNIL pour la France)
+
+Pour exercer ces droits, contactez :
+
+- Email : [email@example.com]
+- Adresse postale : [adresse complète]
+
+Joindre une copie d'une pièce d'identité pourra être demandé pour vérifier l'identité du demandeur.
+
+9) Sécurité
+-----------
+
+Des mesures techniques et organisationnelles appropriées sont mises en œuvre pour protéger les données contre la destruction, la perte, l'altération, la divulgation non autorisée ou l'accès non autorisé. Toutefois, aucune transmission via internet n'est totalement sécurisée.
+
+10) Notification des violations de données
+----------------------------------------
+
+En cas de violation de données personnelles susceptible d'engendrer un risque pour les droits et libertés des personnes, l'éditeur tiendra compte de ses obligations légales en matière de notification aux autorités compétentes et, si nécessaire, aux personnes concernées.
+
+11) Mineurs
+-----------
+
+Le site n'est pas destiné aux personnes de moins de 16 ans sans autorisation parentale. Si des mineurs fournissent des données, l'éditeur invite les parents ou tuteurs à contacter l'éditeur pour demander la suppression des données.
+
+12) Liens vers des sites tiers
+-----------------------------
+
+Ce site peut contenir des liens vers des sites tiers dont les pratiques en matière de protection des données sont indépendantes. L'éditeur n'est pas responsable des politiques de confidentialité de ces tiers.
+
+13) Modifications de la politique
+--------------------------------
+
+La présente politique peut être mise à jour. La date de la dernière mise à jour est indiquée en haut du document. En cas de modification substantielle, l'éditeur pourra informer les utilisateurs (bandeau, e-mail, etc.).
+
+14) Mentions complémentaires
+---------------------------
+
+- Responsable de traitement : [Nom / contact]
+- Base légale principale : [ex. exécution du contrat / consentement / intérêt légitime]
+- Liste des sous-traitants : [hébergeur, solution d'emailing, analytics, etc.]
+
+15) Contact et réclamations
+---------------------------
+
+Pour toute question relative à la protection des données personnelles :
+
+- Email : [email@example.com]
+- Adresse postale : [adresse complète]
+
+Vous pouvez également déposer une réclamation auprès de l'autorité de contrôle compétente (en France : CNIL).
+
+Remarques finales
+-----------------
+
+Ce document est un modèle détaillé destiné à être adapté à votre activité et à vos traitements. Pour conformité juridique complète (notamment RGPD), faites-le relire par un juriste spécialisé.

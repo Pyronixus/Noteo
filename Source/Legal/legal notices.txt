@@ -1,0 +1,91 @@
+Mentions légales
+=================
+
+Dernière mise à jour : 16 mars 2026
+
+1) Éditeur du site
+-------------------
+
+- Nom / Raison sociale : [Nom de la société ou prénom et nom de l'éditeur]
+- Forme juridique : [ex. SARL, SAS, auto-entrepreneur, personne physique]
+- Capital social : [montant] (si applicable)
+- Siège social : [adresse complète]
+- Numéro SIRET / SIREN : [SIRET / SIREN] (si applicable)
+- RCS : [Ville d'immatriculation] (si applicable)
+- TVA intracommunautaire : [Numéro] (si applicable)
+
+2) Directeur de la publication
+-------------------------------
+
+Le directeur de la publication est : [Nom et prénom].
+
+3) Hébergeur
+-------------
+
+- Nom de l'hébergeur : [Hébergeur]
+- Adresse de l'hébergeur : [Adresse complète de l'hébergeur]
+- Téléphone : [Numéro de téléphone de l'hébergeur]
+
+4) Contact
+-----------
+
+Pour toute question relative au site, vous pouvez contacter l'éditeur à :
+
+- Adresse e-mail : [email@example.com]
+- Téléphone : [numéro]
+- Adresse postale : [adresse complète si différente du siège social]
+
+5) Objet du site
+-----------------
+
+Le site [URL du site] a pour objet de fournir des informations sur [activité/produits/services].
+
+6) Propriété intellectuelle
+---------------------------
+
+Tous les éléments présents sur le site (textes, images, vidéos, logos, graphismes, données, logiciels, bases de données, etc.) sont protégés au titre du droit d'auteur, des droits des bases de données et/ou des marques par le titulaire des droits ou par les ayants droit. Toute représentation, reproduction, adaptation, modification ou exploitation totale ou partielle, par quelque procédé que ce soit, est interdite sans autorisation écrite préalable de l'éditeur.
+
+7) Liens hypertextes
+---------------------
+
+Le site peut contenir des liens vers d'autres sites édités par des tiers. L'éditeur n'exerce aucun contrôle sur ces sites externes et ne peut être tenu responsable de leur contenu, de leurs politiques de confidentialité ou de leurs pratiques.
+
+8) Données personnelles et cookies
+---------------------------------
+
+Des informations personnelles peuvent être collectées via le site (formulaire de contact, inscription, commentaires, etc.). La collecte et le traitement de ces données font l'objet d'une politique de confidentialité distincte accessible dans le fichier `politique_confidentialite.txt` situé dans le même dossier.
+
+Concernant les cookies : le site peut utiliser des cookies nécessaires au fonctionnement, des cookies d'analyse et des cookies tiers (ex. réseaux sociaux, publicité). L'utilisateur peut gérer ses préférences via les paramètres de son navigateur et/ou le bandeau cookie présent sur le site.
+
+9) Responsabilité
+------------------
+
+L'éditeur met en œuvre les moyens raisonnables pour assurer la disponibilité et la mise à jour des informations publiées sur le site. Toutefois, l'éditeur ne garantit pas l'exhaustivité, l'exactitude ou l'actualité des informations et ne peut être tenu responsable des erreurs, omissions ou d'un dommage résultant de l'accès ou de l'utilisation du site.
+
+10) Conditions d'utilisation
+---------------------------
+
+L'accès et l'utilisation du site entraînent l'acceptation sans réserve des présentes mentions légales. L'éditeur se réserve le droit de modifier tout ou partie des mentions légales à tout moment ; les modifications prennent effet dès leur mise en ligne.
+
+11) Loi applicable et juridiction
+--------------------------------
+
+Les présentes mentions légales sont soumises au droit français. En cas de litige, les tribunaux compétents seront ceux du ressort du siège social de l'éditeur, sauf disposition légale contraire.
+
+12) Signalement de contenus illicites
+------------------------------------
+
+Si vous constatez la mise en ligne de contenus illicites sur le site, veuillez en informer l'éditeur en fournissant un signalement détaillé (URL concernée, description, preuves éventuelles).
+
+13) Archivage et preuve
+------------------------
+
+Les informations transmises via les formulaires du site sont archivées par l'éditeur dans des conditions raisonnables de sécurité. Elles peuvent être utilisées comme preuve en cas de litige.
+
+14) Mentions complémentaires (si applicable)
+-----------------------------------------
+
+- Conditions générales de vente (CGV) : [lien ou précision si applicables]
+- Conditions générales d'utilisation (CGU) : [lien ou précision si applicables]
+
+Pour personnaliser ces mentions légales, remplacez les champs entre crochets par vos informations réelles et, si nécessaire, faites valider le texte par un conseiller juridique.
