@@ -161,6 +161,42 @@
             chartId: null,
             chartType: null
         };
+        // Flag for phone-restricted experience (no hover primary)
+        let isPhoneXP = false;
+
+        function detectPhoneXP() {
+            const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+            const pointerCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+            const hasTouch = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
+            // If the device cannot hover and has a coarse pointer or touch points, consider it a phone experience.
+            isPhoneXP = (!canHover && (pointerCoarse || hasTouch));
+            return isPhoneXP;
+        }
+
+        function applyPhoneExperience() {
+            document.body.classList.add('phone-xp');
+            // Hide theme toggle button
+            const themeBtn = document.querySelector('button[onclick="cycleTheme()"]');
+            if (themeBtn) themeBtn.style.display = 'none';
+
+            // Hide expand/collapse all accordions button
+            const toggleAllBtn = document.querySelector('button[onclick="toggleAllAccordions()"]');
+            if (toggleAllBtn) toggleAllBtn.style.display = 'none';
+
+            // Ensure only avatar is shown (remove account name)
+            const headerName = document.getElementById('header-user-name');
+            if (headerName) headerName.classList.add('hidden');
+
+            // Hide footer
+            const footer = document.querySelector('footer');
+            if (footer) footer.style.display = 'none';
+
+            // Make main input and analysis more compact via CSS class
+            document.documentElement.classList.add('phone-xp');
+
+            // Remove arrows around semester controls (if present)
+            document.querySelectorAll('button[onclick="cycleSemester(-1)"], button[onclick="cycleSemester(1)"], #semester-menu').forEach(el => el.style.display = 'none');
+        }
         let pendingSubjectData = null;
 
         window.onload = () => {
@@ -227,6 +263,8 @@
 
             // Cache important DOM elements for faster access
             cacheDom();
+            // Detect and apply phone-restricted experience when appropriate
+            try { if (detectPhoneXP()) applyPhoneExperience(); } catch (e) { console.warn('Phone XP detection error', e); }
 
             // Add event listeners for the duplicate subject modal
             document.getElementById('duplicate-opt-update').onclick = () => {
@@ -2338,8 +2376,27 @@ if (fullscreenChart) {
                             const consistency = 20 - stdDev(notes);
                             return { avg, max, min, consistency };
                         };
-                        const firstMetrics = getMetrics([firstSubject]);
-                        const otherMetrics = getMetrics(otherSubjects);
+
+                        typeSelector.innerHTML = chartTypes.map(t => `<button class="chart-type-btn" onclick="addChart('${t.id}')">${t.name}</button>`).join('');
+
+                        // If phone experience is active, collapse selectors by default and attach toggles to headers
+                        if (isPhoneXP) {
+                            try {
+                                // Subject header is the previous element of the subject selector
+                                const subjHeader = subjectSelector.previousElementSibling;
+                                const typeHeader = typeSelector.previousElementSibling;
+                                if (subjHeader && subjectSelector) {
+                                    subjectSelector.style.display = 'none';
+                                    subjHeader.style.cursor = 'pointer';
+                                    subjHeader.onclick = (e) => { e.preventDefault(); subjectSelector.style.display = subjectSelector.style.display === 'none' ? 'block' : 'none'; };
+                                }
+                                if (typeHeader && typeSelector) {
+                                    typeSelector.style.display = 'none';
+                                    typeHeader.style.cursor = 'pointer';
+                                    typeHeader.onclick = (e) => { e.preventDefault(); typeSelector.style.display = typeSelector.style.display === 'none' ? 'block' : 'none'; };
+                                }
+                            } catch (e) { console.warn('Phone chart toggles error', e); }
+                        }
                         return {
                             type: 'radar',
                             data: {
