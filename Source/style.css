@@ -73,7 +73,7 @@
 
         /* Glassmorphism */
         .glass-card {
-            background: var(--bg-card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            background: var(--bg-card); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
             border: 1px solid var(--card-border); box-shadow: var(--shadow);
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -122,7 +122,7 @@
 
         /* Modals */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
             z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
             display: flex; align-items: center; justify-content: center;
         }
@@ -178,7 +178,7 @@
 
         /* Settings-driven classes */
         .zen-mode .blobs-container, .zen-mode #moyenne-gen { display: none; }
-        .no-blur .glass-card, .no-blur header, .no-blur .modal-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        .no-blur .glass-card, .no-blur header, .no-blur .modal-overlay { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
         .fixed-nav header { position: sticky; top: 0; }
         .fixed-nav body { padding-top: var(--header-height); }
         .no-animations * { transition: none !important; animation: none !important; }
@@ -190,7 +190,8 @@
         .chart-type-btn { text-align: left; width: 100%; padding: 0.5rem 0.75rem; font-weight: 700; border-radius: 0.5rem; transition: all 0.2s; }
         .chart-type-btn:hover { background-color: var(--primary-glow); color: var(--primary); }
 
-        /* Mobile/Touch device optimizations */ @media (hover: none) {
+        /* Mobile/Touch device optimizations */ 
+        @media (hover: none) {
             .glass-card:hover {
                 transform: translateY(0);
                 box-shadow: var(--shadow);
@@ -219,9 +220,29 @@
     /* Styled Checkbox */
     .styled-checkbox { appearance: none; background-color: var(--input-bg); border: 2px solid var(--border); width: 1.25rem; height: 1.25rem; border-radius: 0.5rem; display: grid; place-content: center; transition: all 0.2s; cursor: pointer; }
     .styled-checkbox::before { content: ""; width: 0.75rem; height: 0.75rem; transform: scale(0); transition: 0.2s transform ease-in-out; box-shadow: inset 1em 1em var(--primary); transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
+    .styled-checkbox:checked::before { transform: scale(1); }
 /* Disable body scroll when modal is open */
 body.modal-open {
     overflow: hidden;
 }
-    .styled-checkbox:checked::before { transform: scale(1); }
     .styled-checkbox:checked { border-color: var(--primary); }
+
+/* Phone-restricted experience compact styles */
+.phone-xp body, .phone-xp .glass-card, .phone-xp .modal-content { font-size: 14px; }
+.phone-xp .glass-card { padding: 0.75rem !important; }
+.phone-xp #main-card { padding: 1rem !important; }
+.phone-xp #main-card .fraction-input-container input { font-size: 2rem !important; }
+.phone-xp .tab-btn { padding: 0.5rem 0.75rem !important; }
+.phone-xp header { height: 3.5rem !important; }
+.phone-xp header .text-2xl { font-size: 1.1rem !important; }
+.phone-xp .chart-type-btn { padding: 0.4rem 0.5rem; font-size: 0.85rem; }
+.phone-xp .glass-card.h-\[28rem\] { height: 18rem; }
+.phone-xp .w-12.h-12 { width: 40px !important; height: 40px !important; }
+.phone-xp .pulse-logo { width: 3.5rem; height: 3.5rem; }
+.phone-xp .fraction-bar { height: 3px; }
+.phone-xp .history-content { transition: none; }
+
+/* Specific hide elements for phone XP */
+.phone-xp footer { display: none !important; }
+.phone-xp .theme-icon-wrapper { display: none !important; }
+.phone-xp .pin-btn { height: 3.25rem !important; }
