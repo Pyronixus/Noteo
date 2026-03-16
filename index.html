@@ -97,8 +97,8 @@
                     </div>
                     
                     <nav class="flex gap-2 bg-[var(--input-bg)] p-1.5 rounded-2xl border border-[var(--card-border)]">
-                        <button onclick="switchTab('notes')" id="btn-notes" class="tab-btn active px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Saisie</button>
-                        <button onclick="switchTab('charts')" id="btn-charts" class="tab-btn px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Analyses</button>
+                        <button onclick="switchTab('notes')" id="btn-notes" class="tab-btn active px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Notes</button>
+                        <button onclick="switchTab('charts')" id="btn-charts" class="tab-btn px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Graphiques</button>
                     </nav>
 
                     <!-- Semester/Period Selector -->
@@ -283,6 +283,10 @@
                         </div>
                     </div>
                 </div>
+                <!-- Phone switch button -->
+                <div class="phone-switch-btn mt-8 text-center phone-xp:block hidden">
+                    <button onclick="switchTab('charts')" class="glass-card px-8 py-4 rounded-2xl font-bold text-[var(--text-main)] hover:scale-105 transition-all">Voir Graphiques</button>
+                </div>
             </section>
 
             <!-- Tab: Analyses (Charts - NEW) -->
@@ -309,6 +313,10 @@
                             <svg class="w-24 h-24 mx-auto mb-6 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                         </div>
                     </div>
+                </div>
+                <!-- Phone switch button -->
+                <div class="phone-switch-btn mt-8 text-center phone-xp:block hidden">
+                    <button onclick="switchTab('notes')" class="glass-card px-8 py-4 rounded-2xl font-bold text-[var(--text-main)] hover:scale-105 transition-all">Ajouter Notes</button>
                 </div>
             </section>
         </main>
