@@ -191,6 +191,8 @@ const defaultSettings = {
   tagColors: {},
   manualGeneralAverage: null,
   autoReload: false,
+  mobileMode: "editing", // "editing" or "view"
+  hideAddSubject: false,
 };
 let appSettings = { ...defaultSettings };
 const sortOptions = [
@@ -316,14 +318,13 @@ function applyPhoneExperience() {
 let pendingSubjectData = null;
 
 window.onload = () => {
-  const isSafari =
-    navigator.vendor &&
-    navigator.vendor.indexOf("Apple") > -1 &&
-    navigator.userAgent &&
-    !navigator.userAgent.match("CriOS") &&
-    !navigator.userAgent.match("FxiOS");
-  if (isSafari) {
-    document.body.classList.add("is-safari");
+  // Check if mobile device
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    ) || window.innerWidth < 768;
+  if (isMobile) {
+    document.body.classList.add("is-mobile");
   }
 
   loadSettings();
@@ -397,7 +398,7 @@ window.onload = () => {
 
   // Show warnings and cloud import prompt if needed
   maybeShowPhoneWarning();
-  maybeShowSafariWarning();
+  maybeShowMobileModeModal();
   checkCloudImportFromUrl();
 
   // Add event listeners for the duplicate subject modal
@@ -691,6 +692,7 @@ function showApp(silent = false) {
   updateSemesterUI();
   applyMainCardState();
   updateSortButtonUI();
+  applyMobileMode(); // Apply mobile mode settings
 }
 
 // --- NOUVEAUX MENUS (MODALS) ---
@@ -915,10 +917,10 @@ function openAverageInfoModal() {
   document.getElementById("average-info-modal").classList.add("open");
 }
 
-function openPyroModal() {
+function openOpenSourceModal() {
   playSound("swoosh");
   document.body.classList.add("modal-open");
-  document.getElementById("pyro-modal").classList.add("open");
+  document.getElementById("open-source-modal").classList.add("open");
 }
 
 function openDuplicateSubjectModal(data) {
@@ -984,6 +986,8 @@ function updateSettingsUI() {
     appSettings.animations;
   document.getElementById("setting-blur").checked = appSettings.blur;
   document.getElementById("setting-blobs").checked = appSettings.blobs;
+  document.getElementById("setting-hideAddSubject").checked =
+    appSettings.hideAddSubject;
   document.getElementById("setting-confirmDelete").checked =
     appSettings.confirmDelete;
   document.getElementById("setting-showNoteDate").checked =
@@ -1834,6 +1838,11 @@ function applySetting(key, value) {
       document.querySelector(".blobs-container").style.display = value
         ? "block"
         : "none";
+      break;
+    case "hideAddSubject":
+      document.getElementById("main-card").style.display = value
+        ? "none"
+        : "block";
       break;
     case "highContrast":
       bodyClassList.toggle("high-contrast", value);
@@ -3016,10 +3025,91 @@ function dismissSafariWarning() {
   closeModals();
 }
 
-function maybeShowSafariWarning() {
-  if (!document.body.classList.contains("is-safari")) return;
-  if (localStorage.getItem("noteo_safari_warning_dismissed")) return;
-  openSafariWarningModal();
+// --- MOBILE MODE MANAGEMENT ---
+// REMINDER: Always consider mobile mode when adding new UI elements!
+// Check applyMobileMode() and maybeShowMobileModeModal() for mobile-specific behavior
+
+function maybeShowMobileModeModal() {
+  if (!document.body.classList.contains("is-mobile")) return;
+  if (localStorage.getItem("noteo_mobile_mode_selected")) return;
+  openMobileModeModal();
+}
+
+function openMobileModeModal() {
+  playSound("swoosh");
+  document.body.classList.add("modal-open");
+  document.getElementById("mobile-mode-modal").classList.add("open");
+}
+
+function setMobileMode(mode) {
+  localStorage.setItem("noteo_mobile_mode_selected", "1");
+  localStorage.setItem("noteo_mobile_mode", mode);
+  appSettings.mobileMode = mode;
+  // Automatically set hideAddSubject based on mode
+  appSettings.hideAddSubject = mode === "view";
+  saveSettings();
+  applyMobileMode();
+  closeModals();
+  // Show success message
+  showToast(
+    "Mode " + (mode === "view" ? "visualisation" : "édition") + " activé",
+    "success",
+  );
+}
+
+function applyMobileMode() {
+  const mode = appSettings.mobileMode || "editing";
+  const hideAddSubject = appSettings.hideAddSubject || false;
+  const mainCard = document.getElementById("main-card");
+  const cloudImportSection = document.getElementById("cloud-import-section");
+
+  // Hide main card if in view mode OR if hideAddSubject is enabled
+  const shouldHideMainCard = mode === "view" || hideAddSubject;
+  if (mainCard) mainCard.style.display = shouldHideMainCard ? "none" : "block";
+
+  // Show cloud import if in view mode and not already filled
+  if (
+    mode === "view" &&
+    cloudImportSection &&
+    !localStorage.getItem("noteo_cloud_link")
+  ) {
+    cloudImportSection.style.display = "block";
+  } else if (cloudImportSection) {
+    cloudImportSection.style.display = "none";
+  }
+}
+
+function importCloudAccount() {
+  const linkInput = document.getElementById("cloud-link-input");
+  const link = linkInput.value.trim();
+
+  if (!link) {
+    showToast("Veuillez entrer un lien de partage", "error");
+    return;
+  }
+
+  // Basic validation - should be a URL
+  try {
+    new URL(link);
+  } catch (e) {
+    showToast("Lien invalide", "error");
+    return;
+  }
+
+  // Store the link
+  localStorage.setItem("noteo_cloud_link", link);
+
+  // Hide the import section
+  document.getElementById("cloud-import-section").style.display = "none";
+
+  // Show success message
+  showToast("Compte importé avec succès", "success");
+
+  // TODO: Implement actual cloud import logic here
+  // For now, just show a placeholder message
+  setTimeout(() => {
+    showToast("Fonctionnalité cloud à venir", "info");
+  }, 1000);
 }
 
 function switchTab(tab) {
