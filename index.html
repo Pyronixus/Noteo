@@ -734,9 +734,12 @@
             </button>
             <h2 class="text-2xl font-black text-[var(--text-main)] mb-4">Expérience mobile restreinte</h2>
             <p class="text-[var(--text-muted)] text-sm mb-6">Vous utilisez une version simplifiée sur mobile. Pour une expérience complète, il est recommandé d'utiliser un PC.</p>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="closeModals()" class="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-all">J'ai compris</button>
-                <button onclick="dismissPhoneWarning()" class="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-400 transition-all">Ne plus afficher</button>
+            <div class="flex flex-col gap-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="dismiss-phone-warning" class="w-5 h-5 rounded border-2 border-[var(--border)] bg-[var(--input-bg)] checked:bg-indigo-500 checked:border-indigo-500 transition-all">
+                    <span class="text-sm text-[var(--text-main)] font-medium">Ne plus afficher ce message</span>
+                </label>
+                <button onclick="closeModals()" class="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-all">J'ai compris</button>
             </div>
         </div>
     </div>

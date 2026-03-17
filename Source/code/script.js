@@ -3080,7 +3080,10 @@ function openPhoneWarningModal() {
 }
 
 function dismissPhoneWarning() {
-  localStorage.setItem("noteo_phone_warning_dismissed", "1");
+  const checkbox = document.getElementById("dismiss-phone-warning");
+  if (checkbox && checkbox.checked) {
+    localStorage.setItem("noteo_phone_warning_dismissed", "1");
+  }
   closeModals();
 }
 
@@ -3193,6 +3196,23 @@ function importCloudAccount() {
 
   // Hide the import section
   document.getElementById("cloud-import-section").style.display = "none";
+  playSound("click");
+  document
+    .getElementById("tab-notes")
+    .classList.toggle("hidden", tab !== "notes");
+  document
+    .getElementById("tab-charts")
+    .classList.toggle("hidden", tab !== "charts");
+  document
+    .getElementById("btn-notes")
+    .classList.toggle("active", tab === "notes");
+  document
+    .getElementById("btn-charts")
+    .classList.toggle("active", tab === "charts");
+  if (tab === "charts") renderChartControls();
+}
+
+function switchTab(tab) {
   playSound("click");
   document
     .getElementById("tab-notes")

@@ -361,4 +361,73 @@ body.modal-open {
   .toast {
     max-width: 100%;
   }
+
+  /* Améliorations ergonomiques pour mobile */
+  .glass-card {
+    margin: 0.5rem;
+  }
+
+  /* Désactiver les effets gourmands en performance pendant le défilement */
+  .glass-card {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+  }
+
+  /* Optimiser le rendu des cartes pendant le défilement */
+  .subject-card {
+    will-change: auto;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Boutons plus grands et faciles à toucher */
+  button, .btn, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+
+  /* Inputs plus grands */
+  input, select, textarea {
+    font-size: 1rem;
+    padding: 0.75rem;
+    min-height: 44px;
+  }
+
+  /* Espacement amélioré */
+  .modal-content {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+
+  /* Navigation plus accessible */
+  .tab-btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    margin: 0.25rem;
+  }
+
+  /* Cards plus espacées */
+  .subject-card, .glass-card {
+    margin-bottom: 1rem;
+  }
+
+  /* Header plus compact */
+  header {
+    padding: 1rem 0.5rem;
+  }
+
+  /* Liste des matières plus espacée */
+  .subjects-list {
+    gap: 0.75rem;
+  }
+
+  /* Boutons d'action principaux plus visibles */
+  .pin-btn {
+    height: 3.5rem;
+    font-size: 1.25rem;
+    margin: 0.5rem 0;
+  }
 }
