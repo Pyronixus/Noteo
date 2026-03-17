@@ -3213,6 +3213,8 @@ function importCloudAccount() {
 }
 
 function switchTab(tab) {
+  console.log("Switching to tab:", tab);
+  alert("Switching to: " + tab); // Debug temporaire
   playSound("click");
   document
     .getElementById("tab-notes")

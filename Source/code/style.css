@@ -367,21 +367,6 @@ body.modal-open {
     margin: 0.5rem;
   }
 
-  /* Désactiver les effets gourmands en performance pendant le défilement */
-  .glass-card {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-  }
-
-  /* Optimiser le rendu des cartes pendant le défilement */
-  .subject-card {
-    will-change: auto;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-  }
-
   /* Boutons plus grands et faciles à toucher */
   button, .btn, input[type="button"], input[type="submit"] {
     min-height: 44px;
@@ -430,4 +415,23 @@ body.modal-open {
     font-size: 1.25rem;
     margin: 0.5rem 0;
   }
+}
+
+/* Optimisations spécifiques pour l'expérience mobile détectée */
+.phone-xp .glass-card {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.phone-xp .subject-card {
+  will-change: auto;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Indicateur temporaire pour vérifier que les styles mobiles s'appliquent */
+.phone-xp header {
+  background: rgba(255, 0, 0, 0.1) !important;
 }
