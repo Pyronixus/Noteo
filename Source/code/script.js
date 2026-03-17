@@ -2098,19 +2098,20 @@ function decodeCloudPayload(payload) {
 
 function generateCloudLink() {
   if (!user) return;
-  const payload = {
-    profile: user,
-    academicData,
-    settings: appSettings,
-    timestamp: Date.now(),
-  };
-  const encoded = encodeCloudPayload(payload);
-  if (!encoded) {
+
+  // First try to get existing cloud link
+  let url = getCloudLink();
+  if (!url) {
+    // Generate new link if none exists
+    updateCloudLink();
+    url = getCloudLink();
+  }
+
+  if (!url) {
     showToast("Impossible de générer le lien Cloud.", "error");
     return;
   }
 
-  const url = `${window.location.origin}${window.location.pathname}?cloud=${encoded}`;
   const output = document.getElementById("cloud-link-output");
   if (output) {
     output.value = url;
@@ -2176,10 +2177,53 @@ function importCloudData(cloudPayload) {
   setTimeout(() => window.location.reload(), 300);
 }
 
+function updateCloudLink() {
+  if (!user) return;
+
+  const payload = {
+    profile: user,
+    academicData,
+    settings: appSettings,
+    timestamp: Date.now(),
+  };
+
+  const encoded = encodeCloudPayload(payload);
+  if (!encoded) return;
+
+  const url = `${window.location.origin}${window.location.pathname}?cloud=${encoded}`;
+
+  // Store the updated cloud link
+  localStorage.setItem(`noteo_cloud_link_${user.id}`, url);
+
+  // If this is the first time, show a notification
+  const existingLink = localStorage.getItem(`noteo_cloud_link_${user.id}`);
+  if (!existingLink) {
+    showToast("✓ Lien Cloud généré automatiquement", "success");
+  }
+}
+
+function getCloudLink() {
+  if (!user) return null;
+  return localStorage.getItem(`noteo_cloud_link_${user.id}`);
+}
+
 function checkCloudImportFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const cloud = params.get("cloud");
   if (!cloud) return;
+
+  const payload = decodeCloudPayload(cloud);
+  if (!payload || !payload.profile) return;
+
+  // Check if this cloud data belongs to current user
+  if (user && user.id === payload.profile.id) {
+    // Auto-sync for same user
+    history.replaceState(null, "", window.location.pathname);
+    syncCloudData(cloud);
+    return;
+  }
+
+  // Ask for import for different user
   history.replaceState(null, "", window.location.pathname);
   if (
     confirm(
@@ -2188,6 +2232,35 @@ function checkCloudImportFromUrl() {
   ) {
     importCloudData(cloud);
   }
+}
+
+function syncCloudData(cloudPayload) {
+  const payload = decodeCloudPayload(cloudPayload);
+  if (!payload || !payload.profile) {
+    showToast("Données Cloud corrompues", "error");
+    return;
+  }
+
+  // Update local data with cloud data
+  localStorage.setItem(
+    `noteo_profile_${payload.profile.id}`,
+    JSON.stringify(payload.profile),
+  );
+  localStorage.setItem(
+    `noteo_v8_data_${payload.profile.id}`,
+    JSON.stringify(payload.academicData),
+  );
+
+  if (payload.settings) {
+    appSettings = { ...appSettings, ...payload.settings };
+    saveSettings();
+    applyAllSettings();
+  }
+
+  showToast("✓ Données synchronisées depuis le Cloud", "success");
+
+  // Reload to apply changes
+  setTimeout(() => window.location.reload(), 500);
 }
 
 function showToast(message, type = "info", duration = 3000) {
@@ -2353,6 +2426,9 @@ function save() {
       }),
     );
   }
+
+  // Auto-update cloud link for all users (not just cloud mode)
+  updateCloudLink();
 }
 
 function recalculateSubjectAverage(sub) {
@@ -3089,30 +3165,34 @@ function importCloudAccount() {
   }
 
   // Basic validation - should be a URL
+  let cloudCode = null;
   try {
-    new URL(link);
+    const url = new URL(link);
+    cloudCode = url.searchParams.get("cloud");
+    if (!cloudCode) {
+      showToast("Le lien ne contient pas de données Cloud valides", "error");
+      return;
+    }
   } catch (e) {
     showToast("Lien invalide", "error");
     return;
   }
 
-  // Store the link
+  // Import the cloud data
+  const payload = decodeCloudPayload(cloudCode);
+  if (!payload || !payload.profile) {
+    showToast("Données Cloud invalides", "error");
+    return;
+  }
+
+  // Store the link for future sync
   localStorage.setItem("noteo_cloud_link", link);
+
+  // Import the data
+  importCloudData(cloudCode);
 
   // Hide the import section
   document.getElementById("cloud-import-section").style.display = "none";
-
-  // Show success message
-  showToast("Compte importé avec succès", "success");
-
-  // TODO: Implement actual cloud import logic here
-  // For now, just show a placeholder message
-  setTimeout(() => {
-    showToast("Fonctionnalité cloud à venir", "info");
-  }, 1000);
-}
-
-function switchTab(tab) {
   playSound("click");
   document
     .getElementById("tab-notes")
