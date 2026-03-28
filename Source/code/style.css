@@ -103,6 +103,155 @@
             backdrop-filter: none;
         }
 
+        /* ======= macOS — all browsers (backdrop-filter replacement) =======
+           Uses layered solid backgrounds, gradients, rich shadows & borders
+           for a premium look without any backdrop-filter dependency.
+           Does NOT affect Windows or Linux. */
+
+        /* -- macOS Light theme -- */
+        .is-macos .glass-card {
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,247,255,0.92) 100%);
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow:
+                0 1px 1px rgba(0,0,0,0.02),
+                0 4px 8px -2px rgba(0,0,0,0.04),
+                0 16px 32px -8px rgba(99,102,241,0.06),
+                inset 0 1px 0 rgba(255,255,255,0.9),
+                inset 0 -1px 0 rgba(0,0,0,0.02);
+        }
+        .is-macos .glass-card:hover {
+            box-shadow:
+                0 1px 1px rgba(0,0,0,0.02),
+                0 8px 16px -4px rgba(0,0,0,0.06),
+                0 24px 48px -12px rgba(99,102,241,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                inset 0 -1px 0 rgba(0,0,0,0.02);
+        }
+
+        .is-macos header {
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+            background: linear-gradient(180deg, rgba(241,245,249,0.97) 0%, rgba(241,245,249,0.92) 100%);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .is-macos .modal-overlay {
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+            background: rgba(15,23,42,0.45);
+        }
+
+        .is-macos .modal-content {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,255,0.96) 100%);
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow:
+                0 24px 80px -16px rgba(0,0,0,0.15),
+                0 8px 24px -8px rgba(0,0,0,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.95);
+        }
+
+        .is-macos .dropdown-menu {
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,255,0.96) 100%);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow:
+                0 12px 40px -8px rgba(0,0,0,0.12),
+                0 4px 12px -2px rgba(0,0,0,0.06),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+
+        .is-macos .toast {
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(248,250,255,0.95) 100%);
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow:
+                0 8px 30px -6px rgba(0,0,0,0.1),
+                0 2px 8px -2px rgba(0,0,0,0.05),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+
+        .is-macos input {
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        .is-macos input:focus {
+            background: rgba(255,255,255,0.95);
+        }
+
+        /* -- macOS Dark theme -- */
+        .is-macos.dark-theme .glass-card {
+            background: linear-gradient(135deg, rgba(22,22,35,0.95) 0%, rgba(18,18,30,0.92) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow:
+                0 1px 1px rgba(0,0,0,0.1),
+                0 4px 8px -2px rgba(0,0,0,0.2),
+                0 16px 32px -8px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.04),
+                inset 0 -1px 0 rgba(0,0,0,0.1);
+        }
+        .is-macos.dark-theme .glass-card:hover {
+            box-shadow:
+                0 1px 1px rgba(0,0,0,0.1),
+                0 8px 16px -4px rgba(0,0,0,0.3),
+                0 24px 48px -12px rgba(99,102,241,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.06),
+                inset 0 -1px 0 rgba(0,0,0,0.1);
+        }
+
+        .is-macos.dark-theme header {
+            background: linear-gradient(180deg, rgba(8,8,16,0.97) 0%, rgba(5,5,12,0.94) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+
+        .is-macos.dark-theme .modal-overlay {
+            background: rgba(0,0,0,0.55);
+        }
+
+        .is-macos.dark-theme .modal-content {
+            background: linear-gradient(135deg, rgba(22,22,38,0.98) 0%, rgba(15,15,28,0.96) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow:
+                0 24px 80px -16px rgba(0,0,0,0.5),
+                0 8px 24px -8px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .is-macos.dark-theme .dropdown-menu {
+            background: linear-gradient(135deg, rgba(22,22,38,0.98) 0%, rgba(15,15,28,0.96) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow:
+                0 12px 40px -8px rgba(0,0,0,0.4),
+                0 4px 12px -2px rgba(0,0,0,0.25),
+                inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .is-macos.dark-theme .toast {
+            background: linear-gradient(135deg, rgba(22,22,38,0.97) 0%, rgba(15,15,28,0.95) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow:
+                0 8px 30px -6px rgba(0,0,0,0.35),
+                0 2px 8px -2px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .is-macos.dark-theme input {
+            background: rgba(25,25,40,0.85);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .is-macos.dark-theme input:focus {
+            background: rgba(30,30,48,0.95);
+        }
+
+        /* macOS blob refinement — softer glow to match solid backgrounds */
+        .is-macos .blob { opacity: 0.35; }
+        .is-macos.dark-theme .blob { opacity: 0.2; }
+
         /* Inputs & Fraction Bar */
         input { background: var(--input-bg); border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         input:focus { background: var(--bg-card); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
@@ -117,7 +266,7 @@
         }
 
         /* Animations Utils */
-        .animate-entrance { animation: fadeUpSoft 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
+        .animate-entrance { animation: fadeUpSoft 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeUpSoft { from { opacity: 0; transform: translateY(20px) translateZ(0); } to { opacity: 1; transform: translateY(0) translateZ(0); } }
 
         .dropdown-menu {
@@ -147,7 +296,7 @@
         .color-dot:hover { transform: scale(1.1); }
         .color-dot.active { transform: scale(1.3); border: 2px solid var(--bg-body); box-shadow: 0 0 20px currentColor; }
 
-        .history-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease; opacity: 0; will-change: max-height, opacity; }
+        .history-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease; opacity: 0; }
         .history-content.open { max-height: 5000px; opacity: 1; }
         canvas { width: 100% !important; height: 100% !important; }
 

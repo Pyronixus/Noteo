@@ -41,8 +41,7 @@
     <!-- Tailwind (blocking — required for first paint) -->
     <script src="https://cdn.tailwindcss.com" fetchpriority="high"></script>
 
-    <!-- Chart.js (deferred — only needed on Charts tab) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <!-- Chart.js (loaded on demand — only when Charts tab is opened) -->
 
     <!-- EmailJS (loaded on demand — only needed for PIN recovery) -->
 
@@ -53,6 +52,7 @@
     <link href="https://cdn.jsdelivr.net/gh/antijingo/open-dyslexic@1.0/src/open-dyslexic.css" rel="stylesheet" media="print" onload="this.media='all'">
 
     <!-- Styles -->
+    <link rel="preload" as="style" href="Source/code/style.css">
     <link rel="stylesheet" href="Source/code/style.css">
 </head>
 <body class="antialiased light-mode">
@@ -1335,7 +1335,7 @@
         </div>
     </div>
 
-    <script src="Source/code/script.js"></script>
+    <script defer src="Source/code/script.js"></script>
 </body>
 </html>
     

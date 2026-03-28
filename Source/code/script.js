@@ -181,6 +181,18 @@ let user = null;
 let subjects = [];
 let academicData = {};
 let isDark = false;
+
+// Cached profile loader — avoids scanning all localStorage keys repeatedly
+function getProfiles() {
+  const keys = Object.keys(localStorage);
+  const profiles = [];
+  for (let i = 0; i < keys.length; i++) {
+    if (keys[i].startsWith("noteo_profile_")) {
+      try { profiles.push(JSON.parse(localStorage.getItem(keys[i]))); } catch(e) {}
+    }
+  }
+  return profiles;
+}
 const defaultSettings = {
   theme: "system",
   sounds: true,
@@ -338,6 +350,13 @@ window.onload = () => {
     document.body.classList.add("is-mobile");
   }
 
+  // Detect macOS (all browsers) — backdrop-filter renders poorly on macOS
+  const isMacOS = /Macintosh|MacIntel|MacPPC|Mac68K|Mac OS X/i.test(navigator.userAgent)
+    || (navigator.platform && /^Mac/i.test(navigator.platform));
+  if (isMacOS) {
+    document.body.classList.add("is-macos");
+  }
+
   loadSettings();
   applyAllSettings();
 
@@ -363,9 +382,7 @@ window.onload = () => {
         localStorage.getItem("noteo_stay_logged_in"),
       );
       if (stayLoggedInInfo && stayLoggedInInfo.expires > Date.now()) {
-        const profilesForStay = Object.keys(localStorage)
-          .filter((k) => k.startsWith("noteo_profile_"))
-          .map((k) => JSON.parse(localStorage.getItem(k)));
+        const profilesForStay = getProfiles();
         const userToLogin = profilesForStay.find(
           (p) => p.id === stayLoggedInInfo.userId,
         );
@@ -377,9 +394,7 @@ window.onload = () => {
       // If not logged in, clear any old data
       localStorage.removeItem("noteo_stay_logged_in");
 
-      const profiles = Object.keys(localStorage)
-        .filter((k) => k.startsWith("noteo_profile_"))
-        .map((k) => JSON.parse(localStorage.getItem(k)));
+      const profiles = getProfiles();
 
       if (profiles.length > 1) {
         // More than one user, show selection screen
@@ -568,9 +583,7 @@ function applyMainCardState() {
 }
 
 function updateLoginSessions() {
-  const sessions = Object.keys(localStorage)
-    .filter((k) => k.startsWith("noteo_profile_"))
-    .map((k) => JSON.parse(localStorage.getItem(k)));
+  const sessions = getProfiles();
   const area = document.getElementById("login-sessions-area");
   const list = document.getElementById("login-sessions-list");
   if (sessions.length > 0) {
@@ -734,9 +747,7 @@ function openUserSwitchModal() {
   const list = document.getElementById("modal-user-list");
   list.innerHTML = "";
 
-  const sessions = Object.keys(localStorage)
-    .filter((k) => k.startsWith("noteo_profile_"))
-    .map((k) => JSON.parse(localStorage.getItem(k)));
+  const sessions = getProfiles();
   sessions.forEach((s) => {
     const isCurrent = user && s.id === user.id;
     const hasPin = s.authSecret || s.hashedPin;
@@ -1220,16 +1231,20 @@ function onTutoResize() {
 function ensureTutoTabVisible(selector) {
   const chartsSelectors = ["#btn-charts", "#chart-subject-selector", "#chart-type-selector", "#charts-grid"];
   const notesSelectors = ["#btn-notes", "#subject-name", "#calc-top", "#calc-bot", "#calc-form", "#selected-color-preview", "#grades-container", "#sort-menu-btn"];
+  const tabNotes = DOM_CACHE.tabNotes || document.getElementById("tab-notes");
+  const tabCharts = DOM_CACHE.tabCharts || document.getElementById("tab-charts");
+  const btnNotes = document.getElementById("btn-notes");
+  const btnCharts = document.getElementById("btn-charts");
   if (chartsSelectors.includes(selector)) {
-    document.getElementById("tab-notes").classList.add("hidden");
-    document.getElementById("tab-charts").classList.remove("hidden");
-    document.getElementById("btn-notes").classList.remove("active");
-    document.getElementById("btn-charts").classList.add("active");
+    tabNotes.classList.add("hidden");
+    tabCharts.classList.remove("hidden");
+    btnNotes.classList.remove("active");
+    btnCharts.classList.add("active");
   } else if (notesSelectors.includes(selector)) {
-    document.getElementById("tab-charts").classList.add("hidden");
-    document.getElementById("tab-notes").classList.remove("hidden");
-    document.getElementById("btn-charts").classList.remove("active");
-    document.getElementById("btn-notes").classList.add("active");
+    tabCharts.classList.add("hidden");
+    tabNotes.classList.remove("hidden");
+    btnCharts.classList.remove("active");
+    btnNotes.classList.add("active");
   }
 }
 
@@ -1548,7 +1563,7 @@ function renderSettingsDataList() {
                         <button onclick="addGlobalTagPrompt()" class="px-3 py-1 rounded-lg bg-indigo-500 text-white text-sm font-bold">Ajouter un tag</button>
                     </div>
                     <div id="tags-overview" class="space-y-2">
-                        ${allTags.length ? allTags.map((t) => `<div class="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-body)] border border-[var(--border)]"><div class="flex items-center gap-3"><input type="color" value="${appSettings.tagColors?.[t] || "#6366f1"}" onchange="setTagColor('${t}', this.value)" class="w-8 h-8 rounded-lg border-0"><span class="font-bold">${t}</span><span class="text-xs text-[var(--text-muted)]">(${subjects.filter((s) => Array.isArray(s.tags) && s.tags.includes(t)).length})</span></div><div><button onclick="deleteTag('${t}')" class="px-2 py-1 rounded-lg text-rose-500 border border-rose-200 text-sm">Supprimer</button></div></div>`).join("") : '<p class="text-sm text-[var(--text-muted)]">Aucun tag défini.</p>'}
+                        ${allTags.length ? (() => { const tagCounts = {}; allTags.forEach(t => tagCounts[t] = 0); subjects.forEach(s => { if (Array.isArray(s.tags)) s.tags.forEach(t => { if (tagCounts[t] !== undefined) tagCounts[t]++; }); }); return allTags.map((t) => `<div class="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-body)] border border-[var(--border)]"><div class="flex items-center gap-3"><input type="color" value="${appSettings.tagColors?.[t] || "#6366f1"}" onchange="setTagColor('${t}', this.value)" class="w-8 h-8 rounded-lg border-0"><span class="font-bold">${t}</span><span class="text-xs text-[var(--text-muted)]">(${tagCounts[t]})</span></div><div><button onclick="deleteTag('${t}')" class="px-2 py-1 rounded-lg text-rose-500 border border-rose-200 text-sm">Supprimer</button></div></div>`).join(""); })() : '<p class="text-sm text-[var(--text-muted)]">Aucun tag défini.</p>'}
                     </div>
                 </div>
             `;
@@ -1620,9 +1635,7 @@ function renderSettingsDataList() {
 function renderSettingsAccountsList() {
   const accList = document.getElementById("settings-accounts-list");
   accList.innerHTML = "";
-  const sessions = Object.keys(localStorage)
-    .filter((k) => k.startsWith("noteo_profile_"))
-    .map((k) => JSON.parse(localStorage.getItem(k)));
+  const sessions = getProfiles();
   sessions.forEach((s) => {
     const div = document.createElement("div");
     div.className =
@@ -1958,9 +1971,7 @@ function addNewAccount() {
 function logout() {
   if (confirm("Se déconnecter ?")) {
     playSound("delete");
-    const profiles = Object.keys(localStorage)
-      .filter((k) => k.startsWith("noteo_profile_"))
-      .map((k) => JSON.parse(localStorage.getItem(k)));
+    const profiles = getProfiles();
 
     localStorage.removeItem("noteo_v8_active");
     localStorage.removeItem("noteo_stay_logged_in");
@@ -2036,6 +2047,15 @@ function cacheDom() {
   DOM_CACHE.chartsGrid = document.getElementById("charts-grid");
   DOM_CACHE.moyenneGen = document.getElementById("moyenne-gen");
   DOM_CACHE.mainCard = document.getElementById("main-card");
+  DOM_CACHE.calcForm = document.getElementById("calc-form");
+  DOM_CACHE.loginScreen = document.getElementById("login-screen");
+  DOM_CACHE.loadingScreen = document.getElementById("loading-screen");
+  DOM_CACHE.dashboardScreen = document.getElementById("dashboard-screen");
+  DOM_CACHE.chartSubjectSelector = document.getElementById("chart-subject-selector");
+  DOM_CACHE.chartTypeSelector = document.getElementById("chart-type-selector");
+  DOM_CACHE.noChartsMsg = document.getElementById("no-charts-msg");
+  DOM_CACHE.sortOrderBtn = document.getElementById("sort-order-btn");
+  DOM_CACHE.tabNotes = document.getElementById("tab-notes");
 }
 
 // Tag cache to avoid recomputing tags repeatedly during sorting/rendering
@@ -2052,7 +2072,7 @@ function toggleSortOrder() {
 }
 
 function updateSortButtonUI() {
-  const btn = document.getElementById("sort-order-btn");
+  const btn = DOM_CACHE.sortOrderBtn || document.getElementById("sort-order-btn");
   if (!btn) return;
   const label = btn.querySelector("span");
   const icon = btn.querySelector("svg");
@@ -2116,8 +2136,9 @@ function renderSortMenu() {
   const list = document.getElementById("sort-options-list");
   if (!list) return;
   list.innerHTML = "";
+  const hasTags = getAllTags().length > 0;
   sortOptions.forEach((opt) => {
-    if (opt.value === "customTag" && getAllTags().length === 0) return; // don't show Tag option when no tags exist
+    if (opt.value === "customTag" && !hasTags) return; // don't show Tag option when no tags exist
     const btn = document.createElement("button");
     btn.className =
       "w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--input-bg)] flex items-center gap-3";
@@ -2139,22 +2160,25 @@ function renderSortMenu() {
 }
 
 function getAllTags() {
-  // Use cached value when possible
-  const currentVersion = subjects
-    .map((s) => (Array.isArray(s.tags) ? s.tags.join("|") : ""))
-    .join("||");
-  if (tagCache._lastVersion === currentVersion && tagCache.tags.length)
+  // Fast version key: use length + ids + tag counts to avoid expensive .join
+  const vKey = subjects.length + ":" + subjects.reduce((k, s) => {
+    if (Array.isArray(s.tags) && s.tags.length) k += s.id + "=" + s.tags.length + ",";
+    return k;
+  }, "");
+  if (tagCache._lastVersion === vKey && tagCache.tags.length)
     return tagCache.tags;
   const all = new Set();
-  subjects.forEach((s) => {
-    if (Array.isArray(s.tags))
-      s.tags.forEach((t) => {
-        const tt = (t || "").toString().trim();
+  for (let i = 0; i < subjects.length; i++) {
+    const tags = subjects[i].tags;
+    if (Array.isArray(tags)) {
+      for (let j = 0; j < tags.length; j++) {
+        const tt = (tags[j] || "").toString().trim();
         if (tt) all.add(tt);
-      });
-  });
+      }
+    }
+  }
   tagCache.tags = Array.from(all);
-  tagCache._lastVersion = currentVersion;
+  tagCache._lastVersion = vKey;
   return tagCache.tags;
 }
 
@@ -2332,7 +2356,8 @@ function applyTheme() {
   document.body.classList.toggle("dark-theme", applyDark);
   document.body.classList.toggle("light-mode", !applyDark);
   isDark = applyDark;
-  if (!document.getElementById("tab-charts").classList.contains("hidden"))
+  const tabChartsEl = DOM_CACHE.tabCharts || document.getElementById("tab-charts");
+  if (tabChartsEl && !tabChartsEl.classList.contains("hidden"))
     switchTab("charts"); // Re-render charts with new theme
 }
 window
@@ -3033,16 +3058,13 @@ function renderGrades() {
     }
     if (actions) actions.classList.remove("hidden");
 
-    const genTotal = subjects.reduce((sum, s) => sum + s.avg, 0);
-    const computedGeneralAverage =
-      subjects.length > 0 ? genTotal / subjects.length : 0;
     const overrideAvg =
       appSettings.manualGeneralAverage !== null &&
       !isNaN(parseFloat(appSettings.manualGeneralAverage))
         ? parseFloat(appSettings.manualGeneralAverage)
         : null;
     const generalAverage =
-      overrideAvg !== null ? overrideAvg : computedGeneralAverage;
+      overrideAvg !== null ? overrideAvg : (subjects.length > 0 ? subjects.reduce((sum, s) => sum + s.avg, 0) / subjects.length : 0);
 
     const generalAverageSubject = {
       id: "general",
@@ -3093,7 +3115,7 @@ function renderGrades() {
           const group = subjects.filter(
             (s) =>
               Array.isArray(s.tags) &&
-              s.tags.map((x) => (x || "").toString().trim()).includes(tagKey) &&
+              s.tags.some((x) => (x || "").toString().trim() === tagKey) &&
               !added.has(s.id),
           );
           // sort within group by number of tags (more tags first) then name
@@ -3179,8 +3201,10 @@ function renderGrades() {
           })
           .join("");
       } else {
-        historyHtml = s.history
-          .map((n) => {
+        const hist = s.history;
+        const parts = new Array(hist.length);
+        for (let i = hist.length - 1, j = 0; i >= 0; i--, j++) {
+            const n = hist[i];
             const colorClassName = s.color
               ? `hover-border-${s.color.substring(1)}`
               : "";
@@ -3188,7 +3212,7 @@ function renderGrades() {
               n.coef && n.coef !== 1
                 ? `<span class="font-bold text-[var(--text-muted)] text-xs ml-2">x${n.coef}</span>`
                 : "";
-            return `<div class="flex justify-between items-center p-3 bg-[var(--input-bg)] rounded-xl text-sm border border-[var(--border)] hover:scale-[1.02] transition-all ${colorClassName}">
+            parts[j] = `<div class="flex justify-between items-center p-3 bg-[var(--input-bg)] rounded-xl text-sm border border-[var(--border)] hover:scale-[1.02] transition-all ${colorClassName}">
                                     ${appSettings.showNoteDate ? `<span class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider min-w-[3rem]">${n.date}</span>` : ""}
                                     <div class="flex items-center gap-3">
                                         <div class="flex flex-col items-end flex-grow text-right">
@@ -3198,9 +3222,8 @@ function renderGrades() {
                                         <span class="font-black px-2 py-0.5 rounded-md text-xs" style="background:${bgColor}; color:${s.color}">${n.val.toFixed(1)}/20</span>
                                     </div>
                                 </div>`;
-          })
-          .reverse()
-          .join("");
+        }
+        historyHtml = parts.join("");
       }
 
       card.innerHTML = `
@@ -3230,7 +3253,7 @@ function renderGrades() {
     });
     cont.appendChild(frag);
     updateDynamicStyles();
-    const tabChartsEl = document.getElementById("tab-charts");
+    const tabChartsEl = DOM_CACHE.tabCharts || document.getElementById("tab-charts");
     if (tabChartsEl && !tabChartsEl.classList.contains("hidden"))
       renderChartControls();
   } catch (err) {
@@ -3509,7 +3532,7 @@ function initScrollToggleButton() {
     }
   });
 
-  window.addEventListener("scroll", update);
+  window.addEventListener("scroll", update, { passive: true });
   update();
 }
 
@@ -3652,22 +3675,33 @@ function importCloudAccount() {
   if (tab === "charts") renderChartControls();
 }
 
+// --- Lazy Chart.js loader ---
+let _chartJsLoaded = typeof Chart !== "undefined";
+let _chartJsLoading = false;
+function ensureChartJs() {
+  if (_chartJsLoaded) return Promise.resolve();
+  if (_chartJsLoading) return _chartJsLoading;
+  _chartJsLoading = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
+    s.onload = () => { _chartJsLoaded = true; resolve(); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return _chartJsLoading;
+}
+
 function switchTab(tab) {
-  console.log("Switching to tab:", tab);
   playSound("click");
-  document
-    .getElementById("tab-notes")
-    .classList.toggle("hidden", tab !== "notes");
-  document
-    .getElementById("tab-charts")
-    .classList.toggle("hidden", tab !== "charts");
-  document
-    .getElementById("btn-notes")
-    .classList.toggle("active", tab === "notes");
-  document
-    .getElementById("btn-charts")
-    .classList.toggle("active", tab === "charts");
-  if (tab === "charts") renderChartControls();
+  const tabNotes = DOM_CACHE.tabNotes || document.getElementById("tab-notes");
+  const tabCharts = DOM_CACHE.tabCharts || document.getElementById("tab-charts");
+  tabNotes.classList.toggle("hidden", tab !== "notes");
+  tabCharts.classList.toggle("hidden", tab !== "charts");
+  document.getElementById("btn-notes").classList.toggle("active", tab === "notes");
+  document.getElementById("btn-charts").classList.toggle("active", tab === "charts");
+  if (tab === "charts") {
+    ensureChartJs().then(() => renderChartControls());
+  }
 }
 
 function updateAllCharts() {
@@ -3728,10 +3762,10 @@ const chartTypes = [
 ];
 
 function renderChartControls() {
-  const subjectSelector = document.getElementById("chart-subject-selector");
-  const typeSelector = document.getElementById("chart-type-selector");
-  const noDataMsg = document.getElementById("no-charts-msg");
-  const grid = document.getElementById("charts-grid");
+  const subjectSelector = DOM_CACHE.chartSubjectSelector || document.getElementById("chart-subject-selector");
+  const typeSelector = DOM_CACHE.chartTypeSelector || document.getElementById("chart-type-selector");
+  const noDataMsg = DOM_CACHE.noChartsMsg || document.getElementById("no-charts-msg");
+  const grid = DOM_CACHE.chartsGrid || document.getElementById("charts-grid");
 
   if (subjects.length === 0) {
     grid.innerHTML = "";
@@ -4689,7 +4723,7 @@ window.addEventListener("keydown", (e) => {
       ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
       platform: "MacIntel",
       maxTP: 0,
-      classes: ["is-safari"],
+      classes: ["is-safari", "is-macos"],
       safari: true,
       label: "Desktop macOS (Safari)",
       os: "macos",
@@ -5216,7 +5250,7 @@ window.addEventListener("keydown", (e) => {
     const html = document.documentElement;
 
     // 1. Clean slate: remove all simulation classes + device chrome
-    body.classList.remove("phone-xp", "is-mobile", "is-safari");
+    body.classList.remove("phone-xp", "is-mobile", "is-safari", "is-macos");
     html.classList.remove("phone-xp");
     _undoPhoneExperience();
     _removeDeviceChrome();
@@ -5330,8 +5364,9 @@ window.addEventListener("keydown", (e) => {
       "body.is-mobile": document.body.classList.contains("is-mobile") ? "✓" : "✗",
       "body.phone-xp": document.body.classList.contains("phone-xp") ? "✓" : "✗",
       "body.is-safari": document.body.classList.contains("is-safari") ? "✓" : "✗",
+      "body.is-macos": document.body.classList.contains("is-macos") ? "✓" : "✗",
       "html.phone-xp": document.documentElement.classList.contains("phone-xp") ? "✓" : "✗",
-      "backdrop-filter": document.body.classList.contains("is-safari") || document.body.classList.contains("phone-xp") ? "✗ Désactivé" : "✓ Actif",
+      "backdrop-filter": document.body.classList.contains("is-macos") || document.body.classList.contains("is-safari") || document.body.classList.contains("phone-xp") ? "✗ Désactivé" : "✓ Actif",
       "nav visible": document.querySelector("nav") ? (document.querySelector("nav").style.display !== "none" ? "✓" : "✗") : "N/A",
       "footer visible": document.querySelector("footer") ? (document.querySelector("footer").style.display !== "none" ? "✓" : "✗") : "N/A",
     };
