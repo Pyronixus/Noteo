@@ -903,22 +903,219 @@ function openHelpModal() {
   playSound("swoosh");
   document.body.classList.add("modal-open");
   document.getElementById("help-modal").classList.add("open");
-  // Reset search bar every time the modal is opened
   const searchInput = document.getElementById("help-search");
-  if (searchInput) { searchInput.value = ""; filterHelp(""); }
+  if (searchInput) { searchInput.value = ""; }
+  renderHelpCards("");
 }
 
 function filterHelp(query) {
+  renderHelpCards(query);
+}
+
+/* ===== Help Articles Data ===== */
+const helpArticles = [
+  { title: "🚀 Premiers pas — Créer un compte", content: `<ol class="list-decimal list-inside space-y-1"><li>Sur l'écran d'accueil, cliquez sur <strong>« Créer un nouveau compte »</strong>.</li><li>Renseignez votre <strong>prénom</strong> et votre <strong>nom</strong>.</li><li>Choisissez l'organisation de l'année : <strong>Semestres</strong> ou <strong>Trimestres</strong>.</li><li>Sélectionnez le mode de sauvegarde : <strong>Local</strong> (navigateur) ou <strong>Cloud</strong> (serveur).</li><li>Cliquez sur <strong>« Créer un compte »</strong> — vous êtes connecté(e) immédiatement.</li></ol><p class="mt-2">💾 Vos données sont sauvegardées automatiquement à chaque modification.</p>` },
+  { title: "📚 Ajouter une matière", content: `<ol class="list-decimal list-inside space-y-1"><li>Dans l'onglet <strong>Notes</strong>, cliquez sur <strong>« Ajouter une matière »</strong>.</li><li>Saisissez le <strong>nom</strong> de la matière (ex : Mathématiques).</li><li>Définissez un <strong>coefficient</strong> si nécessaire (par défaut : 1).</li><li>Choisissez une <strong>couleur</strong> pour identifier la matière visuellement.</li><li>Cliquez sur <strong>« Ajouter »</strong> — la matière apparaît dans la liste.</li></ol><p>💡 Vous pouvez créer autant de matières que vous le souhaitez.</p>`,
+    tutorial: [
+      { selector: "#btn-notes", text: "Cliquez sur l'onglet Notes pour commencer." },
+      { selector: "#subject-name", text: "Saisissez le nom de la matière ici." },
+      { selector: "#calc-top", text: "Définissez le coefficient de la matière." },
+      { selector: "#selected-color-preview", text: "Choisissez une couleur pour votre matière." },
+      { selector: "#calc-form", text: "Validez le formulaire pour ajouter la matière." }
+    ]
+  },
+  { title: "✍️ Formats de saisie des notes", content: `<p class="font-semibold text-[var(--text-main)]">Noteo accepte de nombreux formats :</p><ul class="space-y-1 list-disc list-inside"><li><code class="bg-[var(--input-bg)] px-1 rounded">15/20</code> — note sur 20</li><li><code class="bg-[var(--input-bg)] px-1 rounded">15</code> — dénominateur 20 par défaut</li><li><code class="bg-[var(--input-bg)] px-1 rounded">15.5/20</code> ou <code class="bg-[var(--input-bg)] px-1 rounded">15,5/20</code> — décimales (point ou virgule)</li><li><code class="bg-[var(--input-bg)] px-1 rounded">15/20 + 12/20 + 18/20</code> — plusieurs notes en une seule saisie</li><li><code class="bg-[var(--input-bg)] px-1 rounded">15/20 * 2</code> ou <code class="bg-[var(--input-bg)] px-1 rounded">15/20 coeff 2</code> — coefficient individuel</li><li><code class="bg-[var(--input-bg)] px-1 rounded">AB</code> ou <code class="bg-[var(--input-bg)] px-1 rounded">ABS</code> — note absente (ignorée)</li></ul><p>📋 Le <strong>copier-coller depuis Pronote</strong> fonctionne directement.</p>`,
+    tutorial: [
+      { selector: "#btn-notes", text: "Assurez-vous d'être sur l'onglet Notes." },
+      { selector: "#calc-bot", text: "Saisissez votre note ici dans le champ dédié." },
+      { selector: "#calc-form", text: "Validez pour enregistrer la note." }
+    ]
+  },
+  { title: "⚖️ Coefficients et pondérations", content: `<p class="font-semibold text-[var(--text-main)]">Il y a deux niveaux de coefficients :</p><ul class="space-y-1 list-disc list-inside"><li><strong>Coefficient de matière</strong> : modifiable via ✏️ sur la carte matière. Influe sur la moyenne générale.</li><li><strong>Coefficient de note individuelle</strong> : saisi avec <code class="bg-[var(--input-bg)] px-1 rounded">* 2</code> dans le champ.</li></ul><p>⚠️ Mettre le coefficient à <strong>0</strong> exclut la matière de la moyenne générale.</p><p>🧮 La moyenne pondérée tient compte des deux niveaux.</p>` },
+  { title: "🧮 Comment est calculée la moyenne générale", content: `<p>Chaque note est ramenée sur 20 (<code class="bg-[var(--input-bg)] px-1 rounded">note / dénominateur × 20</code>), puis la moyenne pondérée est calculée.</p><p>La moyenne générale :</p><pre class="bg-[var(--input-bg)] rounded p-2 text-xs overflow-x-auto">Σ (moyenne_matière × coeff_matière) / Σ coeff_matières</pre><p>📌 Sans note, une matière n'est pas comptée.</p><p>✏️ Vous pouvez saisir une <strong>moyenne manuelle</strong> via le crayon ✏️ à côté de la moyenne.</p>` },
+  { title: "🗂️ Gérer les périodes (semestres / trimestres)", content: `<ul class="space-y-1 list-disc list-inside"><li><strong>Naviguer</strong> : flèches ◀ ▶ dans le sélecteur en haut.</li><li><strong>Ajouter</strong> : Paramètres ⚙️ → Données → « Ajouter une période ».</li><li><strong>Renommer</strong> : Paramètres ⚙️ → Données → « Renommer la période ».</li><li><strong>Supprimer</strong> : Paramètres ⚙️ → Données → « Supprimer la période ».</li></ul><p>📅 Chaque période est indépendante.</p>`,
+    tutorial: [
+      { selector: "#current-semester-name", text: "Voici le nom de votre période actuelle." },
+      { selector: "#semester-menu", text: "Utilisez les flèches pour naviguer entre les périodes." }
+    ]
+  },
+  { title: "🔀 Intervertir deux périodes", content: `<ol class="list-decimal list-inside space-y-1"><li>Allez dans <strong>Paramètres ⚙️ → Données</strong>.</li><li>Cliquez sur « Intervertir deux périodes ».</li><li>Entrez les numéros des deux périodes à échanger.</li></ol><p>💡 Échange <strong>toutes les données</strong> des deux périodes.</p><p>⚠️ Il faut au moins <strong>deux périodes</strong>.</p>` },
+  { title: "📑 Trier et ordonner les matières", content: `<p>Cliquez sur l'icône de tri 🔢 pour choisir :</p><ul class="space-y-1 list-disc list-inside"><li>Date d'ajout / Alphabétique</li><li>Moyenne (haute → basse ou basse → haute)</li><li>Nombre de notes / Note max / Note min</li><li>Écart-type / Moyenne pondérée / Dernière modification</li><li>Par tag (couleur) personnalisé</li></ul><p>🔄 Le tri est <strong>mémorisé</strong> entre les sessions.</p><p>📌 Le bouton épingle fixe une matière en haut.</p>`,
+    tutorial: [
+      { selector: "#btn-notes", text: "Rendez-vous sur l'onglet Notes." },
+      { selector: "#sort-menu-btn", text: "Cliquez ici pour ouvrir le menu de tri." },
+      { selector: "#grades-container", text: "Les matières sont triées selon votre choix ici." }
+    ]
+  },
+  { title: "🏷️ Tags et couleurs des matières", content: `<p>Chaque matière possède une <strong>couleur / tag</strong> pour l'identifier et trier.</p><ul class="space-y-1 list-disc list-inside"><li>Cliquez sur le <strong>cercle coloré</strong> pour changer la couleur.</li><li>Regroupez par catégorie puis triez « par tag ».</li><li>Renommez un tag : <strong>Paramètres ⚙️ → Données → Tags personnalisés</strong>.</li></ul>` },
+  { title: "📊 Analyser ses résultats avec les graphiques", content: `<ol class="list-decimal list-inside space-y-1"><li>Allez dans l'onglet <strong>Graphiques</strong>.</li><li>Cochez les <strong>matières</strong> à afficher.</li><li>Choisissez une <strong>période</strong> ou affichez tout.</li><li>Sélectionnez un <strong>type de graphique</strong>.</li><li>Cliquez sur <strong>« Mettre à jour »</strong>.</li></ol><p>🖥️ Le plein écran agrandit le graphique.</p><p>⚠️ Vérifiez qu'au moins une matière est cochée.</p>`,
+    tutorial: [
+      { selector: "#btn-charts", text: "Passez sur l'onglet Graphiques." },
+      { selector: "#chart-subject-selector", text: "Sélectionnez les matières à afficher ici." },
+      { selector: "#chart-type-selector", text: "Choisissez le type de graphique souhaité." },
+      { selector: "#charts-grid", text: "Le graphique s'affiche dans cette zone." }
+    ]
+  },
+  { title: "📈 Types de graphiques disponibles", content: `<ul class="space-y-1 list-disc list-inside"><li><strong>Barres</strong> — comparaison des moyennes par matière.</li><li><strong>Lignes</strong> — évolution des notes dans le temps.</li><li><strong>Radar</strong> — profil scolaire global.</li><li><strong>Histogramme de répartition</strong> — distribution des notes.</li><li><strong>Boîte à moustaches</strong> — médiane, quartiles et extrêmes.</li><li><strong>Barres groupées multi-périodes</strong> — comparer sur plusieurs semestres.</li></ul>` },
+  { title: "🌙 Basculer entre thème clair et sombre", content: `<ul class="space-y-1 list-disc list-inside"><li>Cliquez sur le <strong>bouton soleil / lune ☀️🌙</strong> en haut à droite.</li><li>Thème automatique : <strong>Paramètres ⚙️ → Apparence → Thème → Système</strong>.</li><li>Le choix est <strong>mémorisé</strong>.</li></ul><p>🎨 La couleur principale est personnalisable indépendamment.</p>` },
+  { title: "🧘 Mode Zen", content: `<p>Le Mode Zen simplifie l'interface :</p><ul class="space-y-1 list-disc list-inside"><li>Masque les <strong>blobs animés</strong>.</li><li>Masque la <strong>moyenne générale</strong>.</li><li>Interface épurée, sans distraction.</li></ul><p>Activez-le via <strong>Paramètres ⚙️ → Apparence → Mode Zen</strong>.</p>` },
+  { title: "🎨 Personnaliser l'application", content: `<p>Dans <strong>Paramètres ⚙️ → Apparence</strong> :</p><ul class="space-y-1 list-disc list-inside"><li><strong>Couleur principale</strong> — sélecteur de couleur.</li><li><strong>Sons ASMR</strong> — activer et régler le volume.</li><li><strong>Animations</strong> — désactivables.</li><li><strong>Flou (glassmorphism)</strong> — désactivable.</li><li><strong>Navigation fixe</strong> — la barre reste visible.</li><li><strong>Afficher l'avatar</strong> — masquer si souhaité.</li></ul>` },
+  { title: "🔔 Notifications (toasts)", content: `<p>Les toasts apparaissent en <strong>bas à droite</strong> :</p><ul class="space-y-1 list-disc list-inside"><li>🟢 <strong>Vert</strong> — opération réussie.</li><li>🔴 <strong>Rouge</strong> — erreur.</li><li>🔵 <strong>Bleu</strong> — information neutre.</li></ul><p>⏱️ Disparaissent après ~3 secondes.</p>` },
+  { title: "🔒 Protéger son compte avec un PIN", content: `<ol class="list-decimal list-inside space-y-1"><li>Ouvrez <strong>Paramètres ⚙️ → Sécurité</strong>.</li><li>Activez « Code PIN » et choisissez la longueur : 4, 6 ou 8 chiffres.</li><li>Saisissez votre PIN deux fois.</li><li>Notez le <strong>code de récupération</strong>.</li></ol><p>🛡️ Le PIN est <strong>hashé en SHA-256</strong>.</p><p>⏳ Verrouillage après <strong>15 min</strong> d'inactivité.</p>` },
+  { title: "🔑 PIN oublié — récupération", content: `<ol class="list-decimal list-inside space-y-1"><li>Sur l'écran de saisie du PIN, cliquez sur <strong>« PIN oublié ? »</strong>.</li><li>Saisissez votre <strong>code de récupération</strong>.</li><li>Définissez un <strong>nouveau PIN</strong>.</li></ol><p>⚠️ En dernier recours : DevTools → Application → Clear storage (données perdues).</p>` },
+  { title: "👤 Gérer plusieurs comptes", content: `<ul class="space-y-1 list-disc list-inside"><li>Cliquez sur votre <strong>avatar</strong> → « Changer d'utilisateur ».</li><li>Sélectionnez un compte ou créez-en un nouveau.</li><li>Chaque profil a ses propres <strong>données, paramètres et PIN</strong>.</li><li>Capacité limitée par le <strong>localStorage</strong> (~5–10 Mo).</li></ul><p>📱 Idéal pour gérer les notes de <strong>plusieurs enfants</strong>.</p>`,
+    tutorial: [
+      { selector: "#user-avatar", text: "Cliquez sur votre avatar pour accéder au menu utilisateur." },
+      { selector: "#user-menu", text: "Ici vous pouvez changer d'utilisateur ou en créer un nouveau." }
+    ]
+  },
+  { title: "☁️ Stockage local vs cloud", content: `<div class="grid grid-cols-2 gap-3"><div class="bg-[var(--input-bg)] rounded-lg p-3"><p class="font-bold text-[var(--text-main)] mb-1">💾 Local</p><ul class="space-y-1 list-disc list-inside text-xs"><li>Données dans le navigateur</li><li>Fonctionne hors-ligne</li><li>Totalement privé</li><li>Perdu si cache effacé</li></ul></div><div class="bg-[var(--input-bg)] rounded-lg p-3"><p class="font-bold text-[var(--text-main)] mb-1">🌐 Cloud</p><ul class="space-y-1 list-disc list-inside text-xs"><li>Données sur un serveur</li><li>Accès multi-appareils</li><li>Compte requis</li><li>Nécessite internet</li></ul></div></div><p>💡 En mode local, <strong>exportez régulièrement</strong> vos données.</p>` },
+  { title: "📤 Exporter ses données", content: `<ol class="list-decimal list-inside space-y-1"><li>Allez dans <strong>Paramètres ⚙️ → Données</strong>.</li><li>Cliquez sur « Exporter le compte ».</li><li>Cochez les <strong>périodes</strong> à inclure.</li><li>Un fichier <code class="bg-[var(--input-bg)] px-1 rounded">.json</code> est téléchargé.</li></ol><p>📦 Contient : matières, notes, coefficients, couleurs et paramètres.</p>` },
+  { title: "📥 Importer des données", content: `<ol class="list-decimal list-inside space-y-1"><li>Allez dans <strong>Paramètres ⚙️ → Données</strong>.</li><li>Cliquez sur « Importer un fichier ».</li><li>Sélectionnez le <code class="bg-[var(--input-bg)] px-1 rounded">.json</code> exporté.</li><li>Confirmez l'import.</li></ol><p>⚠️ Seuls les fichiers <strong>exportés par Noteo</strong> sont acceptés.</p>` },
+  { title: "🗑️ Supprimer des matières, notes ou un compte", content: `<ul class="space-y-1 list-disc list-inside"><li><strong>Supprimer une note</strong> : historique → ✕ à côté de la note.</li><li><strong>Supprimer une matière</strong> : icône 🗑️ sur la carte.</li><li><strong>Vider la période</strong> : Paramètres ⚙️ → Données → « Vider la période ».</li><li><strong>Supprimer le compte</strong> : Paramètres ⚙️ → Données → « Supprimer le compte » — <strong>irréversible</strong>.</li></ul><p>💾 <strong>Exportez avant de supprimer</strong>.</p>` },
+  { title: "♿ Accessibilité", content: `<p>Options dans <strong>Paramètres ⚙️ → Accessibilité</strong> :</p><ul class="space-y-1 list-disc list-inside"><li><strong>Police OpenDyslexic</strong> — optimisée pour les dyslexiques.</li><li><strong>Contraste élevé</strong> — meilleure lisibilité.</li><li><strong>Réduire les animations</strong> — respecte aussi le réglage OS.</li><li><strong>Boutons tactiles agrandis</strong> — sur mobile.</li></ul>` },
+  { title: "⌨️ Astuces et raccourcis", content: `<ul class="space-y-1 list-disc list-inside"><li>Cercle coloré = changer la couleur/tag.</li><li>📌 épingle = fixer en haut de liste.</li><li>« Rester connecté(e) » = ne plus saisir son nom.</li><li>Clic sur le logo « N. » = retour en haut.</li><li>Entrée ↵ = valider l'ajout d'une note.</li><li>Scroll horizontal dans le sélecteur de périodes (mobile).</li><li>Le formulaire peut être réduit / agrandi.</li></ul>` },
+  { title: "❓ Dépannage — problèmes courants", content: `<ul class="space-y-2 list-none"><li>🔄 <strong>Notes absentes</strong> → rechargez (F5).</li><li>📊 <strong>Graphique vide</strong> → cochez une matière + « Mettre à jour ».</li><li>📥 <strong>Import échoue</strong> → vérifiez le format .json Noteo.</li><li>🧮 <strong>Moyenne incorrecte</strong> → vérifiez les coefficients.</li><li>🔢 <strong>PIN refusé</strong> → numérique uniquement, vérifiez Verr. Maj.</li><li>💨 <strong>App lente</strong> → désactivez le flou et les blobs.</li><li>💾 <strong>Données disparues</strong> → cache vidé, exportez régulièrement.</li><li>📱 <strong>Affichage cassé</strong> → activez le mode mobile.</li></ul>` }
+];
+
+let currentHelpArticleIndex = null;
+let tutorialSteps = [];
+let tutorialCurrentStep = 0;
+
+function renderHelpCards(query) {
   const q = (query || "").trim().toLowerCase();
-  const items = document.querySelectorAll("#help-items .help-item");
+  const container = document.getElementById("help-items");
+  if (!container) return;
+  container.innerHTML = "";
   let visible = 0;
-  items.forEach(item => {
-    const match = !q || item.textContent.toLowerCase().includes(q);
-    item.style.display = match ? "" : "none";
-    if (match) visible++;
+  helpArticles.forEach((article, i) => {
+    const match = !q || article.title.toLowerCase().includes(q) || article.content.toLowerCase().includes(q);
+    if (!match) return;
+    visible++;
+    const card = document.createElement("div");
+    card.className = "help-card help-item";
+    card.setAttribute("onclick", "openHelpDetail(" + i + ")");
+    card.innerHTML = '<span>' + article.title + '</span><svg class="w-4 h-4 flex-shrink-0 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
+    container.appendChild(card);
   });
   const noResults = document.getElementById("help-no-results");
   if (noResults) noResults.classList.toggle("hidden", visible > 0);
+}
+
+function openHelpDetail(index) {
+  playSound("click");
+  document.getElementById("help-modal").classList.remove("open");
+  currentHelpArticleIndex = index;
+  const article = helpArticles[index];
+  if (!article) return;
+  document.getElementById("help-detail-title").textContent = article.title;
+  document.getElementById("help-detail-body").innerHTML = article.content;
+  const tutoBtn = document.getElementById("help-detail-tuto-btn");
+  if (tutoBtn) tutoBtn.classList.toggle("hidden", !article.tutorial);
+  document.getElementById("help-detail-modal").classList.add("open");
+}
+
+function closeHelpDetail() {
+  playSound("click");
+  document.getElementById("help-detail-modal").classList.remove("open");
+  document.getElementById("help-modal").classList.add("open");
+}
+
+/* ===== Interactive Tutorial Engine ===== */
+function startTutorial() {
+  const article = helpArticles[currentHelpArticleIndex];
+  if (!article || !article.tutorial) return;
+  playSound("click");
+  document.getElementById("help-detail-modal").classList.remove("open");
+  document.body.classList.remove("modal-open");
+  tutorialSteps = article.tutorial;
+  tutorialCurrentStep = 0;
+  const overlay = document.getElementById("tuto-overlay");
+  overlay.classList.remove("hidden");
+  showTutoStep();
+}
+
+function showTutoStep() {
+  if (tutorialCurrentStep >= tutorialSteps.length) { closeTutorial(); return; }
+  const step = tutorialSteps[tutorialCurrentStep];
+  const el = document.querySelector(step.selector);
+  const overlay = document.getElementById("tuto-overlay");
+  const hole = document.getElementById("tuto-hole");
+  const arrow = document.getElementById("tuto-arrow");
+  const tooltip = document.getElementById("tuto-tooltip");
+  const text = document.getElementById("tuto-text");
+  const counter = document.getElementById("tuto-counter");
+  const nextBtn = document.getElementById("tuto-next-btn");
+
+  text.textContent = step.text;
+  counter.textContent = (tutorialCurrentStep + 1) + " / " + tutorialSteps.length;
+  nextBtn.textContent = tutorialCurrentStep === tutorialSteps.length - 1 ? "Terminer" : "Suivant";
+
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => positionTutoElements(el), 350);
+  } else {
+    hole.setAttribute("width", "0");
+    hole.setAttribute("height", "0");
+    arrow.style.display = "none";
+    tooltip.style.top = "50%";
+    tooltip.style.left = "50%";
+    tooltip.style.transform = "translate(-50%, -50%)";
+  }
+}
+
+function positionTutoElements(el) {
+  const rect = el.getBoundingClientRect();
+  const pad = 8;
+  const hole = document.getElementById("tuto-hole");
+  const arrow = document.getElementById("tuto-arrow");
+  const tooltip = document.getElementById("tuto-tooltip");
+
+  hole.setAttribute("x", rect.left - pad);
+  hole.setAttribute("y", rect.top - pad);
+  hole.setAttribute("width", rect.width + pad * 2);
+  hole.setAttribute("height", rect.height + pad * 2);
+
+  const arrowW = 48, arrowH = 48;
+  const cx = rect.left + rect.width / 2;
+  arrow.style.display = "block";
+  arrow.style.left = (cx - arrowW / 2) + "px";
+  arrow.style.top = (rect.top - arrowH - 8) + "px";
+
+  tooltip.style.transform = "";
+  const ttWidth = 300;
+  let ttLeft = cx - ttWidth / 2;
+  if (ttLeft < 12) ttLeft = 12;
+  if (ttLeft + ttWidth > window.innerWidth - 12) ttLeft = window.innerWidth - 12 - ttWidth;
+  tooltip.style.left = ttLeft + "px";
+
+  const spaceBelow = window.innerHeight - rect.bottom;
+  if (spaceBelow > 120) {
+    tooltip.style.top = (rect.bottom + pad + 12) + "px";
+    arrow.style.top = (rect.top - arrowH - 8) + "px";
+    arrow.querySelector("svg").style.transform = "";
+  } else {
+    tooltip.style.top = (rect.top - 100) + "px";
+    arrow.style.top = (rect.bottom + 8) + "px";
+    arrow.querySelector("svg").style.transform = "rotate(180deg)";
+  }
+}
+
+function nextTutoStep() {
+  playSound("click");
+  tutorialCurrentStep++;
+  if (tutorialCurrentStep >= tutorialSteps.length) {
+    closeTutorial();
+  } else {
+    showTutoStep();
+  }
+}
+
+function closeTutorial() {
+  playSound("click");
+  document.getElementById("tuto-overlay").classList.add("hidden");
+  tutorialSteps = [];
+  tutorialCurrentStep = 0;
 }
 
 function openLegalModal() {
@@ -1069,6 +1266,10 @@ function closeModals() {
     fullscreenChart.destroy();
     fullscreenChart = null;
     currentFullscreenChartInfo = { chartId: null, chartType: null };
+  }
+  const tutoOverlay = document.getElementById("tuto-overlay");
+  if (tutoOverlay && !tutoOverlay.classList.contains("hidden")) {
+    closeTutorial();
   }
 }
 
