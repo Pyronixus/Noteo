@@ -3,13 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noteo.</title>
+
+    <!-- SEO -->
+    <title>Noteo. — Gestion de notes &amp; moyennes académiques</title>
+    <meta name="description" content="Noteo est ton espace académique premium pour gérer tes notes, calculer tes moyennes et analyser tes résultats par matière, semestre ou trimestre.">
+    <meta name="author" content="Pyro">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#05050a" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Noteo. — Gestion de notes &amp; moyennes académiques">
+    <meta property="og:description" content="Gère tes notes, calcule tes moyennes et suis tes résultats académiques avec Noteo.">
+    <meta property="og:image" content="Source/Assets/Img/logo.png">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Noteo.">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Noteo. — Gestion de notes &amp; moyennes académiques">
+    <meta name="twitter:description" content="Gère tes notes, calcule tes moyennes et suis tes résultats académiques avec Noteo.">
+    <meta name="twitter:image" content="Source/Assets/Img/logo.png">
+
+    <!-- Icons -->
     <link rel="icon" type="image/png" href="Source/Assets/Img/logo.png">
+    <link rel="apple-touch-icon" href="Source/Assets/Img/logo.png">
+
+    <!-- Resource hints (early connections) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+    <!-- Tailwind (blocking — required for first paint) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chart.js (deferred — only needed on Charts tab) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/antijingo/open-dyslexic@1.0/src/open-dyslexic.css" rel="stylesheet">
-    <link rel="stylesheet" href="Source//code/style.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="Source/code/style.css">
 </head>
 <body class="antialiased light-mode">
     
@@ -909,18 +948,482 @@
 
     <!-- Modal: Help -->
     <div id="help-modal" class="modal-overlay">
-        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-2xl relative max-h-[80vh] overflow-y-auto">
+        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-3xl relative max-h-[88vh] overflow-y-auto">
             <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 class="text-2xl font-black text-[var(--text-main)] mb-6 tracking-tight flex items-center gap-3">
+            <h2 class="text-2xl font-black text-[var(--text-main)] mb-4 tracking-tight flex items-center gap-3">
                 <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Centre d'Aide
             </h2>
-            <div class="space-y-6">
-                <details class="group">
+
+            <!-- Search bar -->
+            <div class="relative mb-5">
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 0 5 11a6 6 0 0 0 12 0z"/></svg>
+                <input id="help-search" type="search" oninput="filterHelp(this.value)" placeholder="Rechercher dans l'aide…" autocomplete="off" class="w-full pl-10 pr-4 py-3 rounded-2xl text-sm font-medium outline-none text-[var(--text-main)]">
+            </div>
+            <p id="help-no-results" class="hidden text-center text-[var(--text-muted)] text-sm py-6">Aucun résultat pour cette recherche.</p>
+            <div id="help-items" class="space-y-3">
+
+                <!-- 1 -->
+                <details class="help-item group">
                     <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
-                        <span>🚀 Premiers pas - Créer un compte</span>
+                        <span>🚀 Premiers pas — Créer un compte</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Sur l'écran d'accueil, cliquez sur <strong>« Créer un nouveau compte »</strong>.</li>
+                            <li>Renseignez votre <strong>prénom</strong> et votre <strong>nom</strong>.</li>
+                            <li>Choisissez l'organisation de l'année : <strong>Semestres</strong> ou <strong>Trimestres</strong>.</li>
+                            <li>Sélectionnez le mode de sauvegarde : <strong>Local</strong> (navigateur) ou <strong>Cloud</strong> (serveur).</li>
+                            <li>Cliquez sur <strong>« Créer un compte »</strong> — vous êtes connecté(e) immédiatement.</li>
+                        </ol>
+                        <p class="mt-2">💾 Vos données sont sauvegardées automatiquement à chaque modification.</p>
+                    </div>
+                </details>
+
+                <!-- 2 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📚 Ajouter une matière</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Dans l'onglet <strong>Notes</strong>, cliquez sur <strong>« Ajouter une matière »</strong>.</li>
+                            <li>Saisissez le <strong>nom</strong> de la matière (ex : Mathématiques).</li>
+                            <li>Définissez un <strong>coefficient</strong> si nécessaire (par défaut : 1).</li>
+                            <li>Choisissez une <strong>couleur</strong> pour identifier la matière visuellement.</li>
+                            <li>Cliquez sur <strong>« Ajouter »</strong> — la matière apparaît dans la liste.</li>
+                        </ol>
+                        <p>💡 Vous pouvez créer autant de matières que vous le souhaitez.</p>
+                    </div>
+                </details>
+
+                <!-- 3 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>✍️ Formats de saisie des notes</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p class="font-semibold text-[var(--text-main)]">Noteo accepte de nombreux formats :</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li><code class="bg-[var(--input-bg)] px-1 rounded">15/20</code> — note sur 20</li>
+                            <li><code class="bg-[var(--input-bg)] px-1 rounded">15</code> — dénominateur 20 par défaut</li>
+                            <li><code class="bg-[var(--input-bg)] px-1 rounded">15.5/20</code> ou <code class="bg-[var(--input-bg)] px-1 rounded">15,5/20</code> — décimales (point ou virgule)</li>
+                            <li><code class="bg-[var(--input-bg)] px-1 rounded">15/20 + 12/20 + 18/20</code> — plusieurs notes en une seule saisie</li>
+                            <li><code class="bg-[var(--input-bg)] px-1 rounded">15/20 * 2</code> ou <code class="bg-[var(--input-bg)] px-1 rounded">15/20 coeff 2</code> — coefficient individuel de note</li>
+                            <li><code class="bg-[var(--input-bg)] px-1 rounded">AB</code> ou <code class="bg-[var(--input-bg)] px-1 rounded">ABS</code> — note absente (ignorée du calcul)</li>
+                        </ul>
+                        <p>📋 Le <strong>copier-coller depuis Pronote</strong> fonctionne directement — Noteo extrait automatiquement les notes.</p>
+                    </div>
+                </details>
+
+                <!-- 4 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>⚖️ Coefficients et pondérations</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p class="font-semibold text-[var(--text-main)]">Il y a deux niveaux de coefficients :</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li><strong>Coefficient de matière</strong> : modifiable via ✏️ sur la carte matière. Influe sur la moyenne générale.</li>
+                            <li><strong>Coefficient de note individuelle</strong> : saisi directement dans le champ de note avec <code class="bg-[var(--input-bg)] px-1 rounded">* 2</code>.</li>
+                        </ul>
+                        <p>⚠️ Mettre le coefficient d'une matière à <strong>0</strong> l'exclut de la moyenne générale (utile pour les matières sans barème).</p>
+                        <p>🧮 La moyenne pondérée tient compte simultanément des deux niveaux de coefficients.</p>
+                    </div>
+                </details>
+
+                <!-- 5 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🧮 Comment est calculée la moyenne générale</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p>Chaque note est d'abord <strong>ramenée sur 20</strong> (<code class="bg-[var(--input-bg)] px-1 rounded">note / dénominateur × 20</code>), puis la <strong>moyenne pondérée</strong> de la matière est calculée.</p>
+                        <p>La moyenne générale est ensuite :</p>
+                        <pre class="bg-[var(--input-bg)] rounded p-2 text-xs overflow-x-auto">Σ (moyenne_matière × coeff_matière) / Σ coeff_matières</pre>
+                        <p>📌 Si une matière n'a aucune note, elle n'est <strong>pas comptée</strong> dans la moyenne générale.</p>
+                        <p>✏️ Vous pouvez saisir une <strong>moyenne manuelle</strong> en cliquant sur le crayon ✏️ à côté de la moyenne générale affichée.</p>
+                    </div>
+                </details>
+
+                <!-- 6 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🗂️ Gérer les périodes (semestres / trimestres)</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li><strong>Naviguer</strong> entre les périodes : flèches <strong>◀ ▶</strong> dans le sélecteur en haut.</li>
+                            <li><strong>Ajouter</strong> une période : Paramètres ⚙️ → Données → <em>« Ajouter une période »</em>.</li>
+                            <li><strong>Renommer</strong> : Paramètres ⚙️ → Données → <em>« Renommer la période »</em>.</li>
+                            <li><strong>Supprimer</strong> : Paramètres ⚙️ → Données → <em>« Supprimer la période »</em> (impossible s'il n'en reste qu'une).</li>
+                        </ul>
+                        <p>📅 Chaque période est indépendante : matières, notes et moyennes ne se mélangent pas.</p>
+                    </div>
+                </details>
+
+                <!-- 7 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🔀 Intervertir deux périodes</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Allez dans <strong>Paramètres ⚙️ → Données</strong>.</li>
+                            <li>Cliquez sur <em>« Intervertir deux périodes »</em>.</li>
+                            <li>Entrez les numéros des deux périodes à échanger (ex : 1 et 3).</li>
+                        </ol>
+                        <p>💡 Utile si vous avez créé les périodes dans le mauvais ordre. L'opération échange <strong>toutes les données</strong> (matières, notes, moyennes manuelles) des deux périodes.</p>
+                        <p>⚠️ Il faut au moins <strong>deux périodes</strong> pour pouvoir intervertir.</p>
+                    </div>
+                </details>
+
+                <!-- 8 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📑 Trier et ordonner les matières</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p>Cliquez sur l'icône de tri <strong>🔢</strong> à droite de la liste pour choisir parmi :</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li>Date d'ajout / Alphabétique</li>
+                            <li>Moyenne (haute → basse ou basse → haute)</li>
+                            <li>Nombre de notes / Note maximale / Note minimale</li>
+                            <li>Écart-type (dispersion des notes)</li>
+                            <li>Moyenne pondérée / Dernière modification</li>
+                            <li>Par tag (couleur) personnalisé</li>
+                        </ul>
+                        <p>🔄 Le tri (critère + ordre ↑↓) est <strong>mémorisé automatiquement</strong> entre les sessions.</p>
+                        <p>📌 Le bouton <strong>épingle</strong> sur une matière la fixe toujours en haut, indépendamment du tri.</p>
+                    </div>
+                </details>
+
+                <!-- 9 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🏷️ Tags et couleurs des matières</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p>Chaque matière possède une <strong>couleur / tag</strong> qui sert à la fois d'identifiant visuel et de critère de tri.</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li>Cliquez sur le <strong>cercle coloré</strong> à gauche d'une matière pour changer sa couleur.</li>
+                            <li>Regroupez vos matières par catégorie (ex : rouge = sciences, bleu = langues) puis triez <em>« par tag »</em>.</li>
+                            <li>Renommez un tag : <strong>Paramètres ⚙️ → Données → Tags personnalisés</strong>.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- 10 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📊 Analyser ses résultats avec les graphiques</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Allez dans l'onglet <strong>Graphiques</strong>.</li>
+                            <li>Cochez les <strong>matières</strong> à afficher dans le panneau de gauche.</li>
+                            <li>Choisissez une <strong>période</strong> spécifique ou affichez tout.</li>
+                            <li>Sélectionnez un <strong>type de graphique</strong> dans la liste.</li>
+                            <li>Cliquez sur <strong>« Mettre à jour »</strong>.</li>
+                        </ol>
+                        <p>🖥️ Le bouton <strong>plein écran</strong> agrandit le graphique pour une meilleure lisibilité.</p>
+                        <p>⚠️ Si le graphique est vide, vérifiez qu'au moins une matière est cochée et qu'elle contient des notes.</p>
+                    </div>
+                </details>
+
+                <!-- 11 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📈 Types de graphiques disponibles</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li><strong>Barres</strong> — comparaison visuelle des moyennes par matière.</li>
+                            <li><strong>Lignes</strong> — évolution des notes dans le temps pour chaque matière.</li>
+                            <li><strong>Radar</strong> — profil scolaire global (points forts / faibles).</li>
+                            <li><strong>Histogramme de répartition</strong> — distribution de toutes les notes (combien de 10-12, 12-14…).</li>
+                            <li><strong>Boîte à moustaches</strong> — médiane, quartiles et notes extrêmes par matière.</li>
+                            <li><strong>Barres groupées multi-périodes</strong> — comparer la même matière sur plusieurs semestres.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- 12 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🌙 Basculer entre thème clair et sombre</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li>Cliquez sur le <strong>bouton soleil / lune ☀️🌙</strong> en haut à droite de l'interface.</li>
+                            <li>Pour suivre l'OS automatiquement : <strong>Paramètres ⚙️ → Apparence → Thème → Système</strong>.</li>
+                            <li>Le choix est <strong>mémorisé</strong> entre les sessions.</li>
+                        </ul>
+                        <p>🎨 La couleur principale (indigo par défaut) est personnalisable indépendamment du thème.</p>
+                    </div>
+                </details>
+
+                <!-- 13 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🧘 Mode Zen</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p>Le Mode Zen simplifie au maximum l'interface :</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li>Masque les <strong>blobs animés</strong> en arrière-plan.</li>
+                            <li>Masque la <strong>moyenne générale</strong> (pour se concentrer sur les notes sans pression).</li>
+                            <li>Interface épurée, sans distraction visuelle.</li>
+                        </ul>
+                        <p>Activez-le via <strong>Paramètres ⚙️ → Apparence → Mode Zen</strong>.</p>
+                    </div>
+                </details>
+
+                <!-- 14 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🎨 Personnaliser l'application</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p>Dans <strong>Paramètres ⚙️ → Apparence</strong> :</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li><strong>Couleur principale</strong> — choisissez l'accent via le sélecteur de couleur.</li>
+                            <li><strong>Sons ASMR</strong> — activer / désactiver et régler le volume.</li>
+                            <li><strong>Animations</strong> — désactivables si l'interface semble lente.</li>
+                            <li><strong>Flou (glassmorphism)</strong> — désactivable pour de meilleures performances sur des appareils anciens.</li>
+                            <li><strong>Navigation fixe</strong> — la barre d'en-tête reste toujours visible en scrollant.</li>
+                            <li><strong>Afficher l'avatar</strong> — masquer la photo de profil si souhaité.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- 15 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🔔 Notifications (toasts)</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p>Les toasts sont de petites notifications qui apparaissent en <strong>bas à droite</strong> :</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li>🟢 <strong>Vert</strong> — opération réussie (note ajoutée, export effectué…).</li>
+                            <li>🔴 <strong>Rouge</strong> — erreur (format invalide, fichier incorrect…).</li>
+                            <li>🔵 <strong>Bleu</strong> — information neutre.</li>
+                        </ul>
+                        <p>⏱️ Elles disparaissent automatiquement après ~3 secondes et ne bloquent pas les interactions.</p>
+                    </div>
+                </details>
+
+                <!-- 16 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🔒 Protéger son compte avec un PIN</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Ouvrez <strong>Paramètres ⚙️ → Sécurité</strong>.</li>
+                            <li>Activez <em>« Code PIN »</em> et choisissez la longueur : 4, 6 ou 8 chiffres.</li>
+                            <li>Saisissez votre PIN deux fois pour le confirmer.</li>
+                            <li>Notez le <strong>code de récupération</strong> affiché — conservez-le précieusement.</li>
+                        </ol>
+                        <p>🛡️ Le PIN est <strong>hashé en SHA-256</strong> — il n'est jamais stocké en clair.</p>
+                        <p>⏳ Verrouillage automatique après <strong>15 min</strong> d'inactivité.</p>
+                    </div>
+                </details>
+
+                <!-- 17 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🔑 PIN oublié — récupération</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Sur l'écran de saisie du PIN, cliquez sur <strong>« PIN oublié ? »</strong>.</li>
+                            <li>Saisissez votre <strong>code de récupération</strong> (fourni lors de la création du PIN).</li>
+                            <li>Si le code est valide, vous pouvez définir un <strong>nouveau PIN</strong>.</li>
+                        </ol>
+                        <p>⚠️ En dernier recours, vous pouvez effacer les données locales du navigateur (<em>DevTools → Application → Clear storage</em>), mais <strong>toutes les données non exportées seront perdues définitivement</strong>.</p>
+                    </div>
+                </details>
+
+                <!-- 18 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>👤 Gérer plusieurs comptes</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li>Cliquez sur votre <strong>avatar</strong> en haut à droite → <em>« Changer d'utilisateur »</em>.</li>
+                            <li>Sélectionnez un compte existant ou créez-en un nouveau avec <strong>＋</strong>.</li>
+                            <li>Chaque profil a ses propres <strong>données, paramètres et PIN</strong>, totalement isolés.</li>
+                            <li>La capacité est limitée par le <strong>localStorage</strong> du navigateur (~5–10 Mo selon le navigateur).</li>
+                        </ul>
+                        <p>📱 Idéal pour gérer les notes de <strong>plusieurs enfants</strong> ou de plusieurs années scolaires.</p>
+                    </div>
+                </details>
+
+                <!-- 19 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>☁️ Stockage local vs cloud</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-[var(--input-bg)] rounded-lg p-3">
+                                <p class="font-bold text-[var(--text-main)] mb-1">💾 Local</p>
+                                <ul class="space-y-1 list-disc list-inside text-xs">
+                                    <li>Données dans le navigateur</li>
+                                    <li>Fonctionne hors-ligne</li>
+                                    <li>Totalement privé</li>
+                                    <li>Perdu si cache effacé</li>
+                                </ul>
+                            </div>
+                            <div class="bg-[var(--input-bg)] rounded-lg p-3">
+                                <p class="font-bold text-[var(--text-main)] mb-1">🌐 Cloud</p>
+                                <ul class="space-y-1 list-disc list-inside text-xs">
+                                    <li>Données sur un serveur</li>
+                                    <li>Accès multi-appareils</li>
+                                    <li>Compte requis</li>
+                                    <li>Nécessite internet</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p>💡 En mode local, <strong>exportez régulièrement</strong> vos données en JSON pour éviter toute perte.</p>
+                    </div>
+                </details>
+
+                <!-- 20 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📤 Exporter ses données</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Allez dans <strong>Paramètres ⚙️ → Données</strong>.</li>
+                            <li>Cliquez sur <em>« Exporter le compte »</em>.</li>
+                            <li>Cochez les <strong>périodes</strong> à inclure (ou sélectionnez tout).</li>
+                            <li>Un fichier <code class="bg-[var(--input-bg)] px-1 rounded">.json</code> est téléchargé automatiquement.</li>
+                        </ol>
+                        <p>📦 Le fichier contient : matières, toutes les notes, coefficients, couleurs et paramètres du compte.</p>
+                        <p>🔄 Format lisible — vous pouvez l'ouvrir dans un éditeur de texte pour vérifier son contenu.</p>
+                    </div>
+                </details>
+
+                <!-- 21 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>📥 Importer des données</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Allez dans <strong>Paramètres ⚙️ → Données</strong>.</li>
+                            <li>Cliquez sur <em>« Importer un fichier »</em>.</li>
+                            <li>Sélectionnez le fichier <code class="bg-[var(--input-bg)] px-1 rounded">.json</code> précédemment exporté depuis Noteo.</li>
+                            <li>Confirmez l'import — les données sont fusionnées ou remplacées selon le contenu.</li>
+                        </ol>
+                        <p>⚠️ Seuls les fichiers <strong>exportés par Noteo</strong> sont acceptés. Un fichier mal formé ou d'une autre application provoquera une erreur.</p>
+                        <p>💡 Vérifiez la <strong>période ciblée</strong> avant d'importer pour éviter d'écraser des données existantes.</p>
+                    </div>
+                </details>
+
+                <!-- 22 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>🗑️ Supprimer des matières, notes ou un compte</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li><strong>Supprimer une note</strong> : ouvrez l'historique de la matière → cliquez sur ✕ à côté de la note.</li>
+                            <li><strong>Supprimer une matière</strong> : icône 🗑️ sur la carte matière (une confirmation est demandée si l'option est activée).</li>
+                            <li><strong>Vider la période</strong> : <strong>Paramètres ⚙️ → Données → « Vider la période »</strong> (supprime toutes les matières de la période courante).</li>
+                            <li><strong>Supprimer le compte</strong> : <strong>Paramètres ⚙️ → Données → « Supprimer le compte »</strong> — action <strong>irréversible</strong>, toutes les données sont effacées.</li>
+                        </ul>
+                        <p>💾 <strong>Exportez avant de supprimer</strong> si vous souhaitez conserver une archive.</p>
+                    </div>
+                </details>
+
+                <!-- 23 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>♿ Accessibilité</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <p>Noteo intègre plusieurs options d'accessibilité (<strong>Paramètres ⚙️ → Accessibilité</strong>) :</p>
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li><strong>Police OpenDyslexic</strong> — optimisée pour les personnes dyslexiques.</li>
+                            <li><strong>Contraste élevé</strong> — renforce les contrastes texte / fond pour une meilleure lisibilité.</li>
+                            <li><strong>Réduire les animations</strong> — désactive transitions et animations (respecte aussi le réglage OS <em>prefers-reduced-motion</em>).</li>
+                            <li><strong>Boutons tactiles agrandis</strong> — sur mobile, les zones de clic sont élargies automatiquement.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- 24 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>⌨️ Astuces et raccourcis</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ul class="space-y-1 list-disc list-inside">
+                            <li>Cliquer sur le <strong>cercle coloré</strong> d'une matière = changer immédiatement sa couleur/tag.</li>
+                            <li>Bouton <strong>📌 épingle</strong> sur une matière = la fixer en haut de liste, peu importe le tri.</li>
+                            <li>Cocher <strong>« Rester connecté(e) »</strong> à la connexion = ne plus saisir son nom à chaque visite.</li>
+                            <li>Clic sur le logo <strong>« N. »</strong> en haut à gauche = retour en haut de la page instantanément.</li>
+                            <li>Le champ de saisie accepte <strong>Entrée ↵</strong> pour valider rapidement l'ajout d'une note.</li>
+                            <li><strong>Scroll horizontal</strong> dans le sélecteur de périodes sur mobile.</li>
+                            <li>Le formulaire de note peut être <strong>réduit / agrandi</strong> en cliquant sur l'en-tête de la carte.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- 25 -->
+                <details class="help-item group">
+                    <summary class="cursor-pointer font-bold text-[var(--text-main)] hover:text-indigo-500 transition-colors flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-card)] border border-[var(--border)]">
+                        <span>❓ Dépannage — problèmes courants</span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-sm text-[var(--text-muted)] space-y-2">
+                        <ul class="space-y-2 list-none">
+                            <li>🔄 <strong>Les notes ne s'affichent pas</strong> → rechargez la page (F5 / Ctrl+R).</li>
+                            <li>📊 <strong>Graphique vide</strong> → vérifiez qu'au moins une matière est cochée et contient des notes, puis cliquez « Mettre à jour ».</li>
+                            <li>📥 <strong>L'import échoue</strong> → vérifiez que le fichier est bien un <code class="bg-[var(--input-bg)] px-1 rounded">.json</code> exporté depuis Noteo.</li>
+                            <li>🧮 <strong>La moyenne semble incorrecte</strong> → vérifiez les coefficients des matières (un coeff à 0 exclut la matière).</li>
+                            <li>🔢 <strong>PIN refusé</strong> → le code est <strong>numérique uniquement</strong> ; vérifiez que Verr. Maj ou un clavier virtuel ne perturbe pas la saisie.</li>
+                            <li>💨 <strong>L'application est lente</strong> → désactivez le flou (glassmorphism) et les blobs dans Paramètres → Apparence.</li>
+                            <li>💾 <strong>Données disparues</strong> → le cache du navigateur a peut-être été vidé. Utilisez <strong>Export régulier</strong> pour éviter ce risque.</li>
+                            <li>📱 <strong>Affichage cassé sur mobile</strong> → activez le mode mobile dans Paramètres → Apparence → Mode mobile.</li>
+                        </ul>
+                    </div>
+                </details>
+
+            </div>
+        </div>
+    </div>
                         <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </summary>
                     <div class="mt-3 p-4 bg-[var(--bg-body)] rounded-lg text-[var(--text-muted)]">
