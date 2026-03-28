@@ -43,6 +43,9 @@
     <!-- Chart.js (deferred — only needed on Charts tab) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
+    <!-- EmailJS (deferred — only needed for PIN recovery) -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/antijingo/open-dyslexic@1.0/src/open-dyslexic.css" rel="stylesheet">
@@ -677,6 +680,57 @@
         </div>
     </div>
 
+    <!-- Modal: PIN Recovery -->
+    <div id="recovery-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-sm relative text-center">
+            <button onclick="closeRecoveryModal()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Step 1: Confirm email -->
+            <div id="recovery-step-email">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                    <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h2 class="text-xl font-black text-[var(--text-main)] mb-2 tracking-tight">Récupération du PIN</h2>
+                <p class="text-sm text-[var(--text-muted)] mb-5">Un code de vérification à 6 chiffres sera envoyé à votre adresse email.</p>
+                <p id="recovery-email-display" class="text-sm font-bold text-[var(--text-main)] mb-5 bg-[var(--input-bg)] rounded-xl py-3 px-4"></p>
+                <button onclick="sendRecoveryCode()" id="recovery-send-btn" class="w-full py-3 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-lg">
+                    Envoyer le code
+                </button>
+                <p id="recovery-send-error" class="hidden text-xs text-rose-500 font-bold mt-3"></p>
+            </div>
+
+            <!-- Step 2: Enter code -->
+            <div id="recovery-step-code" class="hidden">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                    <svg class="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-xl font-black text-[var(--text-main)] mb-2 tracking-tight">Entrez le code</h2>
+                <p class="text-sm text-[var(--text-muted)] mb-5">Vérifiez votre boîte mail (et les spams).</p>
+                <input type="text" id="recovery-code-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="one-time-code" class="w-full text-center text-3xl font-black tracking-[0.4em] py-3 px-4 rounded-2xl bg-[var(--input-bg)] border border-[var(--border)] outline-none text-[var(--text-main)] mb-2">
+                <p id="recovery-timer" class="text-xs text-[var(--text-muted)] font-bold mb-4"></p>
+                <button onclick="verifyRecoveryCode()" id="recovery-verify-btn" class="w-full py-3 rounded-2xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg">
+                    Vérifier
+                </button>
+                <p id="recovery-code-error" class="hidden text-xs text-rose-500 font-bold mt-3"></p>
+                <button onclick="sendRecoveryCode()" id="recovery-resend-btn" class="mt-3 text-sm font-bold text-indigo-500 hover:underline disabled:opacity-40 disabled:no-underline" disabled>Renvoyer le code</button>
+            </div>
+
+            <!-- Step 3: No email -->
+            <div id="recovery-step-noemail" class="hidden">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-rose-500/10 flex items-center justify-center">
+                    <svg class="w-7 h-7 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                </div>
+                <h2 class="text-xl font-black text-[var(--text-main)] mb-2 tracking-tight">Aucun email configuré</h2>
+                <p class="text-sm text-[var(--text-muted)] mb-5">Ce compte n'a pas d'email de récupération. Vous pouvez forcer la réinitialisation, mais cette action est <strong>irréversible</strong>.</p>
+                <button onclick="forceResetPin()" class="w-full py-3 rounded-2xl font-bold text-white bg-rose-600 hover:bg-rose-500 transition-all shadow-lg">
+                    Réinitialiser le PIN
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Duplicate Subject -->
     <div id="duplicate-subject-modal" class="modal-overlay">
         <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-lg relative">
@@ -1147,6 +1201,128 @@
             </div>
         </div>
     </div>
+    <!-- Dev Terminal (hidden, zero cost when closed) -->
+    <div id="dev-terminal" class="dev-hidden">
+        <div id="dev-drag-handle" title="Glisser pour redimensionner"></div>
+        <div class="dev-terminal-header">
+            <div class="dev-terminal-title">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Dev Terminal</span>
+                <span id="dev-terminal-user" class="dev-badge"></span>
+                <span id="dev-sim-badge" class="dev-sim-indicator" style="display:none;"></span>
+            </div>
+            <div class="dev-terminal-tabs" role="tablist">
+                <button onclick="devSwitchTab('info')" class="dev-tab active" data-devtab="info" title="Infos système">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span>Système</span>
+                </button>
+                <button onclick="devSwitchTab('app')" class="dev-tab" data-devtab="app" title="État de l'application">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    <span>App</span>
+                </button>
+                <button onclick="devSwitchTab('storage')" class="dev-tab" data-devtab="storage" title="Inspecteur localStorage">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
+                    <span>Storage</span>
+                </button>
+                <button onclick="devSwitchTab('platform')" class="dev-tab" data-devtab="platform" title="Simulateur de plateforme">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <span>Plateforme</span>
+                </button>
+                <button onclick="devSwitchTab('perf')" class="dev-tab" data-devtab="perf" title="Métriques de performance">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span>Perf</span>
+                </button>
+                <button onclick="devSwitchTab('console')" class="dev-tab" data-devtab="console" title="Console capturée">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3"/></svg>
+                    <span>Console</span>
+                </button>
+            </div>
+            <div class="dev-terminal-actions">
+                <button onclick="refreshDevInfo()" title="Rafraîchir les données">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </button>
+                <button onclick="toggleDevTerminalSize()" id="dev-resize-btn" title="Plein écran / Réduire">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                </button>
+                <button onclick="closeDevTerminal()" title="Fermer le terminal">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="dev-terminal-body">
+            <div id="dev-panel-info" class="dev-panel active"><div class="dev-grid" id="dev-sys-info"></div></div>
+            <div id="dev-panel-app" class="dev-panel"><div class="dev-grid" id="dev-app-info"></div></div>
+            <div id="dev-panel-storage" class="dev-panel">
+                <div class="dev-toolbar">
+                    <div class="dev-search-wrap">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input type="text" id="dev-storage-search" placeholder="Filtrer les clés…" oninput="devRefreshStorage()">
+                    </div>
+                    <button onclick="devRefreshStorage()" class="dev-btn">↻ Rafraîchir</button>
+                    <button onclick="devExportStorage()" class="dev-btn dev-btn-accent">⬇ Exporter JSON</button>
+                </div>
+                <div id="dev-storage-list" class="dev-list"></div>
+            </div>
+            <div id="dev-panel-platform" class="dev-panel">
+                <div class="dev-platform-section">
+                    <div class="dev-section-label">Appareils Desktop</div>
+                    <div class="dev-platform-grid">
+                        <button onclick="devSimulatePlatform('desktop-win')" class="dev-platform-btn" data-plat="desktop-win">
+                            <span class="dev-platform-icon">🖥️</span><span class="dev-platform-name">Windows</span>
+                            <span class="dev-platform-detail">Chrome / Win32</span>
+                        </button>
+                        <button onclick="devSimulatePlatform('desktop-mac')" class="dev-platform-btn" data-plat="desktop-mac">
+                            <span class="dev-platform-icon">🍎</span><span class="dev-platform-name">macOS</span>
+                            <span class="dev-platform-detail">Safari / MacIntel</span>
+                        </button>
+                        <button onclick="devSimulatePlatform('desktop-linux')" class="dev-platform-btn" data-plat="desktop-linux">
+                            <span class="dev-platform-icon">🐧</span><span class="dev-platform-name">Linux</span>
+                            <span class="dev-platform-detail">Firefox / Linux x86_64</span>
+                        </button>
+                    </div>
+                    <div class="dev-section-label">Appareils Mobiles</div>
+                    <div class="dev-platform-grid">
+                        <button onclick="devSimulatePlatform('phone-android')" class="dev-platform-btn" data-plat="phone-android">
+                            <span class="dev-platform-icon">📱</span><span class="dev-platform-name">Android</span>
+                            <span class="dev-platform-detail">Chrome Mobile / Linux armv8l</span>
+                        </button>
+                        <button onclick="devSimulatePlatform('phone-ios')" class="dev-platform-btn" data-plat="phone-ios">
+                            <span class="dev-platform-icon">📱</span><span class="dev-platform-name">iPhone</span>
+                            <span class="dev-platform-detail">Safari Mobile / iPhone</span>
+                        </button>
+                        <button onclick="devSimulatePlatform('tablet-ipad')" class="dev-platform-btn" data-plat="tablet-ipad">
+                            <span class="dev-platform-icon">📋</span><span class="dev-platform-name">iPad</span>
+                            <span class="dev-platform-detail">Safari / iPad</span>
+                        </button>
+                        <button onclick="devSimulatePlatform('tablet-android')" class="dev-platform-btn" data-plat="tablet-android">
+                            <span class="dev-platform-icon">📋</span><span class="dev-platform-name">Tablette Android</span>
+                            <span class="dev-platform-detail">Chrome / Linux armv8l</span>
+                        </button>
+                    </div>
+                </div>
+                <button onclick="devSimulatePlatform('reset')" class="dev-btn dev-btn-reset">🔄 Rétablir la vraie plateforme</button>
+                <div id="dev-platform-status" class="dev-status-box"></div>
+            </div>
+            <div id="dev-panel-perf" class="dev-panel"><div class="dev-grid" id="dev-perf-info"></div></div>
+            <div id="dev-panel-console" class="dev-panel">
+                <div class="dev-toolbar">
+                    <button onclick="devClearConsole()" class="dev-btn">🗑 Effacer</button>
+                    <label class="dev-label"><input type="checkbox" id="dev-console-errors" checked onchange="devFilterConsole()"> <span class="dev-dot dev-dot-err"></span>Errors</label>
+                    <label class="dev-label"><input type="checkbox" id="dev-console-warns" checked onchange="devFilterConsole()"> <span class="dev-dot dev-dot-warn"></span>Warns</label>
+                    <label class="dev-label"><input type="checkbox" id="dev-console-logs" checked onchange="devFilterConsole()"> <span class="dev-dot dev-dot-log"></span>Logs</label>
+                    <span id="dev-console-count" class="dev-count-badge"></span>
+                </div>
+                <div id="dev-console-output" class="dev-console-log"></div>
+            </div>
+        </div>
+        <div class="dev-statusbar">
+            <span id="dev-sb-platform">Plateforme : réelle</span>
+            <span id="dev-sb-fps"></span>
+            <span id="dev-sb-mem"></span>
+            <span id="dev-sb-dom"></span>
+        </div>
+    </div>
+
     <script src="Source/code/script.js"></script>
 </body>
 </html>

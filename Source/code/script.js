@@ -386,6 +386,8 @@ window.onload = () => {
 
   // Cache important DOM elements for faster access
   cacheDom();
+  // Initialize EmailJS for PIN recovery
+  initEmailJS();
   // Detect and apply phone-restricted experience when appropriate
   try {
     if (detectPhoneXP()) {
@@ -745,6 +747,21 @@ function openUserSwitchModal() {
   modal.classList.add("open");
 }
 
+/* ===== EmailJS Configuration ===== */
+const EMAILJS_CONFIG = {
+  serviceId: "service_noteo",
+  templateId: "template_noteo_pin",
+  publicKey: "YOUR_EMAILJS_PUBLIC_KEY"
+};
+
+let recoveryState = { timerId: null, resendCooldown: 0 };
+
+function initEmailJS() {
+  if (typeof emailjs !== "undefined" && EMAILJS_CONFIG.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY") {
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+  }
+}
+
 async function forgotPin() {
   const { targetUser } = pinState;
   if (!targetUser) return;
@@ -752,72 +769,183 @@ async function forgotPin() {
   const profileKey = `noteo_profile_${targetUser.id}`;
   const profileData = JSON.parse(localStorage.getItem(profileKey));
 
+  closePinModal();
+  playSound("swoosh");
+
+  const modal = document.getElementById("recovery-modal");
+  document.getElementById("recovery-step-email").classList.remove("hidden");
+  document.getElementById("recovery-step-code").classList.add("hidden");
+  document.getElementById("recovery-step-noemail").classList.add("hidden");
+  document.getElementById("recovery-send-error").classList.add("hidden");
+  document.getElementById("recovery-code-error").classList.add("hidden");
+
   if (profileData && profileData.recoveryEmail) {
-    const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const hashedCode = await hashPin(recoveryCode);
-
-    sessionStorage.setItem(
-      "noteo_recovery",
-      JSON.stringify({
-        userId: targetUser.id,
-        code: hashedCode,
-        expires: Date.now() + 10 * 60 * 1000,
-      }),
-    );
-
-    alert(
-      `Un email de récupération a été simulé pour ${profileData.recoveryEmail}.\n\nPour des raisons de démonstration, voici le code : ${recoveryCode}\n\nCe code expirera dans 10 minutes.`,
-    );
-
-    const enteredCode = prompt(
-      "Veuillez entrer le code de récupération à 6 chiffres :",
-    );
-
-    if (enteredCode) {
-      const recoveryData = JSON.parse(sessionStorage.getItem("noteo_recovery"));
-      const hashedEnteredCode = await hashPin(enteredCode.trim());
-
-      if (
-        recoveryData &&
-        recoveryData.userId === targetUser.id &&
-        recoveryData.expires > Date.now() &&
-        hashedEnteredCode === recoveryData.code
-      ) {
-        sessionStorage.removeItem("noteo_recovery");
-        alert(
-          "Code correct. Vous pouvez maintenant définir un nouveau code PIN.",
-        );
-        closePinModal();
-        setTimeout(() => openAuthSetup(), 300);
-      } else {
-        alert("Code incorrect ou expiré. Veuillez réessayer.");
-        playSound("error");
-      }
-    }
+    const email = profileData.recoveryEmail;
+    const masked = maskEmail(email);
+    document.getElementById("recovery-email-display").textContent = masked;
+    document.getElementById("recovery-send-btn").disabled = false;
+    document.getElementById("recovery-send-btn").textContent = "Envoyer le code";
   } else {
-    if (
-      confirm(
-        `Aucun email de récupération n'est défini pour ce compte.\n\nSouhaitez-vous réinitialiser la protection par code PIN ? Cette action est irréversible et supprimera le code PIN actuel.`,
-      )
-    ) {
-      if (profileData) {
-        delete profileData.authSecret;
-        delete profileData.authType;
-        delete profileData.hashedPin; // For old profiles
-        delete profileData.recoveryEmail;
-        localStorage.setItem(profileKey, JSON.stringify(profileData));
+    document.getElementById("recovery-step-email").classList.add("hidden");
+    document.getElementById("recovery-step-noemail").classList.remove("hidden");
+  }
 
-        playSound("delete");
-        closePinModal();
+  document.body.classList.add("modal-open");
+  modal.classList.add("open");
+}
 
-        if (pinState.mode === "check") {
-          completeLogin(profileData);
-        }
-        alert(
-          "Le code PIN a été réinitialisé. Vous pouvez vous connecter et en définir un nouveau dans les paramètres.",
-        );
-      }
+function maskEmail(email) {
+  const [local, domain] = email.split("@");
+  if (!domain) return email;
+  const masked = local.length <= 2 ? local[0] + "***" : local[0] + "***" + local.slice(-1);
+  return masked + "@" + domain;
+}
+
+function closeRecoveryModal() {
+  playSound("click");
+  document.getElementById("recovery-modal").classList.remove("open");
+  document.body.classList.remove("modal-open");
+  if (recoveryState.timerId) { clearInterval(recoveryState.timerId); recoveryState.timerId = null; }
+}
+
+async function sendRecoveryCode() {
+  const { targetUser } = pinState;
+  if (!targetUser) return;
+
+  const profileKey = `noteo_profile_${targetUser.id}`;
+  const profileData = JSON.parse(localStorage.getItem(profileKey));
+  if (!profileData || !profileData.recoveryEmail) return;
+
+  const sendBtn = document.getElementById("recovery-send-btn");
+  const errorEl = document.getElementById("recovery-send-error");
+  errorEl.classList.add("hidden");
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Envoi en cours…";
+
+  const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedCode = await hashPin(recoveryCode);
+
+  sessionStorage.setItem("noteo_recovery", JSON.stringify({
+    userId: targetUser.id,
+    code: hashedCode,
+    expires: Date.now() + 10 * 60 * 1000,
+  }));
+
+  let emailSent = false;
+  if (typeof emailjs !== "undefined" && EMAILJS_CONFIG.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY") {
+    try {
+      await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+        to_email: profileData.recoveryEmail,
+        to_name: profileData.prenom || "Utilisateur",
+        recovery_code: recoveryCode,
+      });
+      emailSent = true;
+    } catch (err) {
+      console.warn("EmailJS error:", err);
     }
+  }
+
+  if (!emailSent) {
+    console.info("[Noteo] Recovery code (EmailJS not configured):", recoveryCode);
+  }
+
+  sendBtn.textContent = "Code envoyé ✓";
+  playSound("click");
+
+  setTimeout(() => {
+    document.getElementById("recovery-step-email").classList.add("hidden");
+    document.getElementById("recovery-step-code").classList.remove("hidden");
+    document.getElementById("recovery-code-input").value = "";
+    document.getElementById("recovery-code-input").focus();
+    document.getElementById("recovery-code-error").classList.add("hidden");
+    startRecoveryTimer();
+  }, 600);
+}
+
+function startRecoveryTimer() {
+  recoveryState.resendCooldown = 60;
+  const timerEl = document.getElementById("recovery-timer");
+  const resendBtn = document.getElementById("recovery-resend-btn");
+  resendBtn.disabled = true;
+
+  if (recoveryState.timerId) clearInterval(recoveryState.timerId);
+  recoveryState.timerId = setInterval(() => {
+    recoveryState.resendCooldown--;
+    if (recoveryState.resendCooldown > 0) {
+      timerEl.textContent = `Le code expire dans 10 min · Renvoyer dans ${recoveryState.resendCooldown}s`;
+    } else {
+      timerEl.textContent = "Le code expire dans 10 min";
+      resendBtn.disabled = false;
+      clearInterval(recoveryState.timerId);
+      recoveryState.timerId = null;
+    }
+  }, 1000);
+  timerEl.textContent = `Le code expire dans 10 min · Renvoyer dans 60s`;
+}
+
+async function verifyRecoveryCode() {
+  const { targetUser } = pinState;
+  const input = document.getElementById("recovery-code-input").value.trim();
+  const errorEl = document.getElementById("recovery-code-error");
+  errorEl.classList.add("hidden");
+
+  if (!input || input.length !== 6 || !/^\d{6}$/.test(input)) {
+    errorEl.textContent = "Veuillez entrer un code à 6 chiffres.";
+    errorEl.classList.remove("hidden");
+    playSound("error");
+    return;
+  }
+
+  const recoveryData = JSON.parse(sessionStorage.getItem("noteo_recovery"));
+  if (!recoveryData || recoveryData.userId !== targetUser.id) {
+    errorEl.textContent = "Session expirée. Veuillez recommencer.";
+    errorEl.classList.remove("hidden");
+    playSound("error");
+    return;
+  }
+
+  if (recoveryData.expires < Date.now()) {
+    errorEl.textContent = "Le code a expiré. Renvoyez un nouveau code.";
+    errorEl.classList.remove("hidden");
+    playSound("error");
+    sessionStorage.removeItem("noteo_recovery");
+    return;
+  }
+
+  const hashedInput = await hashPin(input);
+  if (hashedInput !== recoveryData.code) {
+    errorEl.textContent = "Code incorrect. Vérifiez et réessayez.";
+    errorEl.classList.remove("hidden");
+    playSound("error");
+    return;
+  }
+
+  sessionStorage.removeItem("noteo_recovery");
+  if (recoveryState.timerId) { clearInterval(recoveryState.timerId); recoveryState.timerId = null; }
+  playSound("click");
+  closeRecoveryModal();
+  setTimeout(() => openAuthSetup(), 300);
+}
+
+function forceResetPin() {
+  const { targetUser } = pinState;
+  if (!targetUser) return;
+
+  const profileKey = `noteo_profile_${targetUser.id}`;
+  const profileData = JSON.parse(localStorage.getItem(profileKey));
+  if (!profileData) return;
+
+  delete profileData.authSecret;
+  delete profileData.authType;
+  delete profileData.hashedPin;
+  delete profileData.recoveryEmail;
+  localStorage.setItem(profileKey, JSON.stringify(profileData));
+
+  playSound("delete");
+  closeRecoveryModal();
+
+  if (pinState.mode === "check") {
+    completeLogin(profileData);
   }
 }
 
@@ -962,7 +1090,7 @@ const helpArticles = [
   { title: "🎨 Personnaliser l'application", content: `<p>Dans <strong>Paramètres ⚙️ → Apparence</strong> :</p><ul class="space-y-1 list-disc list-inside"><li><strong>Couleur principale</strong> — sélecteur de couleur.</li><li><strong>Sons ASMR</strong> — activer et régler le volume.</li><li><strong>Animations</strong> — désactivables.</li><li><strong>Flou (glassmorphism)</strong> — désactivable.</li><li><strong>Navigation fixe</strong> — la barre reste visible.</li><li><strong>Afficher l'avatar</strong> — masquer si souhaité.</li></ul>` },
   { title: "🔔 Notifications (toasts)", content: `<p>Les toasts apparaissent en <strong>bas à droite</strong> :</p><ul class="space-y-1 list-disc list-inside"><li>🟢 <strong>Vert</strong> — opération réussie.</li><li>🔴 <strong>Rouge</strong> — erreur.</li><li>🔵 <strong>Bleu</strong> — information neutre.</li></ul><p>⏱️ Disparaissent après ~3 secondes.</p>` },
   { title: "🔒 Protéger son compte avec un PIN", content: `<ol class="list-decimal list-inside space-y-1"><li>Ouvrez <strong>Paramètres ⚙️ → Sécurité</strong>.</li><li>Activez « Code PIN » et choisissez la longueur : 4, 6 ou 8 chiffres.</li><li>Saisissez votre PIN deux fois.</li><li>Notez le <strong>code de récupération</strong>.</li></ol><p>🛡️ Le PIN est <strong>hashé en SHA-256</strong>.</p><p>⏳ Verrouillage après <strong>15 min</strong> d'inactivité.</p>` },
-  { title: "🔑 PIN oublié — récupération", content: `<ol class="list-decimal list-inside space-y-1"><li>Sur l'écran de saisie du PIN, cliquez sur <strong>« PIN oublié ? »</strong>.</li><li>Saisissez votre <strong>code de récupération</strong>.</li><li>Définissez un <strong>nouveau PIN</strong>.</li></ol><p>⚠️ En dernier recours : DevTools → Application → Clear storage (données perdues).</p>` },
+  { title: "🔑 PIN oublié — récupération", content: `<ol class="list-decimal list-inside space-y-1"><li>Sur l'écran de saisie du PIN, cliquez sur <strong>« PIN oublié ? »</strong>.</li><li>Confirmez l'envoi du code à votre <strong>adresse email</strong> de récupération.</li><li>Saisissez le <strong>code à 6 chiffres</strong> reçu par email.</li><li>Définissez un <strong>nouveau PIN</strong>.</li></ol><p>⚠️ Si aucun email n'est configuré, vous pourrez forcer la réinitialisation (supprime le PIN actuel).</p><p>💡 Pensez à vérifier vos <strong>spams</strong> si vous ne recevez pas l'email.</p>` },
   { title: "👤 Gérer plusieurs comptes", content: `<ul class="space-y-1 list-disc list-inside"><li>Cliquez sur votre <strong>avatar</strong> → « Changer d'utilisateur ».</li><li>Sélectionnez un compte ou créez-en un nouveau.</li><li>Chaque profil a ses propres <strong>données, paramètres et PIN</strong>.</li><li>Capacité limitée par le <strong>localStorage</strong> (~5–10 Mo).</li></ul><p>📱 Idéal pour gérer les notes de <strong>plusieurs enfants</strong>.</p>`,
     tutorial: [
       { selector: "#user-avatar", text: "Cliquez sur votre avatar pour accéder au menu utilisateur." },
@@ -982,6 +1110,12 @@ let currentHelpArticleIndex = null;
 let tutorialSteps = [];
 let tutorialCurrentStep = 0;
 
+function stripHtml(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return tmp.textContent || "";
+}
+
 function renderHelpCards(query) {
   const q = (query || "").trim().toLowerCase();
   const container = document.getElementById("help-items");
@@ -989,7 +1123,7 @@ function renderHelpCards(query) {
   container.innerHTML = "";
   let visible = 0;
   helpArticles.forEach((article, i) => {
-    const match = !q || article.title.toLowerCase().includes(q) || article.content.toLowerCase().includes(q);
+    const match = !q || article.title.toLowerCase().includes(q) || stripHtml(article.content).toLowerCase().includes(q);
     if (!match) return;
     visible++;
     const card = document.createElement("div");
@@ -1032,14 +1166,38 @@ function startTutorial() {
   tutorialCurrentStep = 0;
   const overlay = document.getElementById("tuto-overlay");
   overlay.classList.remove("hidden");
+  window.addEventListener("resize", onTutoResize);
   showTutoStep();
+}
+
+function onTutoResize() {
+  if (tutorialCurrentStep >= tutorialSteps.length) return;
+  const step = tutorialSteps[tutorialCurrentStep];
+  const el = step && document.querySelector(step.selector);
+  if (el) positionTutoElements(el);
+}
+
+function ensureTutoTabVisible(selector) {
+  const chartsSelectors = ["#btn-charts", "#chart-subject-selector", "#chart-type-selector", "#charts-grid"];
+  const notesSelectors = ["#btn-notes", "#subject-name", "#calc-top", "#calc-bot", "#calc-form", "#selected-color-preview", "#grades-container", "#sort-menu-btn"];
+  if (chartsSelectors.includes(selector)) {
+    document.getElementById("tab-notes").classList.add("hidden");
+    document.getElementById("tab-charts").classList.remove("hidden");
+    document.getElementById("btn-notes").classList.remove("active");
+    document.getElementById("btn-charts").classList.add("active");
+  } else if (notesSelectors.includes(selector)) {
+    document.getElementById("tab-charts").classList.add("hidden");
+    document.getElementById("tab-notes").classList.remove("hidden");
+    document.getElementById("btn-charts").classList.remove("active");
+    document.getElementById("btn-notes").classList.add("active");
+  }
 }
 
 function showTutoStep() {
   if (tutorialCurrentStep >= tutorialSteps.length) { closeTutorial(); return; }
   const step = tutorialSteps[tutorialCurrentStep];
+  ensureTutoTabVisible(step.selector);
   const el = document.querySelector(step.selector);
-  const overlay = document.getElementById("tuto-overlay");
   const hole = document.getElementById("tuto-hole");
   const arrow = document.getElementById("tuto-arrow");
   const tooltip = document.getElementById("tuto-tooltip");
@@ -1111,9 +1269,10 @@ function nextTutoStep() {
   }
 }
 
-function closeTutorial() {
-  playSound("click");
+function closeTutorial(silent) {
+  if (!silent) playSound("click");
   document.getElementById("tuto-overlay").classList.add("hidden");
+  window.removeEventListener("resize", onTutoResize);
   tutorialSteps = [];
   tutorialCurrentStep = 0;
 }
@@ -1269,7 +1428,7 @@ function closeModals() {
   }
   const tutoOverlay = document.getElementById("tuto-overlay");
   if (tutoOverlay && !tutoOverlay.classList.contains("hidden")) {
-    closeTutorial();
+    closeTutorial(true);
   }
 }
 
@@ -4422,3 +4581,743 @@ window.addEventListener("keydown", (e) => {
     }
   }
 });
+
+// ===================================================================
+// DEV TERMINAL — Hidden developer panel (zero-cost when closed)
+// Activated by typing {prenom}{nom}dev on the keyboard
+// ===================================================================
+(function () {
+  // --- State ---
+  let _devKeyBuffer = "";
+  let _devOpen = false;
+  let _devInitialized = false; // lazy init flag
+  let _devConsoleLogs = [];
+  let _devConsoleHooked = false;
+  let _devCurrentPlatform = null;
+  let _devFpsRaf = null;
+  let _devActiveTab = "info";
+  let _devDirtyTabs = new Set();
+
+  // Saved originals for navigator overrides
+  const _realUA = navigator.userAgent;
+  const _realPlatform = navigator.platform;
+  const _realMaxTP = navigator.maxTouchPoints;
+
+  const _origConsole = {
+    log: console.log.bind(console),
+    warn: console.warn.bind(console),
+    error: console.error.bind(console),
+  };
+
+  // Platform presets: UA, platform, maxTouchPoints, classes, isSafari
+  const PLATFORMS = {
+    "desktop-win": {
+      ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      platform: "Win32",
+      maxTP: 0,
+      classes: [],
+      safari: false,
+      label: "Desktop Windows",
+    },
+    "desktop-mac": {
+      ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+      platform: "MacIntel",
+      maxTP: 0,
+      classes: ["is-safari"],
+      safari: true,
+      label: "Desktop macOS (Safari)",
+    },
+    "desktop-linux": {
+      ua: "Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0",
+      platform: "Linux x86_64",
+      maxTP: 0,
+      classes: [],
+      safari: false,
+      label: "Desktop Linux",
+    },
+    "phone-android": {
+      ua: "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36",
+      platform: "Linux armv8l",
+      maxTP: 5,
+      classes: ["is-mobile", "phone-xp"],
+      safari: false,
+      label: "Phone Android",
+    },
+    "phone-ios": {
+      ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
+      platform: "iPhone",
+      maxTP: 5,
+      classes: ["is-mobile", "phone-xp", "is-safari"],
+      safari: true,
+      label: "iPhone (Safari)",
+    },
+    "tablet-ipad": {
+      ua: "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
+      platform: "iPad",
+      maxTP: 5,
+      classes: ["is-mobile", "is-safari"],
+      safari: true,
+      label: "iPad (Safari)",
+    },
+    "tablet-android": {
+      ua: "Mozilla/5.0 (Linux; Android 14; SM-X810) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      platform: "Linux armv8l",
+      maxTP: 5,
+      classes: ["is-mobile"],
+      safari: false,
+      label: "Tablette Android",
+    },
+  };
+
+  // --- Activation: keystroke detection (always lightweight) ---
+  window.addEventListener("keydown", (e) => {
+    // Skip modifier combos and special keys
+    if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+    // Skip if user is typing in an input/textarea
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
+
+    _devKeyBuffer += e.key.toLowerCase();
+    if (_devKeyBuffer.length > 60) _devKeyBuffer = _devKeyBuffer.slice(-60);
+
+    if (user && user.prenom && user.nom) {
+      const secret = (user.prenom + user.nom + "dev").toLowerCase().replace(/\s/g, "");
+      if (_devKeyBuffer.endsWith(secret)) {
+        _devKeyBuffer = "";
+        toggleDevTerminal();
+      }
+    }
+  });
+
+  // --- Lazy init (runs once on first open) ---
+  function _initDevTerminal() {
+    if (_devInitialized) return;
+    _devInitialized = true;
+    _hookConsole();
+    _initDrag();
+  }
+
+  // --- Console hooks (only installed on first open) ---
+  function _hookConsole() {
+    if (_devConsoleHooked) return;
+    _devConsoleHooked = true;
+
+    function capture(type, origFn, args) {
+      const time = new Date().toLocaleTimeString("fr-FR", { hour12: false });
+      const parts = [];
+      for (let i = 0; i < args.length; i++) {
+        const a = args[i];
+        if (a === null) { parts.push("null"); continue; }
+        if (a === undefined) { parts.push("undefined"); continue; }
+        if (typeof a === "object") {
+          try { parts.push(JSON.stringify(a, null, 2)); } catch { parts.push(String(a)); }
+          continue;
+        }
+        parts.push(String(a));
+      }
+      _devConsoleLogs.push({ type, time, msg: parts.join(" ") });
+      if (_devConsoleLogs.length > 800) _devConsoleLogs.splice(0, 300);
+      if (_devOpen && _devActiveTab === "console") _devDirtyTabs.add("console");
+      origFn.apply(console, args);
+    }
+
+    console.log = function () { capture("log", _origConsole.log, arguments); };
+    console.warn = function () { capture("warn", _origConsole.warn, arguments); };
+    console.error = function () { capture("error", _origConsole.error, arguments); };
+  }
+
+  // --- Drag to resize ---
+  function _initDrag() {
+    const handle = document.getElementById("dev-drag-handle");
+    const terminal = document.getElementById("dev-terminal");
+    if (!handle || !terminal) return;
+
+    let dragging = false;
+    let startY = 0;
+    let startH = 0;
+
+    handle.addEventListener("mousedown", (e) => {
+      dragging = true;
+      startY = e.clientY;
+      startH = terminal.offsetHeight;
+      document.body.style.cursor = "ns-resize";
+      document.body.style.userSelect = "none";
+      e.preventDefault();
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!dragging) return;
+      const newH = Math.min(
+        Math.max(startH + (startY - e.clientY), 180),
+        window.innerHeight * 0.92
+      );
+      terminal.style.height = newH + "px";
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    });
+
+    // Touch support
+    handle.addEventListener("touchstart", (e) => {
+      dragging = true;
+      startY = e.touches[0].clientY;
+      startH = terminal.offsetHeight;
+      e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener("touchmove", (e) => {
+      if (!dragging) return;
+      const newH = Math.min(
+        Math.max(startH + (startY - e.touches[0].clientY), 180),
+        window.innerHeight * 0.92
+      );
+      terminal.style.height = newH + "px";
+    }, { passive: true });
+
+    window.addEventListener("touchend", () => { dragging = false; });
+  }
+
+  // --- FPS counter (only runs when terminal is visible) ---
+  function _startFps() {
+    if (_devFpsRaf) return;
+    let frames = 0;
+    let last = performance.now();
+    const el = document.getElementById("dev-sb-fps");
+
+    function tick(now) {
+      frames++;
+      if (now - last >= 1000) {
+        if (el) el.textContent = "FPS : " + frames;
+        frames = 0;
+        last = now;
+        // Also update mem
+        _updateStatusBar();
+      }
+      if (_devOpen) {
+        _devFpsRaf = requestAnimationFrame(tick);
+      } else {
+        _devFpsRaf = null;
+      }
+    }
+    _devFpsRaf = requestAnimationFrame(tick);
+  }
+
+  function _stopFps() {
+    if (_devFpsRaf) {
+      cancelAnimationFrame(_devFpsRaf);
+      _devFpsRaf = null;
+    }
+  }
+
+  function _updateStatusBar() {
+    const memEl = document.getElementById("dev-sb-mem");
+    const domEl = document.getElementById("dev-sb-dom");
+    if (memEl && performance.memory) {
+      memEl.textContent = "Heap : " + (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + " Mo";
+    }
+    if (domEl) {
+      domEl.textContent = "DOM : " + document.querySelectorAll("*").length + " éléments";
+    }
+  }
+
+  // --- Toggle / Open / Close ---
+  window.toggleDevTerminal = function () {
+    _devOpen = !_devOpen;
+    if (_devOpen) {
+      _initDevTerminal();
+      const el = document.getElementById("dev-terminal");
+      if (el) el.classList.remove("dev-hidden");
+      _startFps();
+      _renderActiveTab();
+      _updateSimBadge();
+      const badge = document.getElementById("dev-terminal-user");
+      if (badge && user) badge.textContent = user.prenom + " " + user.nom;
+    } else {
+      closeDevTerminal();
+    }
+  };
+
+  window.closeDevTerminal = function () {
+    _devOpen = false;
+    _stopFps();
+    const el = document.getElementById("dev-terminal");
+    if (el) el.classList.add("dev-hidden");
+  };
+
+  window.toggleDevTerminalSize = function () {
+    const el = document.getElementById("dev-terminal");
+    if (el) el.classList.toggle("dev-expanded");
+  };
+
+  // --- Tab switching ---
+  window.devSwitchTab = function (tabName) {
+    _devActiveTab = tabName;
+    document.querySelectorAll("#dev-terminal .dev-tab").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.devtab === tabName);
+    });
+    document.querySelectorAll("#dev-terminal .dev-panel").forEach((p) => {
+      p.classList.toggle("active", p.id === "dev-panel-" + tabName);
+    });
+    _renderActiveTab();
+  };
+
+  function _renderActiveTab() {
+    switch (_devActiveTab) {
+      case "info": _renderSysInfo(); break;
+      case "app": _renderAppInfo(); break;
+      case "storage": devRefreshStorage(); break;
+      case "platform": _renderPlatformStatus(); break;
+      case "perf": _renderPerfInfo(); break;
+      case "console": _renderConsoleLogs(); break;
+    }
+    _devDirtyTabs.delete(_devActiveTab);
+  }
+
+  window.refreshDevInfo = function () {
+    _renderActiveTab();
+    _updateStatusBar();
+  };
+
+  // --- System Info ---
+  function _renderSysInfo() {
+    const el = document.getElementById("dev-sys-info");
+    if (!el) return;
+
+    const nav = navigator;
+    const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
+    const cards = [];
+
+    cards.push(_card("Navigateur", {
+      "User Agent": nav.userAgent,
+      Langue: nav.language,
+      Langues: (nav.languages || []).join(", "),
+      "Cookies activés": nav.cookieEnabled ? "Oui" : "Non",
+      "Do Not Track": nav.doNotTrack || "non défini",
+      Plateforme: nav.platform,
+      "Max Touch Points": nav.maxTouchPoints,
+    }));
+
+    cards.push(_card("Écran", {
+      Résolution: screen.width + " × " + screen.height,
+      Viewport: window.innerWidth + " × " + window.innerHeight,
+      "Device Pixel Ratio": window.devicePixelRatio,
+      "Profondeur couleur": screen.colorDepth + " bits",
+      Orientation: (screen.orientation && screen.orientation.type) || "N/A",
+    }));
+
+    const hw = { "CPU Cores": nav.hardwareConcurrency || "N/A" };
+    if (nav.deviceMemory) hw["RAM"] = nav.deviceMemory + " Go";
+    if (conn) {
+      hw["Connexion"] = conn.effectiveType || "N/A";
+      hw["Downlink"] = conn.downlink ? conn.downlink + " Mbps" : "N/A";
+      hw["RTT"] = conn.rtt != null ? conn.rtt + " ms" : "N/A";
+      hw["Save Data"] = conn.saveData ? "Oui" : "Non";
+    }
+    cards.push(_card("Hardware / Réseau", hw));
+
+    const mq = (q) => window.matchMedia && window.matchMedia(q).matches;
+    cards.push(_card("Media Queries", {
+      "(hover: hover)": mq("(hover: hover)") ? "✓ oui" : "✗ non",
+      "(pointer: coarse)": mq("(pointer: coarse)") ? "✓ oui" : "✗ non",
+      "(pointer: fine)": mq("(pointer: fine)") ? "✓ oui" : "✗ non",
+      "(prefers-color-scheme: dark)": mq("(prefers-color-scheme: dark)") ? "✓ oui" : "✗ non",
+      "(prefers-reduced-motion)": mq("(prefers-reduced-motion: reduce)") ? "✓ oui" : "✗ non",
+      "(display-mode: standalone)": mq("(display-mode: standalone)") ? "✓ oui" : "✗ non",
+    }));
+
+    el.innerHTML = cards.join("");
+  }
+
+  // --- App Info ---
+  function _renderAppInfo() {
+    const el = document.getElementById("dev-app-info");
+    if (!el) return;
+    const cards = [];
+
+    if (user) {
+      cards.push(_card("Utilisateur actif", {
+        ID: user.id,
+        Prénom: user.prenom,
+        Nom: user.nom,
+        "Type période": user.periodType || "N/A",
+        "Storage mode": user.storageMode || "N/A",
+        "Auth": user.authSecret ? "✓ PIN configuré" : "✗ Pas de PIN",
+        Email: user.recoveryEmail || "Non défini",
+      }));
+    } else {
+      cards.push(_card("Utilisateur", { Statut: "Aucun utilisateur actif" }));
+    }
+
+    if (typeof appSettings === "object") {
+      const s = {};
+      for (const [k, v] of Object.entries(appSettings)) {
+        s[k] = typeof v === "object" && v !== null ? JSON.stringify(v) : String(v);
+      }
+      cards.push(_card("Paramètres (appSettings)", s));
+    }
+
+    const bodyClasses = Array.from(document.body.classList);
+    const htmlClasses = Array.from(document.documentElement.classList);
+    cards.push(_card("DOM / Classes", {
+      "Éléments totaux": document.querySelectorAll("*").length,
+      Modales: document.querySelectorAll(".modal-overlay").length,
+      "Classes <body>": bodyClasses.join(", ") || "(aucune)",
+      "Classes <html>": htmlClasses.join(", ") || "(aucune)",
+      isPhoneXP: typeof isPhoneXP !== "undefined" ? String(isPhoneXP) : "N/A",
+    }));
+
+    if (typeof subjects !== "undefined" && Array.isArray(subjects)) {
+      const totalGrades = subjects.reduce((a, s) => a + (s.grades ? s.grades.length : 0), 0);
+      cards.push(_card("Données scolaires", {
+        Matières: subjects.length,
+        "Notes totales": totalGrades,
+        "Moy. notes/matière": subjects.length ? (totalGrades / subjects.length).toFixed(1) : "0",
+      }));
+    }
+
+    el.innerHTML = cards.join("");
+  }
+
+  // --- Performance ---
+  function _renderPerfInfo() {
+    const el = document.getElementById("dev-perf-info");
+    if (!el) return;
+    const cards = [];
+
+    if (performance.timing) {
+      const t = performance.timing;
+      const ns = t.navigationStart;
+      cards.push(_card("Navigation Timing", {
+        "Page Load": (t.loadEventEnd - ns) + " ms",
+        "DOM Ready": (t.domContentLoadedEventEnd - ns) + " ms",
+        "DOM Interactive": (t.domInteractive - ns) + " ms",
+        DNS: (t.domainLookupEnd - t.domainLookupStart) + " ms",
+        "TCP Connect": (t.connectEnd - t.connectStart) + " ms",
+        TTFB: (t.responseStart - ns) + " ms",
+        "DOM Parsing": (t.domComplete - t.domInteractive) + " ms",
+      }));
+    }
+
+    if (performance.memory) {
+      const m = performance.memory;
+      const mb = (b) => (b / 1048576).toFixed(1) + " Mo";
+      const pct = ((m.usedJSHeapSize / m.jsHeapSizeLimit) * 100).toFixed(1);
+      cards.push(_card("Mémoire JS", {
+        "Heap utilisé": mb(m.usedJSHeapSize),
+        "Heap total": mb(m.totalJSHeapSize),
+        "Heap limite": mb(m.jsHeapSizeLimit),
+        Utilisation: pct + " %",
+      }));
+    }
+
+    if (performance.getEntriesByType) {
+      const res = performance.getEntriesByType("resource");
+      const totalKo = (res.reduce((a, r) => a + (r.transferSize || 0), 0) / 1024).toFixed(1);
+      const top5 = res.slice().sort((a, b) => b.duration - a.duration).slice(0, 5);
+      const rd = { "Ressources": res.length, "Transfert total": totalKo + " Ko" };
+      top5.forEach((r, i) => {
+        rd["#" + (i + 1) + " " + r.name.split("/").pop().substring(0, 28)] = r.duration.toFixed(0) + " ms";
+      });
+      cards.push(_card("Ressources (top 5 lentes)", rd));
+    }
+
+    let lsBytes = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      lsBytes += (k.length + (localStorage.getItem(k) || "").length) * 2;
+    }
+    cards.push(_card("Stockage local", {
+      "Clés localStorage": localStorage.length,
+      "Taille estimée": (lsBytes / 1024).toFixed(1) + " Ko",
+    }));
+
+    el.innerHTML = cards.join("");
+  }
+
+  // --- Storage inspector ---
+  window.devRefreshStorage = function () {
+    const el = document.getElementById("dev-storage-list");
+    if (!el) return;
+    const search = (document.getElementById("dev-storage-search") || {}).value || "";
+    const filter = search.toLowerCase();
+    let html = "";
+    let count = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (filter && !key.toLowerCase().includes(filter)) continue;
+      const val = localStorage.getItem(key) || "";
+      const size = ((key.length + val.length) * 2 / 1024).toFixed(1);
+      const preview = val.length > 100 ? val.substring(0, 100) + "…" : val;
+      count++;
+      html +=
+        '<div class="dev-storage-item" onclick="devToggleStorageItem(this)">' +
+        '<span class="dev-storage-key">' + _esc(key) + "</span>" +
+        '<span class="dev-storage-size">' + size + " Ko</span>" +
+        '<div class="dev-storage-preview">' + _esc(preview) + "</div>" +
+        '<div class="dev-storage-expanded">' + _esc(val) + "</div>" +
+        "</div>";
+    }
+    if (!html) html = '<div style="color:#6e7681;padding:10px;">Aucune donnée' + (filter ? ' correspondant à "' + _esc(filter) + '"' : '') + '.</div>';
+    el.innerHTML = html;
+  };
+
+  window.devToggleStorageItem = function (el) {
+    const expanded = el.querySelector(".dev-storage-expanded");
+    if (expanded) {
+      expanded.style.display = expanded.style.display === "block" ? "none" : "block";
+    }
+  };
+
+  window.devExportStorage = function () {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      data[k] = localStorage.getItem(k);
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "noteo_localstorage_export.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // ============================================================
+  // PLATFORM SIMULATOR — truly overrides navigator properties
+  // so ALL platform-dependent code reacts as if on that device
+  // ============================================================
+
+  function _overrideNavigator(prop, value) {
+    try {
+      Object.defineProperty(navigator, prop, {
+        get: function () { return value; },
+        configurable: true,
+      });
+    } catch (ex) {
+      // Some browsers prevent override; use writable fallback
+      try { navigator[prop] = value; } catch (_) {}
+    }
+  }
+
+  function _restoreNavigator(prop, realValue) {
+    try {
+      Object.defineProperty(navigator, prop, {
+        get: function () { return realValue; },
+        configurable: true,
+      });
+    } catch (_) {
+      try { navigator[prop] = realValue; } catch (_) {}
+    }
+  }
+
+  function _undoPhoneExperience() {
+    const themeBtn = document.querySelector('button[onclick="cycleTheme()"]');
+    if (themeBtn) themeBtn.style.display = "";
+    const toggleAllBtn = document.querySelector('button[onclick="toggleAllAccordions()"]');
+    if (toggleAllBtn) toggleAllBtn.style.display = "";
+    const headerName = document.getElementById("header-user-name");
+    if (headerName) headerName.classList.remove("hidden");
+    const footer = document.querySelector("footer");
+    if (footer) footer.style.display = "";
+    const tabNav = document.querySelector("nav");
+    if (tabNav) tabNav.style.display = "";
+    document.querySelectorAll(
+      'button[onclick="cycleSemester(-1)"], button[onclick="cycleSemester(1)"], #semester-menu'
+    ).forEach((el) => (el.style.display = ""));
+    const mobileSemLabel = document.getElementById("mobile-semester-label");
+    if (mobileSemLabel) mobileSemLabel.classList.add("hidden");
+  }
+
+  window.devSimulatePlatform = function (plat) {
+    const body = document.body;
+    const html = document.documentElement;
+
+    // 1. Clean slate: remove all simulation classes
+    body.classList.remove("phone-xp", "is-mobile", "is-safari");
+    html.classList.remove("phone-xp");
+    _undoPhoneExperience();
+
+    if (plat === "reset") {
+      _devCurrentPlatform = null;
+
+      // Restore real navigator values
+      _restoreNavigator("userAgent", _realUA);
+      _restoreNavigator("platform", _realPlatform);
+      _restoreNavigator("maxTouchPoints", _realMaxTP);
+
+      // Re-run real detection
+      if (typeof detectPhoneXP === "function") {
+        detectPhoneXP();
+        if (isPhoneXP && typeof applyPhoneExperience === "function") {
+          applyPhoneExperience();
+          if (typeof initScrollToggleButton === "function") initScrollToggleButton();
+        }
+      }
+      // Re-apply real mobile UA check
+      const isMobileReal = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(_realUA)
+        || window.innerWidth < 768;
+      if (isMobileReal) body.classList.add("is-mobile");
+
+      _updateSimBadge();
+      _updatePlatButtons();
+      _renderPlatformStatus();
+      _tryRerender();
+      return;
+    }
+
+    const preset = PLATFORMS[plat];
+    if (!preset) return;
+
+    _devCurrentPlatform = plat;
+
+    // 2. Override navigator properties so any code reading them sees the simulated values
+    _overrideNavigator("userAgent", preset.ua);
+    _overrideNavigator("platform", preset.platform);
+    _overrideNavigator("maxTouchPoints", preset.maxTP);
+
+    // 3. Apply CSS classes
+    preset.classes.forEach((c) => {
+      body.classList.add(c);
+      if (c === "phone-xp") html.classList.add("phone-xp");
+    });
+
+    // 4. Update isPhoneXP global
+    if (typeof window.isPhoneXP !== "undefined") {
+      window.isPhoneXP = preset.classes.includes("phone-xp");
+    }
+
+    // 5. Apply phone experience side-effects if phone/tablet
+    if (preset.classes.includes("phone-xp")) {
+      if (typeof applyPhoneExperience === "function") applyPhoneExperience();
+      if (typeof initScrollToggleButton === "function") initScrollToggleButton();
+    }
+
+    // 6. Safari class → disables backdrop-filter via CSS
+    // (is-safari already added above if in preset.classes)
+
+    _updateSimBadge();
+    _updatePlatButtons();
+    _renderPlatformStatus();
+    _tryRerender();
+  };
+
+  function _tryRerender() {
+    if (typeof renderGrades === "function" && user) {
+      try { renderGrades(); } catch (_) {}
+    }
+  }
+
+  function _updateSimBadge() {
+    const badge = document.getElementById("dev-sim-badge");
+    const sb = document.getElementById("dev-sb-platform");
+    if (_devCurrentPlatform) {
+      const p = PLATFORMS[_devCurrentPlatform];
+      if (badge) {
+        badge.textContent = "SIM: " + (p ? p.label : _devCurrentPlatform);
+        badge.style.display = "";
+      }
+      if (sb) sb.textContent = "Plateforme : " + (p ? p.label : _devCurrentPlatform);
+    } else {
+      if (badge) badge.style.display = "none";
+      if (sb) sb.textContent = "Plateforme : réelle";
+    }
+  }
+
+  function _updatePlatButtons() {
+    document.querySelectorAll(".dev-platform-btn").forEach((btn) => {
+      btn.classList.toggle("active-plat", btn.dataset.plat === _devCurrentPlatform);
+    });
+  }
+
+  function _renderPlatformStatus() {
+    const el = document.getElementById("dev-platform-status");
+    if (!el) return;
+
+    const rows = {
+      "Mode": _devCurrentPlatform ? "Simulé" : "Réel",
+      "Preset": _devCurrentPlatform || "—",
+      "navigator.userAgent": navigator.userAgent.substring(0, 90) + (navigator.userAgent.length > 90 ? "…" : ""),
+      "navigator.platform": navigator.platform,
+      "navigator.maxTouchPoints": navigator.maxTouchPoints,
+      "isPhoneXP": typeof isPhoneXP !== "undefined" ? String(isPhoneXP) : "N/A",
+      "body.is-mobile": document.body.classList.contains("is-mobile") ? "✓" : "✗",
+      "body.phone-xp": document.body.classList.contains("phone-xp") ? "✓" : "✗",
+      "body.is-safari": document.body.classList.contains("is-safari") ? "✓" : "✗",
+      "html.phone-xp": document.documentElement.classList.contains("phone-xp") ? "✓" : "✗",
+      "backdrop-filter": document.body.classList.contains("is-safari") || document.body.classList.contains("phone-xp") ? "✗ Désactivé" : "✓ Actif",
+      "nav visible": document.querySelector("nav") ? (document.querySelector("nav").style.display !== "none" ? "✓" : "✗") : "N/A",
+      "footer visible": document.querySelector("footer") ? (document.querySelector("footer").style.display !== "none" ? "✓" : "✗") : "N/A",
+    };
+
+    let html = "";
+    for (const [k, v] of Object.entries(rows)) {
+      const cls = String(v).startsWith("✓") ? " good" : String(v).startsWith("✗") ? " warn" : "";
+      html +=
+        '<div class="dev-card-row"><span class="dev-card-key">' + _esc(k) +
+        '</span><span class="dev-card-val' + cls + '">' + _esc(String(v)) + "</span></div>";
+    }
+    el.innerHTML = html;
+  }
+
+  // --- Console viewer ---
+  function _renderConsoleLogs() {
+    const el = document.getElementById("dev-console-output");
+    if (!el) return;
+    const sE = document.getElementById("dev-console-errors");
+    const sW = document.getElementById("dev-console-warns");
+    const sL = document.getElementById("dev-console-logs");
+    const showE = sE ? sE.checked : true;
+    const showW = sW ? sW.checked : true;
+    const showL = sL ? sL.checked : true;
+
+    let html = "";
+    let count = 0;
+    for (const entry of _devConsoleLogs) {
+      if (entry.type === "log" && !showL) continue;
+      if (entry.type === "warn" && !showW) continue;
+      if (entry.type === "error" && !showE) continue;
+      count++;
+      html +=
+        '<div class="dev-log-entry log-type-' + entry.type + '">' +
+        '<span class="log-time">' + _esc(entry.time) + "</span>" +
+        '<span class="log-msg">' + _esc(entry.msg) + "</span></div>";
+    }
+    if (!html) html = '<div style="color:#30363d;padding:10px;">Aucun log capturé.</div>';
+    el.innerHTML = html;
+    el.scrollTop = el.scrollHeight;
+
+    const badge = document.getElementById("dev-console-count");
+    if (badge) badge.textContent = count + " entrée" + (count !== 1 ? "s" : "");
+  }
+
+  window.devClearConsole = function () {
+    _devConsoleLogs = [];
+    _renderConsoleLogs();
+  };
+
+  window.devFilterConsole = function () {
+    _renderConsoleLogs();
+  };
+
+  // --- Helpers ---
+  function _card(title, data) {
+    let html = '<div class="dev-card"><div class="dev-card-title">' + _esc(title) + "</div>";
+    for (const [k, v] of Object.entries(data)) {
+      html +=
+        '<div class="dev-card-row"><span class="dev-card-key">' + _esc(k) +
+        '</span><span class="dev-card-val">' + _esc(String(v)) + "</span></div>";
+    }
+    return html + "</div>";
+  }
+
+  function _esc(str) {
+    const d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
+  }
+})();
