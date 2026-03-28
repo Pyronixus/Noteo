@@ -363,10 +363,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Phone switch button -->
-                <div class="phone-switch-btn mt-8 text-center phone-xp:block hidden">
-                    <button onclick="switchTab('charts')" class="glass-card px-8 py-4 rounded-2xl font-bold text-[var(--text-main)] hover:scale-105 transition-all">Voir Graphiques</button>
-                </div>
             </section>
 
             <!-- Tab: Analyses (Charts - NEW) -->
@@ -394,16 +390,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- Phone switch button -->
-                <div class="phone-switch-btn mt-8 text-center phone-xp:block hidden">
-                    <button onclick="switchTab('notes')" class="glass-card px-8 py-4 rounded-2xl font-bold text-[var(--text-main)] hover:scale-105 transition-all">Voie Notes</button>
-                </div>
             </section>
         </main>
-
-        <button id="scroll-toggle-btn" class="fixed bottom-6 right-4 z-50 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-500 transition-all hidden" title="Aller en haut / bas">
-            <svg id="scroll-toggle-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path id="scroll-toggle-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-        </button>
 
         <footer class="mt-auto p-3 sm:p-4 text-center text-[var(--text-muted)] text-xs sm:text-sm">
             <div class="flex items-center justify-center flex-wrap gap-3 sm:gap-6">
@@ -414,6 +402,27 @@
                 <button onclick="openHelpModal()" class="hover:text-green-500 transition-colors">Aide</button>
             </div>
         </footer>
+
+        <!-- Mobile Bottom Navigation Bar (≤639px only) -->
+        <nav id="mobile-nav-bar" aria-label="Navigation mobile">
+            <button onclick="switchTab('notes')" id="mobile-btn-notes" class="mobile-nav-item active" aria-label="Notes">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <span>Notes</span>
+            </button>
+            <div class="mobile-nav-semester">
+                <button onclick="cycleSemester(-1)" aria-label="Période précédente" class="mobile-nav-sem-arrow">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <span id="mobile-nav-semester-name" class="mobile-nav-sem-name">—</span>
+                <button onclick="cycleSemester(1)" aria-label="Période suivante" class="mobile-nav-sem-arrow">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+            <button onclick="switchTab('charts')" id="mobile-btn-charts" class="mobile-nav-item" aria-label="Graphiques">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span>Graphiques</span>
+            </button>
+        </nav>
     </div>
 
     <!-- Modal: Switch User -->
@@ -839,33 +848,6 @@
         </div>
     </div>
 
-    <!-- Modal: Mobile Mode Selection -->
-    <div id="mobile-mode-modal" class="modal-overlay">
-        <div class="modal-content glass-card p-6 rounded-[2.5rem] w-full max-w-md relative text-center">
-            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-2xl font-black text-[var(--text-main)] mb-4">Mode d'utilisation</h2>
-            <p class="text-[var(--text-muted)] text-sm mb-6">Choisissez comment vous souhaitez utiliser Noteo sur mobile. Vous pourrez changer cela plus tard dans les paramètres.</p>
-            <div class="flex flex-col gap-3">
-                <button onclick="setMobileMode('editing')" class="flex-1 py-4 px-6 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-all text-left flex items-center gap-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    <div>
-                        <div class="font-bold">Édition complète</div>
-                        <div class="text-sm opacity-90">Ajouter et modifier des matières et notes</div>
-                    </div>
-                </button>
-                <button onclick="setMobileMode('view')" class="flex-1 py-4 px-6 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-500 transition-all text-left flex items-center gap-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    <div>
-                        <div class="font-bold">Visualisation des notes</div>
-                        <div class="text-sm opacity-90">Consulter uniquement les notes existantes</div>
-                    </div>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal: Version -->
     <div id="version-modal" class="modal-overlay">
         <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-lg relative">
@@ -879,7 +861,7 @@
             <div class="space-y-4">
                 <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                     <h3 class="text-lg font-bold text-[var(--text-main)] mb-2">Version actuelle</h3>
-                    <p class="text-[var(--text-muted)]">2.2 (mode dev avancé et simulation d'appareils)</p>
+                    <p class="text-[var(--text-muted)]">2.3 (macOS, performances maximales et correctifs)</p>
                 </div>
                 <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                     <h3 class="text-lg font-bold text-[var(--text-main)] mb-4">Changelog</h3>

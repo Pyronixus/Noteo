@@ -99,7 +99,7 @@
 
         <!-- Footer -->
         <footer class="mt-12 p-6 text-center text-[var(--text-muted)] text-sm border-t border-[var(--border)]">
-            <p>Noteo © 2024 - Créé par <a href="https://github.com/Pyronixus" class="hover:text-purple-500 transition-colors font-bold">Pyro</a></p>
+            <p>Noteo © 2026 - Créé par <a href="https://github.com/Pyronixus" class="hover:text-purple-500 transition-colors font-bold">Pyro</a></p>
         </footer>
     </div>
 
@@ -113,12 +113,58 @@
     <script>
         const versionsData = [
             {
+                number: "2.3",
+                type: "important",
+                color: "indigo",
+                label: "Mise à jour importante",
+                icon: "⭐",
+                current: true,
+                content: `
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-indigo-500 mb-3">🍎 Support macOS Natif</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Rendu macOS Optimisé</strong> - Détection automatique de macOS et remplacement du backdrop-filter (non supporté) par des dégradés solides multi-couches</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Thème Clair & Sombre</strong> - Overrides CSS complets pour une apparence premium sur tous les navigateurs macOS</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Ombres Riches</strong> - Box-shadows multicouches en remplacement du flou pour une profondeur visuelle équivalente</span></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-indigo-500 mb-3">⚡ Performances Maximales</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Chart.js Chargé à la Demande</strong> - La librairie graphique n'est téléchargée que quand l'onglet Graphiques est ouvert</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>DOM Cache Étendu</strong> - 19 éléments DOM mis en cache pour éviter les lookups répétés</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>getProfiles() Centralisé</strong> - Suppression de 6 scans redondants du localStorage en un seul helper optimisé</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Rendu Historique Optimisé</strong> - Itération inverse directe sans <code>.reverse()</code> (zéro allocation supplémentaire)</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Calcul des Tags O(N+M)</strong> - Pré-calcul des comptages de tags remplace le filtre imbriqué O(N×M)</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Tri CustomTag Optimisé</strong> - <code>.some()</code> avec court-circuit remplace <code>.map().includes()</code></span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Script Différé</strong> - Attribut <code>defer</code> sur script.js + préchargement CSS pour un premier rendu plus rapide</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Scroll Passif</strong> - Listener scroll avec <code>passive: true</code>, <code>will-change</code> retiré des éléments non-animés</span></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-indigo-500 mb-3">📱 Responsive Complet</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>6 Breakpoints CSS</strong> - Adaptation parfaite de 480px à 1536px sur tous les écrans</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Classes Responsives HTML</strong> - Tous les composants adaptés mobile/tablette/desktop</span></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-indigo-500 mb-3">🔧 Corrections & Nettoyage</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Correction Critique</strong> - Du code de <code>switchTab()</code> s'était glissé dans <code>importCloudAccount()</code>, causant une erreur à l'import</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Modal Pyro</strong> - La fonction <code>openPyroModal()</code> manquante est ajoutée</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Sécurité</strong> - Suppression du <code>console.info</code> qui exposait le code PIN de récupération dans la console</span></li>
+                            <li class="flex gap-3"><span class="text-indigo-500 font-bold">→</span><span><strong>Code Mort Retiré</strong> - Suppression de <code>notify()</code>, <code>initEmailJS()</code> stub et la modal de sélection du mode mobile</span></li>
+                        </ul>
+                    </div>
+                `
+            },
+            {
                 number: "2.2",
                 type: "important",
                 color: "cyan",
                 label: "Mise à jour importante",
                 icon: "⭐",
-                current: true,
                 content: `
                     <div class="space-y-3 mb-6 text-[var(--text-main)]">
                         <h4 class="font-bold text-lg text-cyan-500 mb-3">🛠️ Mode Développeur Avancé</h4>

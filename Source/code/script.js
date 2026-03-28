@@ -171,11 +171,6 @@ function updateDynamicStyles() {
     .join("\n");
 }
 
-// --- NOTIFICATIONS ---
-function notify(msg, type = "success") {
-  // Les notifications ont été désactivées.
-}
-
 // --- CORE APP ---
 let user = null;
 let subjects = [];
@@ -214,7 +209,6 @@ const defaultSettings = {
   tagColors: {},
   manualGeneralAverage: null,
   autoReload: false,
-  mobileMode: "editing", // "editing" or "view"
   hideAddSubject: false,
 };
 let appSettings = { ...defaultSettings };
@@ -412,8 +406,6 @@ window.onload = () => {
 
   // Cache important DOM elements for faster access
   cacheDom();
-  // Initialize EmailJS for PIN recovery (lazy — loads on demand)
-  initEmailJS();
 
   // Defer non-critical tasks to idle time
   const deferTask = window.requestIdleCallback || ((cb) => setTimeout(cb, 100));
@@ -422,14 +414,12 @@ window.onload = () => {
     try {
       if (detectPhoneXP()) {
         applyPhoneExperience();
-        initScrollToggleButton();
       }
     } catch (e) {
       console.warn("Phone XP detection error", e);
     }
     // Show warnings and cloud import prompt if needed
     maybeShowPhoneWarning();
-    maybeShowMobileModeModal();
     checkCloudImportFromUrl();
   });
 
@@ -722,7 +712,7 @@ function showApp(silent = false) {
   updateSemesterUI();
   applyMainCardState();
   updateSortButtonUI();
-  applyMobileMode(); // Apply mobile mode settings
+  applySetting("hideAddSubject", appSettings.hideAddSubject);
 }
 
 // --- NOUVEAUX MENUS (MODALS) ---
@@ -783,10 +773,6 @@ const EMAILJS_CONFIG = {
 let recoveryState = { timerId: null, resendCooldown: 0 };
 
 let _emailJSLoaded = false;
-function initEmailJS() {
-  // EmailJS is now lazy-loaded on first use via loadEmailJS()
-  // This function is kept for backward compatibility
-}
 function loadEmailJS() {
   if (_emailJSLoaded) return Promise.resolve();
   return new Promise((resolve, reject) => {
@@ -897,7 +883,7 @@ async function sendRecoveryCode() {
   }
 
   if (!emailSent) {
-    console.info("[Noteo] Recovery code (EmailJS not configured):", recoveryCode);
+    // No email provider configured — recovery code was shown in modal
   }
 
   sendBtn.textContent = "Code envoyé ✓";
@@ -1167,6 +1153,11 @@ function stripHtml(html) {
   return tmp.textContent || "";
 }
 
+// Pre-compute lowercased searchable content for each article (avoids DOM parse on every keystroke)
+helpArticles.forEach((a) => {
+  a._searchText = (a.title + " " + stripHtml(a.content)).toLowerCase();
+});
+
 function renderHelpCards(query) {
   const q = (query || "").trim().toLowerCase();
   const container = document.getElementById("help-items");
@@ -1174,7 +1165,7 @@ function renderHelpCards(query) {
   container.innerHTML = "";
   let visible = 0;
   helpArticles.forEach((article, i) => {
-    const match = !q || article.title.toLowerCase().includes(q) || stripHtml(article.content).toLowerCase().includes(q);
+    const match = !q || article._searchText.includes(q);
     if (!match) return;
     visible++;
     const card = document.createElement("div");
@@ -1350,6 +1341,12 @@ function openOpenSourceModal() {
   document.getElementById("open-source-modal").classList.add("open");
 }
 
+function openPyroModal() {
+  playSound("swoosh");
+  document.body.classList.add("modal-open");
+  document.getElementById("pyro-modal").classList.add("open");
+}
+
 function openDuplicateSubjectModal(data) {
   pendingSubjectData = data;
   document.getElementById("duplicate-subject-name").textContent = data.name;
@@ -1501,14 +1498,12 @@ document.addEventListener("click", function (e) {
 
 function switchSettingsTab(tabName) {
   playSound("click");
-  document
-    .querySelectorAll(".settings-tab-content")
+  (DOM_CACHE.settingsTabContents || document.querySelectorAll(".settings-tab-content"))
     .forEach((c) => c.classList.add("hidden"));
   document
     .getElementById(`settings-tab-content-${tabName}`)
     .classList.remove("hidden");
-  document
-    .querySelectorAll(".settings-tab-btn")
+  (DOM_CACHE.settingsTabBtns || document.querySelectorAll(".settings-tab-btn"))
     .forEach((b) => b.classList.remove("active"));
   document
     .getElementById(`settings-tab-btn-${tabName}`)
@@ -1603,7 +1598,7 @@ function renderSettingsDataList() {
     const subDiv = document.createElement("div");
     subDiv.className =
       "bg-[var(--input-bg)] rounded-2xl border border-[var(--border)] overflow-hidden";
-    let inner = `<div class="p-4 font-black flex flex-col md:flex-row md:items-center justify-between items-start gap-2" style="background-color: ${hex2rgba(sub.color, 0.1)};">
+    const parts = [`<div class="p-4 font-black flex flex-col md:flex-row md:items-center justify-between items-start gap-2" style="background-color: ${hex2rgba(sub.color, 0.1)};">
                                 <div class="flex items-center gap-3 w-full md:w-auto">
                                     <input type="color" value="${sub.color}" onchange="changeSubjectColor(${sub.id}, this.value)" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent">
                                     <span class="flex-grow font-bold" style="color:${sub.color}">${sub.name}</span>
@@ -1612,9 +1607,9 @@ function renderSettingsDataList() {
                                     <input type="text" value="${Array.isArray(sub.tags) ? sub.tags.join(", ") : ""}" onchange="updateSubjectTags(${sub.id}, this.value)" placeholder="Tags (séparés par des virgules)" class="px-3 py-2 rounded-xl border border-[var(--border)] w-full md:w-64 bg-[var(--bg-body)]">
                                     <span class="text-xs bg-white/50 px-2 py-1 rounded-lg" style="color:${sub.color}">${sub.history.length} notes</span>
                                 </div>
-                             </div><div class="p-2 space-y-1">`;
+                             </div><div class="p-2 space-y-1">`];
     sub.history.forEach((n) => {
-      inner += `
+      parts.push(`
                         <div class="flex justify-between items-center p-2 hover:bg-[var(--bg-card)] rounded-xl group transition-all text-left">
                             <span class="font-bold text-sm flex-grow">
                                 ${n.name ? `<span class="block text-xs text-indigo-500 mb-0.5">${n.name}</span>` : ""}
@@ -1624,10 +1619,10 @@ function renderSettingsDataList() {
                             <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onclick="editNote(${sub.id}, ${n.id})" class="p-1.5 text-indigo-500 hover:bg-indigo-500/10 rounded-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button><button onclick="deleteSpecificNote(${sub.id}, ${n.id})" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                             </div>
-                        </div>`;
+                        </div>`);
     });
-    inner += `</div>`;
-    subDiv.innerHTML = inner;
+    parts.push(`</div>`);
+    subDiv.innerHTML = parts.join("");
     notesList.appendChild(subDiv);
   });
 }
@@ -2045,7 +2040,6 @@ function cacheDom() {
   DOM_CACHE.modalOverlays = document.querySelectorAll(".modal-overlay");
   DOM_CACHE.tabCharts = document.getElementById("tab-charts");
   DOM_CACHE.chartsGrid = document.getElementById("charts-grid");
-  DOM_CACHE.moyenneGen = document.getElementById("moyenne-gen");
   DOM_CACHE.mainCard = document.getElementById("main-card");
   DOM_CACHE.calcForm = document.getElementById("calc-form");
   DOM_CACHE.loginScreen = document.getElementById("login-screen");
@@ -2056,6 +2050,8 @@ function cacheDom() {
   DOM_CACHE.noChartsMsg = document.getElementById("no-charts-msg");
   DOM_CACHE.sortOrderBtn = document.getElementById("sort-order-btn");
   DOM_CACHE.tabNotes = document.getElementById("tab-notes");
+  DOM_CACHE.settingsTabContents = document.querySelectorAll(".settings-tab-content");
+  DOM_CACHE.settingsTabBtns = document.querySelectorAll(".settings-tab-btn");
 }
 
 // Tag cache to avoid recomputing tags repeatedly during sorting/rendering
@@ -2067,7 +2063,6 @@ function markTagCacheDirty() {
 function toggleSortOrder() {
   const newOrder = appSettings.sortOrder === "asc" ? "desc" : "asc";
   updateSetting("sortOrder", newOrder);
-  updateSortButtonUI();
   playSound("click");
 }
 
@@ -2184,8 +2179,6 @@ function getAllTags() {
 
 function setSortCriterion(value) {
   updateSetting("defaultSort", value);
-  updateSortButtonUI();
-  renderGrades();
   playSound("click");
 }
 
@@ -3491,7 +3484,8 @@ function updateSemesterUI() {
 
 function updateMobileSemesterLabel() {
   const el = document.getElementById("mobile-semester-label");
-  if (!el) return;
+  const navEl = document.getElementById("mobile-nav-semester-name");
+  if (!el && !navEl) return;
   const currentSemester =
     academicData && Array.isArray(academicData.semesters)
       ? academicData.semesters.find(
@@ -3499,41 +3493,9 @@ function updateMobileSemesterLabel() {
         )
       : null;
   if (currentSemester) {
-    el.textContent = currentSemester.name;
+    if (el) el.textContent = currentSemester.name;
+    if (navEl) navEl.textContent = currentSemester.name;
   }
-}
-
-function initScrollToggleButton() {
-  const btn = document.getElementById("scroll-toggle-btn");
-  const iconPath = document.getElementById("scroll-toggle-path");
-  if (!btn || !iconPath) return;
-
-  const update = () => {
-    if (!isPhoneXP) {
-      btn.classList.add("hidden");
-      return;
-    }
-    const atTop = window.scrollY < 120;
-    btn.classList.remove("hidden");
-    if (atTop) {
-      iconPath.setAttribute("d", "M5 9l7 7 7-7");
-      btn.title = "Aller en bas";
-    } else {
-      iconPath.setAttribute("d", "M19 15l-7-7-7 7");
-      btn.title = "Aller en haut";
-    }
-  };
-
-  btn.addEventListener("click", () => {
-    if (window.scrollY < 120) {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  });
-
-  window.addEventListener("scroll", update, { passive: true });
-  update();
 }
 
 function openPhoneWarningModal() {
@@ -3565,60 +3527,6 @@ function openSafariWarningModal() {
 function dismissSafariWarning() {
   localStorage.setItem("noteo_safari_warning_dismissed", "1");
   closeModals();
-}
-
-// --- MOBILE MODE MANAGEMENT ---
-// REMINDER: Always consider mobile mode when adding new UI elements!
-// Check applyMobileMode() and maybeShowMobileModeModal() for mobile-specific behavior
-
-function maybeShowMobileModeModal() {
-  if (!document.body.classList.contains("is-mobile")) return;
-  if (localStorage.getItem("noteo_mobile_mode_selected")) return;
-  openMobileModeModal();
-}
-
-function openMobileModeModal() {
-  playSound("swoosh");
-  document.body.classList.add("modal-open");
-  document.getElementById("mobile-mode-modal").classList.add("open");
-}
-
-function setMobileMode(mode) {
-  localStorage.setItem("noteo_mobile_mode_selected", "1");
-  localStorage.setItem("noteo_mobile_mode", mode);
-  appSettings.mobileMode = mode;
-  // Automatically set hideAddSubject based on mode
-  appSettings.hideAddSubject = mode === "view";
-  saveSettings();
-  applyMobileMode();
-  closeModals();
-  // Show success message
-  showToast(
-    "Mode " + (mode === "view" ? "visualisation" : "édition") + " activé",
-    "success",
-  );
-}
-
-function applyMobileMode() {
-  const mode = appSettings.mobileMode || "editing";
-  const hideAddSubject = appSettings.hideAddSubject || false;
-  const mainCard = document.getElementById("main-card");
-  const cloudImportSection = document.getElementById("cloud-import-section");
-
-  // Hide main card if in view mode OR if hideAddSubject is enabled
-  const shouldHideMainCard = mode === "view" || hideAddSubject;
-  if (mainCard) mainCard.style.display = shouldHideMainCard ? "none" : "block";
-
-  // Show cloud import if in view mode and not already filled
-  if (
-    mode === "view" &&
-    cloudImportSection &&
-    !localStorage.getItem("noteo_cloud_link")
-  ) {
-    cloudImportSection.style.display = "block";
-  } else if (cloudImportSection) {
-    cloudImportSection.style.display = "none";
-  }
 }
 
 function importCloudAccount() {
@@ -3659,20 +3567,7 @@ function importCloudAccount() {
 
   // Hide the import section
   document.getElementById("cloud-import-section").style.display = "none";
-  playSound("click");
-  document
-    .getElementById("tab-notes")
-    .classList.toggle("hidden", tab !== "notes");
-  document
-    .getElementById("tab-charts")
-    .classList.toggle("hidden", tab !== "charts");
-  document
-    .getElementById("btn-notes")
-    .classList.toggle("active", tab === "notes");
-  document
-    .getElementById("btn-charts")
-    .classList.toggle("active", tab === "charts");
-  if (tab === "charts") renderChartControls();
+  playSound("success");
 }
 
 // --- Lazy Chart.js loader ---
@@ -3699,6 +3594,11 @@ function switchTab(tab) {
   tabCharts.classList.toggle("hidden", tab !== "charts");
   document.getElementById("btn-notes").classList.toggle("active", tab === "notes");
   document.getElementById("btn-charts").classList.toggle("active", tab === "charts");
+  // Sync mobile bottom nav active states
+  const mobileNotes = document.getElementById("mobile-btn-notes");
+  const mobileCharts = document.getElementById("mobile-btn-charts");
+  if (mobileNotes) mobileNotes.classList.toggle("active", tab === "notes");
+  if (mobileCharts) mobileCharts.classList.toggle("active", tab === "charts");
   if (tab === "charts") {
     ensureChartJs().then(() => renderChartControls());
   }
@@ -5268,7 +5168,6 @@ window.addEventListener("keydown", (e) => {
         detectPhoneXP();
         if (isPhoneXP && typeof applyPhoneExperience === "function") {
           applyPhoneExperience();
-          if (typeof initScrollToggleButton === "function") initScrollToggleButton();
         }
       }
       // Re-apply real mobile UA check
@@ -5307,7 +5206,6 @@ window.addEventListener("keydown", (e) => {
     // 5. Apply phone experience side-effects if phone/tablet
     if (preset.classes.includes("phone-xp")) {
       if (typeof applyPhoneExperience === "function") applyPhoneExperience();
-      if (typeof initScrollToggleButton === "function") initScrollToggleButton();
     }
 
     // 6. Safari class → disables backdrop-filter via CSS

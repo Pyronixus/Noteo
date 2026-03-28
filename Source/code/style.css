@@ -832,6 +832,162 @@ html { scroll-behavior: smooth; }
   * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
+/* ====================================================
+   MOBILE BOTTOM NAVIGATION BAR (≤639px only)
+   Replaces the header nav on small screens with a
+   polished fixed bottom bar: Notes | Semestre | Charts
+   ==================================================== */
+
+#mobile-nav-bar {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  /* Show & style the bar */
+  #mobile-nav-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    min-height: 3.5rem;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--bg-card);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border-top: 1px solid var(--card-border);
+    box-shadow: 0 -4px 24px -4px rgba(0, 0, 0, 0.08), 0 -1px 0 var(--card-border);
+    align-items: stretch;
+  }
+
+  /* Push main content above the fixed bar */
+  main {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Push toasts above the bar */
+  #toast-container {
+    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+
+  /* Hide the header nav (bottom bar takes its role) */
+  header nav {
+    display: none !important;
+  }
+
+  /* Header: single clean row with no wrapping */
+  header .max-w-7xl {
+    flex-wrap: nowrap !important;
+  }
+
+  /* Hide footer (links accessible via settings/help) */
+  footer {
+    display: none !important;
+  }
+
+  /* Suppress old phone-switch-btn completely */
+  .phone-switch-btn {
+    display: none !important;
+  }
+
+  /* ---- Tab buttons (Notes / Charts) ---- */
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--text-muted);
+    font-size: 0.58rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0.5rem 0.25rem;
+    transition: color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--primary);
+  }
+
+  .mobile-nav-item svg {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mobile-nav-item.active svg {
+    transform: translateY(-2px) scale(1.15);
+  }
+
+  /* Small active dot underneath active tab icon */
+  .mobile-nav-item.active::after {
+    content: "";
+    display: block;
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-top: 1px;
+  }
+
+  /* ---- Semester selector section ---- */
+  .mobile-nav-semester {
+    flex: 1.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    min-height: 3.5rem;
+    padding: 0 0.125rem;
+  }
+
+  .mobile-nav-sem-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 100%;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 0.4rem;
+  }
+
+  .mobile-nav-sem-arrow:active {
+    color: var(--primary);
+    background: var(--input-bg);
+  }
+
+  .mobile-nav-sem-name {
+    flex: 1;
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-main);
+    padding: 0 0.125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 4.5rem;
+  }
+}
+
+/* Dark theme: stronger shadow for bottom nav */
+@media (max-width: 639px) {
+  .dark-theme #mobile-nav-bar {
+    box-shadow: 0 -4px 24px -4px rgba(0, 0, 0, 0.4), 0 -1px 0 var(--card-border);
+  }
+}
+
 /* ====== DEV TERMINAL ====== */
 #dev-terminal {
   position: fixed;
