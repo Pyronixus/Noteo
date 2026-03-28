@@ -903,6 +903,22 @@ function openHelpModal() {
   playSound("swoosh");
   document.body.classList.add("modal-open");
   document.getElementById("help-modal").classList.add("open");
+  // Reset search bar every time the modal is opened
+  const searchInput = document.getElementById("help-search");
+  if (searchInput) { searchInput.value = ""; filterHelp(""); }
+}
+
+function filterHelp(query) {
+  const q = (query || "").trim().toLowerCase();
+  const items = document.querySelectorAll("#help-items .help-item");
+  let visible = 0;
+  items.forEach(item => {
+    const match = !q || item.textContent.toLowerCase().includes(q);
+    item.style.display = match ? "" : "none";
+    if (match) visible++;
+  });
+  const noResults = document.getElementById("help-no-results");
+  if (noResults) noResults.classList.toggle("hidden", visible > 0);
 }
 
 function openLegalModal() {
