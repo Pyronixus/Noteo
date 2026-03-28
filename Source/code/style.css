@@ -44,7 +44,7 @@
             position: fixed; inset: 0; z-index: 9999;
             background: var(--bg-body);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.8s ease, visibility 0.8s;
+            transition: opacity 0.4s ease, visibility 0.4s;
         }
         .pulse-logo { animation: pulseGlow 2s infinite alternate ease-in-out; will-change: transform; }
         @keyframes pulseGlow {
@@ -56,6 +56,7 @@
         .blobs-container {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             overflow: hidden; z-index: -1; pointer-events: none;
+            contain: strict;
         }
         .blob {
             position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.6;
@@ -79,6 +80,8 @@
             border: 1px solid var(--card-border); box-shadow: var(--shadow);
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
             contain: layout style;
+            content-visibility: auto;
+            contain-intrinsic-size: auto 200px;
         }
         .glass-card:hover { transform: translateY(-2px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 0 15px rgba(255, 255, 255, 0.5) inset; }
         .dark-theme .glass-card:hover { box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.03) inset; }
@@ -212,6 +215,7 @@
             }
             .blob {
                 animation-play-state: paused;
+                will-change: auto;
             }
         }
     .pin-btn { height: 4.5rem; font-size: 1.5rem; font-weight: 800; border-radius: 1.5rem; background: var(--input-bg); border: 1px solid var(--border); transition: all 0.2s; }
@@ -360,7 +364,76 @@ body.modal-open {
   font-size: 1.1rem;
 }
 
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   - xs: max-width 480px (petits téléphones)
+   - sm: max-width 640px (téléphones)
+   - md: max-width 768px (tablettes portrait)
+   - lg: max-width 1024px (tablettes paysage / petit laptop)
+   - xl: min-width 1280px (grands écrans)
+   ============================================ */
+
+/* --- GRAND ÉCRAN (xl: 1280px+) --- */
+@media (min-width: 1280px) {
+  main { max-width: 80rem; }
+  #charts-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* --- TABLETTES PAYSAGE / PETIT LAPTOP (max-width: 1024px) --- */
+@media (max-width: 1024px) {
+  header .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
+  main { padding-left: 1rem; padding-right: 1rem; }
+  #charts-grid { grid-template-columns: 1fr; }
+  .settings-tab-btn { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+}
+
+/* --- TABLETTES PORTRAIT (max-width: 768px) --- */
+@media (max-width: 768px) {
+  header { height: auto !important; min-height: 3.5rem; }
+  header .max-w-7xl {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+  header nav { order: 3; width: 100%; justify-content: center; }
+  header nav .tab-btn { flex: 1; text-align: center; padding: 0.5rem 0.75rem; font-size: 0.7rem; }
+
+  main { padding: 0.75rem; padding-top: 1rem; }
+  main .py-12 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+  .glass-card { border-radius: 1.5rem; }
+  #main-card { padding: 1.25rem !important; border-radius: 1.5rem; }
+  #main-card .rounded-\[2\.5rem\] { border-radius: 1.25rem; }
+
+  .modal-content {
+    margin: 0.75rem;
+    max-width: calc(100vw - 1.5rem);
+    max-height: 90vh;
+    border-radius: 1.5rem !important;
+    padding: 1.25rem !important;
+  }
+  .modal-overlay { padding: 0.5rem; align-items: center; }
+
+  /* Paramètres tabs scrollables */
+  #settings-modal .flex.border-b { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  #settings-modal .flex.border-b::-webkit-scrollbar { display: none; }
+  .settings-tab-btn { white-space: nowrap; flex-shrink: 0; padding: 0.5rem 0.75rem; font-size: 0.75rem; }
+
+  footer .flex { flex-wrap: wrap; gap: 0.5rem; }
+
+  /* Charts sidebar empilée */
+  #tab-charts .lg\:w-96 { width: 100%; position: static; }
+  #tab-charts .lg\:sticky { position: static; }
+}
+
+/* --- TÉLÉPHONES (max-width: 640px) --- */
 @media (max-width: 640px) {
+  /* Smaller blobs on mobile for better GPU performance */
+  .blob { filter: blur(50px); opacity: 0.4; }
+  .blob-1 { width: 40vw; height: 40vw; }
+  .blob-2 { width: 35vw; height: 35vw; }
+  .blob-3 { width: 30vw; height: 30vw; }
+
   #toast-container {
     bottom: 1rem;
     right: 1rem;
@@ -370,59 +443,174 @@ body.modal-open {
     max-width: 100%;
   }
 
-  /* Améliorations ergonomiques pour mobile */
   .glass-card {
-    margin: 0.5rem;
+    margin: 0.25rem 0;
+    border-radius: 1.25rem;
   }
 
-  /* Boutons plus grands et faciles à toucher */
+  /* Touch targets Apple/Android minimum 44px */
   button, .btn, input[type="button"], input[type="submit"] {
     min-height: 44px;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
   }
 
-  /* Inputs plus grands */
   input, select, textarea {
     font-size: 1rem;
-    padding: 0.75rem;
     min-height: 44px;
   }
 
-  /* Espacement amélioré */
   .modal-content {
-    margin: 1rem;
-    max-width: calc(100vw - 2rem);
+    margin: 0.5rem;
+    max-width: calc(100vw - 1rem);
+    max-height: 92vh;
+    padding: 1rem !important;
+    border-radius: 1.25rem !important;
   }
+  .modal-overlay { padding: 0.25rem; }
 
-  /* Navigation plus accessible */
   .tab-btn {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    margin: 0.25rem;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
   }
 
-  /* Cards plus espacées */
-  .subject-card, .glass-card {
-    margin-bottom: 1rem;
-  }
-
-  /* Header plus compact */
   header {
-    padding: 1rem 0.5rem;
+    height: auto !important;
+    min-height: 3rem;
+    padding: 0.5rem;
+  }
+  header .max-w-7xl {
+    padding: 0 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  header nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+  header nav .tab-btn {
+    flex: 1;
+    text-align: center;
   }
 
-  /* Liste des matières plus espacée */
-  .subjects-list {
-    gap: 0.75rem;
+  /* Header buttons plus compacts */
+  header .w-12.h-12, header .h-12 {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
   }
+  header .w-10.h-10 { width: 2rem !important; height: 2rem !important; }
+  header .rounded-2xl { border-radius: 0.75rem; }
 
-  /* Boutons d'action principaux plus visibles */
-  .pin-btn {
-    height: 3.5rem;
-    font-size: 1.25rem;
-    margin: 0.5rem 0;
+  /* Login screen */
+  #login-screen .glass-card { padding: 2rem 1.25rem; border-radius: 1.5rem; }
+  #login-screen .w-20.h-20 { width: 3.5rem; height: 3.5rem; border-radius: 1rem; }
+  #login-screen .text-3xl { font-size: 1.5rem; }
+
+  /* User selection */
+  #user-selection-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1rem; }
+  #user-selection-screen h1 { font-size: 1.75rem; }
+  #user-selection-screen .text-lg { font-size: 0.9rem; }
+
+  /* Main card form */
+  #main-card { padding: 1rem !important; }
+  #main-card h2 { font-size: 1.25rem; }
+  #calc-form .text-4xl { font-size: 2rem; }
+  #calc-form .text-xl { font-size: 1rem; }
+  .fraction-bar { width: 50%; }
+  .fraction-input-container { padding: 0.5rem 0; }
+  #calc-form .md\:w-32 { width: 100%; height: 3.5rem; }
+  #calc-form .md\:h-32 { height: 3.5rem; }
+
+  /* Sidebar des graphiques */
+  #tab-charts > div { flex-direction: column; }
+  #tab-charts .lg\:w-96 { width: 100%; }
+  
+  /* Grades actions */
+  #grades-actions { flex-wrap: wrap; gap: 0.5rem; }
+
+  /* Footer */
+  footer .flex { flex-direction: column; gap: 0.25rem; font-size: 0.75rem; }
+
+  /* Settings modal */
+  #settings-modal .modal-content { max-width: calc(100vw - 0.5rem); }
+  .settings-tab-btn { padding: 0.4rem 0.5rem; font-size: 0.7rem; }
+
+  /* PIN modal */
+  #pin-modal .grid-cols-3 { gap: 0.5rem; }
+  .pin-btn { height: 3.5rem; font-size: 1.25rem; border-radius: 1rem; }
+
+  /* Semester selector caché, label mobile visible */
+  #mobile-semester-label { display: flex !important; }
+
+  /* Scroll toggle button */
+  #scroll-toggle-btn { bottom: 1rem; right: 1rem; width: 2.75rem; height: 2.75rem; }
+
+  /* Changelog / legal modals */
+  #changelog-modal .modal-content,
+  #legal-modal .modal-content { max-height: 85vh; }
+  #changelog-modal article { padding: 1rem; }
+}
+
+/* --- PETITS TÉLÉPHONES (max-width: 480px) --- */
+@media (max-width: 480px) {
+  body { font-size: 14px; }
+
+  header .text-2xl { font-size: 1rem !important; }
+  header .w-10.h-10 { display: none; }
+
+  #login-screen .glass-card { padding: 1.5rem 1rem; }
+  #login-screen .text-3xl { font-size: 1.25rem; }
+  #login-screen .w-20.h-20 { width: 3rem; height: 3rem; }
+
+  #user-selection-grid { grid-template-columns: 1fr !important; gap: 0.75rem; }
+
+  #main-card h2 { font-size: 1.1rem; }
+  #calc-form .text-4xl { font-size: 1.5rem; }
+
+  .modal-content {
+    margin: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
+    padding: 0.75rem !important;
   }
+  .modal-content h2 { font-size: 1.25rem; }
+  .modal-content .text-2xl { font-size: 1.25rem; }
+
+  /* Settings tabs : 2 lignes */
+  #settings-modal .flex.border-b { flex-wrap: wrap; }
+  .settings-tab-btn { font-size: 0.65rem; padding: 0.35rem 0.5rem; }
+
+  /* Charts */
+  #chart-subject-selector { max-height: 8rem; }
+
+  /* Footer minimal */
+  footer { padding: 0.5rem; }
+  footer .flex { font-size: 0.7rem; }
+
+  /* Color picker grid */
+  #color-menu .grid-cols-6 { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+  .color-dot { width: 1.75rem; height: 1.75rem; }
+
+  /* PIN modal compact */
+  .pin-btn { height: 3rem; font-size: 1.1rem; }
+  #pin-display { font-size: 2.5rem; }
+}
+
+/* --- HAUTEUR D'ÉCRAN RÉDUITE (paysage téléphone) --- */
+@media (max-height: 600px) {
+  header { height: auto !important; min-height: 2.5rem; }
+  header .max-w-7xl { padding: 0.25rem 0.5rem; }
+  main { padding-top: 0.5rem; }
+  .modal-content { max-height: 95vh; }
+  .modal-overlay { padding: 0.25rem; }
+  #loading-screen .pulse-logo { width: 3rem; height: 3rem; }
+  #loading-screen .w-4.h-4 { width: 0.75rem; height: 0.75rem; }
+}
+
+/* --- TRÈS GRANDS ÉCRANS (min-width: 1536px) --- */
+@media (min-width: 1536px) {
+  main { max-width: 90rem; }
+  .glass-card { border-radius: 2.5rem; }
+  #main-card { padding: 3rem !important; }
 }
 
 /* Optimisations spécifiques pour l'expérience mobile détectée */
@@ -462,9 +650,30 @@ body.modal-open {
 /* Tutorial overlay transitions */
 #tuto-tooltip {
   transition: top 0.3s ease, left 0.3s ease;
+  max-width: min(320px, calc(100vw - 2rem));
 }
 #tuto-arrow {
   transition: top 0.3s ease, left 0.3s ease;
+}
+
+/* General responsive utilities */
+.overflow-x-hidden { overflow-x: hidden; }
+img, video, svg { max-width: 100%; height: auto; }
+
+/* Smooth scroll on all devices */
+html { scroll-behavior: smooth; }
+
+/* Better tap highlight on mobile */
+@media (hover: none) {
+  * { -webkit-tap-highlight-color: rgba(99, 102, 241, 0.15); }
+}
+
+/* Safe area insets for notched phones */
+@supports(padding: max(0px)) {
+  header { padding-left: max(0.5rem, env(safe-area-inset-left)); padding-right: max(0.5rem, env(safe-area-inset-right)); }
+  main { padding-left: max(0.75rem, env(safe-area-inset-left)); padding-right: max(0.75rem, env(safe-area-inset-right)); }
+  footer { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+  .modal-overlay { padding-top: max(0.5rem, env(safe-area-inset-top)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
 }
 
 /* @media prefers-reduced-motion: honour OS-level accessibility setting */

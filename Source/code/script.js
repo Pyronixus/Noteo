@@ -392,27 +392,31 @@ window.onload = () => {
         document.getElementById("login-screen").classList.remove("hidden");
         updateLoginSessions();
       }
-    }, 800); // This must match the loader's transition time
-  }, 1000); // This is the minimum loading display time
+    }, 400); // This must match the loader's transition time
+  }, 300); // This is the minimum loading display time
 
   // Cache important DOM elements for faster access
   cacheDom();
-  // Initialize EmailJS for PIN recovery
+  // Initialize EmailJS for PIN recovery (lazy — loads on demand)
   initEmailJS();
-  // Detect and apply phone-restricted experience when appropriate
-  try {
-    if (detectPhoneXP()) {
-      applyPhoneExperience();
-      initScrollToggleButton();
-    }
-  } catch (e) {
-    console.warn("Phone XP detection error", e);
-  }
 
-  // Show warnings and cloud import prompt if needed
-  maybeShowPhoneWarning();
-  maybeShowMobileModeModal();
-  checkCloudImportFromUrl();
+  // Defer non-critical tasks to idle time
+  const deferTask = window.requestIdleCallback || ((cb) => setTimeout(cb, 100));
+  deferTask(() => {
+    // Detect and apply phone-restricted experience when appropriate
+    try {
+      if (detectPhoneXP()) {
+        applyPhoneExperience();
+        initScrollToggleButton();
+      }
+    } catch (e) {
+      console.warn("Phone XP detection error", e);
+    }
+    // Show warnings and cloud import prompt if needed
+    maybeShowPhoneWarning();
+    maybeShowMobileModeModal();
+    checkCloudImportFromUrl();
+  });
 
   // Add event listeners for the duplicate subject modal
   document.getElementById("duplicate-opt-update").onclick = () => {
@@ -767,10 +771,30 @@ const EMAILJS_CONFIG = {
 
 let recoveryState = { timerId: null, resendCooldown: 0 };
 
+let _emailJSLoaded = false;
 function initEmailJS() {
-  if (typeof emailjs !== "undefined" && EMAILJS_CONFIG.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY") {
-    emailjs.init(EMAILJS_CONFIG.publicKey);
-  }
+  // EmailJS is now lazy-loaded on first use via loadEmailJS()
+  // This function is kept for backward compatibility
+}
+function loadEmailJS() {
+  if (_emailJSLoaded) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    if (typeof emailjs !== "undefined") {
+      if (EMAILJS_CONFIG.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY") emailjs.init(EMAILJS_CONFIG.publicKey);
+      _emailJSLoaded = true;
+      resolve();
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
+    s.onload = () => {
+      if (EMAILJS_CONFIG.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY") emailjs.init(EMAILJS_CONFIG.publicKey);
+      _emailJSLoaded = true;
+      resolve();
+    };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
 }
 
 async function forgotPin() {
@@ -843,6 +867,11 @@ async function sendRecoveryCode() {
   }));
 
   let emailSent = false;
+  try {
+    await loadEmailJS();
+  } catch (e) {
+    console.warn("Failed to load EmailJS", e);
+  }
   if (typeof emailjs !== "undefined" && EMAILJS_CONFIG.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY") {
     try {
       await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
@@ -2989,12 +3018,13 @@ function renderGrades() {
     const isMd = _mediaQueryMd.matches;
     const colCount = isLg ? 3 : isMd ? 2 : 1;
     const cols = [];
+    const frag = document.createDocumentFragment();
 
     for (let i = 0; i < colCount; i++) {
       const col = document.createElement("div");
       col.className = "flex-1 w-full space-y-8 flex flex-col";
       cols.push(col);
-      cont.appendChild(col);
+      frag.appendChild(col);
     }
 
     if (subjects.length === 0) {
@@ -3135,7 +3165,7 @@ function renderGrades() {
       const bgColor = hex2rgba(displayColor, 0.1);
 
       const card = document.createElement("div");
-      card.className = "glass-card p-6 rounded-[2rem] animate-entrance w-full";
+      card.className = "glass-card p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] animate-entrance w-full";
 
       let historyHtml;
       if (s.id === "general") {
@@ -3175,10 +3205,10 @@ function renderGrades() {
 
       card.innerHTML = `
                     <div class="flex items-start justify-between mb-4 z-10 relative">
-                        <div class="flex items-center gap-4 cursor-pointer flex-grow group" onclick="toggleAcc('${s.id}')">
-                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" style="background:${displayColor}; box-shadow: 0 4px 15px ${hex2rgba(displayColor, 0.4)}">${s.id === "general" ? "G" : s.name[0].toUpperCase()}</div>
-                            <div>
-                                <h4 class="text-lg font-black text-[var(--text-main)] leading-tight">${s.name}</h4>
+                        <div class="flex items-center gap-3 sm:gap-4 cursor-pointer flex-grow group" onclick="toggleAcc('${s.id}')">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-black text-lg sm:text-xl shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" style="background:${displayColor}; box-shadow: 0 4px 15px ${hex2rgba(displayColor, 0.4)}">${s.id === "general" ? "G" : s.name[0].toUpperCase()}</div>
+                            <div class="min-w-0">
+                                <h4 class="text-base sm:text-lg font-black text-[var(--text-main)] leading-tight truncate">${s.name}</h4>
                                 <p class="text-xs font-bold text-[var(--text-muted)] flex items-center gap-2 mt-1">
                                     <span style="color:${displayColor}">${s.history.length}</span> ${s.id === "general" ? "matières" : "notes"}
                                     <svg class="w-3 h-3 transition-transform duration-300" id="icon-${s.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -3187,7 +3217,7 @@ function renderGrades() {
                             </div>
                         </div>
                         <div class="flex flex-col items-end gap-2">
-                            <div class="px-3 py-1 rounded-xl font-black text-xl hover:scale-110 transition-transform cursor-default" style="background:${bgColor}; color:${displayColor}">${s.avg.toFixed(2)}</div>
+                            <div class="px-2 sm:px-3 py-1 rounded-xl font-black text-lg sm:text-xl hover:scale-110 transition-transform cursor-default" style="background:${bgColor}; color:${displayColor}">${s.avg.toFixed(2)}</div>
                         </div>
                     </div>
                     <div id="acc-${s.id}" class="history-content">
@@ -3198,6 +3228,7 @@ function renderGrades() {
                 `;
       cols[idx % colCount].appendChild(card);
     });
+    cont.appendChild(frag);
     updateDynamicStyles();
     const tabChartsEl = document.getElementById("tab-charts");
     if (tabChartsEl && !tabChartsEl.classList.contains("hidden"))

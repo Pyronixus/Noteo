@@ -39,18 +39,18 @@
     <link rel="dns-prefetch" href="https://ui-avatars.com">
 
     <!-- Tailwind (blocking — required for first paint) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" fetchpriority="high"></script>
 
     <!-- Chart.js (deferred — only needed on Charts tab) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
-    <!-- EmailJS (deferred — only needed for PIN recovery) -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+    <!-- EmailJS (loaded on demand — only needed for PIN recovery) -->
 
     <!-- Fonts -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/gh/antijingo/open-dyslexic@1.0/src/open-dyslexic.css" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- OpenDyslexic: lazy-loaded (only needed when dyslexia setting is on) -->
+    <link href="https://cdn.jsdelivr.net/gh/antijingo/open-dyslexic@1.0/src/open-dyslexic.css" rel="stylesheet" media="print" onload="this.media='all'">
 
     <!-- Styles -->
     <link rel="stylesheet" href="Source/code/style.css">
@@ -81,8 +81,8 @@
     <div id="toast-container"></div>
 
     <!-- Login Screen -->
-    <div id="login-screen" class="hidden min-h-screen flex items-center justify-center p-6">
-        <div class="glass-card p-12 rounded-[3rem] w-full max-w-md animate-entrance text-center relative overflow-hidden">
+    <div id="login-screen" class="hidden min-h-screen flex items-center justify-center p-3 sm:p-6">
+        <div class="glass-card p-6 sm:p-12 rounded-[1.5rem] sm:rounded-[3rem] w-full max-w-md animate-entrance text-center relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
             
             <div class="w-20 h-20 rounded-[1.8rem] mx-auto mb-8 flex items-center justify-center shadow-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 hover:scale-110 transition-transform duration-500">
@@ -120,11 +120,11 @@
     </div>
 
     <!-- User Selection Screen -->
-    <div id="user-selection-screen" class="hidden min-h-screen flex items-center justify-center p-6">
+    <div id="user-selection-screen" class="hidden min-h-screen flex items-center justify-center p-3 sm:p-6">
         <div class="w-full max-w-4xl animate-entrance text-center">
-            <h1 class="text-4xl font-black italic text-[var(--text-main)] mb-2 tracking-tight">Qui est-ce ?</h1>
-            <p class="text-[var(--text-muted)] text-lg mb-12 font-medium">Sélectionnez votre profil pour continuer.</p>
-            <div id="user-selection-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <h1 class="text-2xl sm:text-4xl font-black italic text-[var(--text-main)] mb-2 tracking-tight">Qui est-ce ?</h1>
+            <p class="text-[var(--text-muted)] text-sm sm:text-lg mb-6 sm:mb-12 font-medium">Sélectionnez votre profil pour continuer.</p>
+            <div id="user-selection-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8">
                 <!-- User cards will be injected here by JS -->
             </div>
             <div class="mt-8">
@@ -144,9 +144,9 @@
 
     <!-- Main Dashboard -->
     <div id="dashboard-screen" class="hidden min-h-screen flex flex-col opacity-0 transition-opacity duration-1000 ">
-        <header class="sticky top-0 z-40 h-24 bg-[var(--bg-body)]/40 backdrop-blur-md border-b border-[var(--border)]">
-            <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-                <div class="flex items-center gap-8 md:gap-12">
+        <header class="sticky top-0 z-40 bg-[var(--bg-body)]/40 backdrop-blur-md border-b border-[var(--border)]">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-3 sm:gap-6 md:gap-12 flex-shrink-0">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
                             <span class="text-white text-xl font-black">N.</span>
@@ -155,9 +155,9 @@
                         <span id="mobile-semester-label" class="hidden phone-xp:flex items-center gap-2 text-sm font-bold text-[var(--text-muted)]">Semestre 1</span>
                     </div>
                     
-                    <nav class="flex gap-2 bg-[var(--input-bg)] p-1.5 rounded-2xl border border-[var(--card-border)]">
-                        <button onclick="switchTab('notes')" id="btn-notes" class="tab-btn active px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Notes</button>
-                        <button onclick="switchTab('charts')" id="btn-charts" class="tab-btn px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Graphiques</button>
+                    <nav class="flex gap-1 sm:gap-2 bg-[var(--input-bg)] p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-[var(--card-border)]">
+                        <button onclick="switchTab('notes')" id="btn-notes" class="tab-btn active px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest transition-all">Notes</button>
+                        <button onclick="switchTab('charts')" id="btn-charts" class="tab-btn px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest transition-all">Graphiques</button>
                     </nav>
 
                     <!-- Semester/Period Selector -->
@@ -175,15 +175,15 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
-                        <div id="semester-menu" class="dropdown-menu absolute left-0 mt-3 w-64 glass-card rounded-[2rem] p-4 z-[100]">
+                        <div id="semester-menu" class="dropdown-menu absolute left-0 mt-3 w-56 sm:w-64 glass-card rounded-[2rem] p-4 z-[100]">
                             <!-- JS will populate this -->
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     <!-- Bouton Thème avec animation précise -->
-                    <button onclick="cycleTheme()" title="Changer le thème" class="relative overflow-hidden w-12 h-12 rounded-2xl bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)] hover:border-indigo-500 transition-all hover:scale-105 active:scale-95">
+                    <button onclick="cycleTheme()" title="Changer le thème" class="relative overflow-hidden w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)] hover:border-indigo-500 transition-all hover:scale-105 active:scale-95">
                         <div class="theme-icon-wrapper sun-icon">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" /></svg>
                         </div>
@@ -193,18 +193,18 @@
                     </button>
 
                     <!-- Bouton Paramètres (Engrenage) -->
-                    <button onclick="openSettings()" title="Ouvrir les paramètres" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)] hover:text-indigo-500 hover:border-indigo-500 transition-all hover:scale-105 active:scale-95">
+                    <button onclick="openSettings()" title="Ouvrir les paramètres" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)] hover:text-indigo-500 hover:border-indigo-500 transition-all hover:scale-105 active:scale-95">
                         <svg class="w-5 h-5 hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     </button>
 
                     <!-- Profil & Dropdown basique -->
                     <div class="relative">
-                        <button onclick="toggleUserMenu(event)" class="h-12 px-4 flex items-center gap-3 rounded-2xl bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all">
+                        <button onclick="toggleUserMenu(event)" class="h-10 sm:h-12 px-2 sm:px-4 flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all">
                             <span id="header-user-name" class="font-bold text-sm hidden md:block">--</span>
                             <img src="" id="user-avatar" class="w-7 h-7 rounded-full" alt="Avatar">
                         </button>
                         
-                        <div id="user-menu" class="dropdown-menu absolute right-0 mt-3 w-56 glass-card rounded-[2rem] p-4 z-[100]">
+                        <div id="user-menu" class="dropdown-menu absolute right-0 mt-3 w-48 sm:w-56 glass-card rounded-[2rem] p-4 z-[100]">
                             <div class="mb-4 px-2">
                                 <p class="text-[10px] font-black uppercase text-indigo-500 tracking-widest mb-1">Actuel</p>
                                 <p id="user-display" class="text-lg font-black truncate">--</p>
@@ -231,23 +231,23 @@
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto px-6 py-12 w-full flex-grow">
+        <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 md:py-12 w-full flex-grow">
             <!-- Tab: Notes -->
             <section id="tab-notes" class="animate-entrance">
-                <div class="flex flex-col lg:flex-row gap-8 xl:gap-12">
+                <div class="flex flex-col lg:flex-row gap-4 sm:gap-8 xl:gap-12">
                     <!-- Main content -->
                     <div class="flex-grow min-w-0 space-y-12">
                         <!-- Input Form -->
-                        <div id="main-card" class="glass-card p-8 md:p-10 rounded-[3rem] transition-all duration-500 cursor-pointer" onclick="if(this.classList.contains('collapsed')) toggleMainCard()">
-                            <div class="flex justify-between items-center mb-6">
-                                <div class="flex items-center gap-3">
-                                    <h2 class="text-2xl font-black text-[var(--text-main)] tracking-tight">Ajouter une matière</h2>
+                        <div id="main-card" class="glass-card p-4 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[3rem] transition-all duration-500 cursor-pointer" onclick="if(this.classList.contains('collapsed')) toggleMainCard()">
+                            <div class="flex justify-between items-center mb-3 sm:mb-6">
+                                <div class="flex items-center gap-2 sm:gap-3">
+                                    <h2 class="text-lg sm:text-2xl font-black text-[var(--text-main)] tracking-tight">Ajouter une matière</h2>
                                     <button onclick="event.stopPropagation(); openTutoModal()" title="Comment ça marche ?" class="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-muted)] hover:text-indigo-500 hover:border-indigo-500 transition-all hover:scale-105 active:scale-95">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     </button>
                                 </div>
                                 <div>
-                                    <button onclick="event.stopPropagation(); toggleMainCard()" id="toggle-main-card-btn" title="Réduire/Agrandir le formulaire" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)] hover:text-indigo-500 hover:border-indigo-500 transition-all hover:scale-105 active:scale-95">
+                                    <button onclick="event.stopPropagation(); toggleMainCard()" id="toggle-main-card-btn" title="Réduire/Agrandir le formulaire" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)] hover:text-indigo-500 hover:border-indigo-500 transition-all hover:scale-105 active:scale-95">
                                         <svg id="main-card-icon-minus" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"></path></svg>
                                         <svg id="main-card-icon-plus" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
                                     </button>
@@ -255,8 +255,8 @@
                             </div>
 
                             <div id="main-card-content">
-                              <form id="calc-form" class="space-y-8">
-                                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                              <form id="calc-form" class="space-y-4 sm:space-y-8">
+                                <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-6">
                                     <div class="space-y-3 flex-grow">
                                         <label class="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest pl-2">Matière</label>
                                 <input type="text" id="subject-name" required title="Nom de la matière" placeholder="Ex: Mathématiques" aria-label="Nom de la matière" class="w-full px-6 py-4 rounded-2xl text-xl font-extrabold focus:ring-2 focus:ring-indigo-500/50 bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-main)]">
@@ -270,8 +270,8 @@
                                             </div>
                                             <svg class="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                         </button>
-                                        <div id="color-menu" class="dropdown-menu absolute right-0 mt-2 w-64 glass-card rounded-[2rem] p-4 z-50">
-                                            <div class="grid grid-cols-6 gap-3">
+                                        <div id="color-menu" class="dropdown-menu absolute right-0 mt-2 w-52 sm:w-64 glass-card rounded-[2rem] p-4 z-50">
+                                            <div class="grid grid-cols-4 sm:grid-cols-6 gap-3">
                                                 <div class="color-dot bg-indigo-500 text-indigo-500" data-color="#6366f1" data-name="Indigo" onclick="selectColor(this)"></div>
                                                 <div class="color-dot bg-emerald-400 text-emerald-400" data-color="#34d399" data-name="Émeraude" onclick="selectColor(this)"></div>
                                                 <div class="color-dot bg-rose-400 text-rose-400" data-color="#fb7185" data-name="Rose" onclick="selectColor(this)"></div>
@@ -297,15 +297,15 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col md:flex-row items-center gap-8 bg-[var(--bg-body)]/50 p-6 md:p-8 rounded-[2.5rem] border border-[var(--border)]">
+                                <div class="flex flex-col md:flex-row items-center gap-4 sm:gap-8 bg-[var(--bg-body)]/50 p-3 sm:p-6 md:p-8 rounded-[1.25rem] sm:rounded-[2rem] md:rounded-[2.5rem] border border-[var(--border)]">
                                     <!-- Fraction Input UI -->
-                                    <div class="flex-grow flex flex-col items-center justify-center relative fraction-input-container w-full py-4">
-                                        <input type="text" id="calc-top" required placeholder="Note (ex: 15+8 ou 12x2)" title="Note ou calcul de notes" aria-label="Note" class="w-full text-center outline-none text-4xl font-black text-[var(--text-main)] transition-all hover:scale-105">
-                                        <div class="fraction-bar my-2"></div>
-                                        <input type="text" id="calc-bot" required placeholder="Barème (ex: 20)" title="Barème de la note" aria-label="Barème" class="w-full text-center outline-none text-xl font-bold text-[var(--text-muted)] transition-all hover:scale-105">
+                                    <div class="flex-grow flex flex-col items-center justify-center relative fraction-input-container w-full py-2 sm:py-4">
+                                        <input type="text" id="calc-top" required placeholder="Note (ex: 15+8 ou 12x2)" title="Note ou calcul de notes" aria-label="Note" class="w-full text-center outline-none text-2xl sm:text-4xl font-black text-[var(--text-main)] transition-all hover:scale-105">
+                                        <div class="fraction-bar my-1 sm:my-2"></div>
+                                        <input type="text" id="calc-bot" required placeholder="Barème (ex: 20)" title="Barème de la note" aria-label="Barème" class="w-full text-center outline-none text-base sm:text-xl font-bold text-[var(--text-muted)] transition-all hover:scale-105">
                                     </div>
                                     
-                                    <button type="submit" class="w-full md:w-32 h-20 md:h-32 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-[2rem] flex flex-col items-center justify-center gap-2 shadow-lg hover:shadow-indigo-500/40 hover:scale-[1.05] active:scale-95 transition-all">
+                                    <button type="submit" class="w-full md:w-32 h-14 sm:h-20 md:h-32 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl sm:rounded-[1.5rem] md:rounded-[2rem] flex flex-col items-center justify-center gap-1 sm:gap-2 shadow-lg hover:shadow-indigo-500/40 hover:scale-[1.05] active:scale-95 transition-all">
                                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
                                         <span class="text-xs font-black uppercase tracking-widest">Ajouter</span>
                                     </button>
@@ -315,7 +315,7 @@
                         </div>
                         
                         <!-- Cloud Import Section (for mobile view mode) -->
-                        <div id="cloud-import-section" class="glass-card p-8 md:p-10 rounded-[3rem] transition-all duration-500" style="display: none;">
+                        <div id="cloud-import-section" class="glass-card p-4 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[3rem] transition-all duration-500" style="display: none;">
                             <div class="flex justify-between items-center mb-6">
                                 <div class="flex items-center gap-3">
                                     <h2 class="text-2xl font-black text-[var(--text-main)] tracking-tight">Importer un compte</h2>
@@ -371,9 +371,9 @@
 
             <!-- Tab: Analyses (Charts - NEW) -->
             <section id="tab-charts" class="hidden animate-entrance">
-                <div class="flex flex-col lg:flex-row gap-8">
+                <div class="flex flex-col lg:flex-row gap-4 sm:gap-8">
                     <!-- Controls Sidebar -->
-                    <div class="lg:w-96 glass-card p-6 rounded-[2rem] self-start lg:sticky top-28">
+                    <div class="w-full lg:w-96 glass-card p-4 sm:p-6 rounded-[1.25rem] sm:rounded-[2rem] self-start lg:sticky top-28">
                         <h3 class="font-black text-lg mb-4 text-[var(--text-main)]">1. Choisir les matières</h3>
                         <div id="chart-subject-selector" class="space-y-2 max-h-48 overflow-y-auto pr-2 border-b border-[var(--border)] pb-4 mb-4"></div>
                         <h3 class="font-black text-lg mb-4 text-[var(--text-main)]">2. Choisir un graphique</h3>
@@ -381,14 +381,14 @@
                     </div>
                     <!-- Chart Display Area -->
                     <div class="flex-grow min-w-0">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-3xl font-black">Analyses</h2>
+                        <div class="flex justify-between items-center mb-4 sm:mb-6">
+                            <h2 class="text-xl sm:text-3xl font-black">Analyses</h2>
                             <div class="flex items-center gap-2">
                                 <button onclick="updateAllCharts()" class="px-4 py-2 rounded-lg text-xs font-bold text-indigo-500 hover:bg-indigo-500/10 transition-colors">Mettre à jour</button>
                                 <button onclick="clearCharts()" class="px-4 py-2 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-colors">Réinitialiser</button>
                             </div>
                         </div>
-                        <div id="charts-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-8"></div>
+                        <div id="charts-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8"></div>
                         <div id="no-charts-msg" class="hidden text-center py-20 glass-card rounded-[2rem]">
                             <svg class="w-24 h-24 mx-auto mb-6 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                         </div>
@@ -405,8 +405,8 @@
             <svg id="scroll-toggle-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path id="scroll-toggle-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
         </button>
 
-        <footer class="mt-auto p-4 text-center text-[var(--text-muted)] text-sm">
-            <div class="flex items-center justify-center gap-6">
+        <footer class="mt-auto p-3 sm:p-4 text-center text-[var(--text-muted)] text-xs sm:text-sm">
+            <div class="flex items-center justify-center flex-wrap gap-3 sm:gap-6">
                 <span>Noteo <button onclick="openVersionModal()" class="hover:text-indigo-500 transition-colors font-bold">v2.2</button></span>
                 <button onclick="openOpenSourceModal()" class="hover:text-green-500 transition-colors">Open Source</button>
                 <span>Copyright © <button onclick="openPyroModal()" class="hover:text-purple-500 transition-colors"><strong>Pyro</strong></button></span>
@@ -433,23 +433,23 @@
 
     <!-- Modal: Paramètres (Comptes & Notes) -->
     <div id="settings-modal" class="modal-overlay">
-        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-3xl relative max-h-[90vh] flex flex-col">
-            <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors z-10">
+        <div class="modal-content glass-card p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] w-full max-w-3xl relative max-h-[90vh] flex flex-col">
+            <button onclick="closeModals()" title="Fermer" class="absolute top-4 right-4 sm:top-6 sm:right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 class="text-3xl font-black text-[var(--text-main)] mb-4 tracking-tight flex items-center gap-3">
+            <h2 class="text-xl sm:text-3xl font-black text-[var(--text-main)] mb-4 tracking-tight flex items-center gap-2 sm:gap-3">
                 <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 Paramètres
             </h2>
 
             <!-- Tabs -->
-            <div class="flex border-b border-[var(--border)] mb-6 flex-wrap">
-                <button id="settings-tab-btn-profile" onclick="switchSettingsTab('profile')" class="settings-tab-btn active">Profil</button>
-                <button id="settings-tab-btn-interface" onclick="switchSettingsTab('interface')" class="settings-tab-btn">Interface</button>
-                <button id="settings-tab-btn-behavior" onclick="switchSettingsTab('behavior')" class="settings-tab-btn">Comportement</button>
-                <button id="settings-tab-btn-data" onclick="switchSettingsTab('data')" class="settings-tab-btn">Données</button>
-                <button id="settings-tab-btn-accounts" onclick="switchSettingsTab('accounts')" class="settings-tab-btn">Comptes</button>
-                <button id="settings-tab-btn-accessibility" onclick="switchSettingsTab('accessibility')" class="settings-tab-btn">Accessibilité</button>
+            <div class="flex border-b border-[var(--border)] mb-4 sm:mb-6 overflow-x-auto -mx-1 px-1" style="scrollbar-width: none;">
+                <button id="settings-tab-btn-profile" onclick="switchSettingsTab('profile')" class="settings-tab-btn active flex-shrink-0">Profil</button>
+                <button id="settings-tab-btn-interface" onclick="switchSettingsTab('interface')" class="settings-tab-btn flex-shrink-0">Interface</button>
+                <button id="settings-tab-btn-behavior" onclick="switchSettingsTab('behavior')" class="settings-tab-btn flex-shrink-0">Comportement</button>
+                <button id="settings-tab-btn-data" onclick="switchSettingsTab('data')" class="settings-tab-btn flex-shrink-0">Données</button>
+                <button id="settings-tab-btn-accounts" onclick="switchSettingsTab('accounts')" class="settings-tab-btn flex-shrink-0">Comptes</button>
+                <button id="settings-tab-btn-accessibility" onclick="switchSettingsTab('accessibility')" class="settings-tab-btn flex-shrink-0">Accessibilité</button>
             </div>
 
             <!-- Auth Setup (nested inside settings logic) -->
@@ -543,7 +543,7 @@
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <label for="setting-soundVolume" class="font-bold">Volume des sons</label>
-                        <input type="range" min="0" max="1" step="0.05" id="setting-soundVolume" title="Volume des sons" aria-label="Volume des sons" oninput="updateSetting('soundVolume', parseFloat(this.value))" class="w-40 accent-indigo-500">
+                        <input type="range" min="0" max="1" step="0.05" id="setting-soundVolume" title="Volume des sons" aria-label="Volume des sons" oninput="updateSetting('soundVolume', parseFloat(this.value))" class="w-full sm:w-40 accent-indigo-500">
                     </div>
                     <div class="flex items-center justify-between p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                         <div><h4 class="font-bold text-[var(--text-main)]">Confirmer avant suppression</h4><p class="text-xs text-[var(--text-muted)]">Affiche une alerte avant toute suppression.</p></div>
@@ -794,7 +794,7 @@
 
     <!-- Modal: Fullscreen Chart -->
     <div id="fullscreen-chart-modal" class="modal-overlay !bg-black/90">
-        <div class="absolute top-4 right-6 flex gap-4 z-20">
+        <div class="absolute top-2 sm:top-4 right-3 sm:right-6 flex gap-2 sm:gap-4 z-20">
             <button onclick="navigateFullscreenChart(-1)" title="Graphique précédent" class="w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
@@ -805,7 +805,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-        <div id="fullscreen-chart-content" class="w-full h-full p-16"><canvas id="fullscreen-chart-canvas"></canvas></div>
+        <div id="fullscreen-chart-content" class="w-full h-full p-4 sm:p-8 md:p-16"><canvas id="fullscreen-chart-canvas"></canvas></div>
     </div>
 
     <!-- Modal: Reload Required -->
@@ -895,7 +895,7 @@
 
     <!-- Modal: Changelog -->
     <div id="changelog-modal" class="modal-overlay">
-        <div class="modal-content glass-card p-8 rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-y-auto relative">
+        <div class="modal-content glass-card p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-y-auto relative">
             <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -1014,7 +1014,7 @@
 
     <!-- Modal: Help (list) -->
     <div id="help-modal" class="modal-overlay">
-        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-3xl relative max-h-[88vh] overflow-y-auto">
+        <div class="modal-content glass-card p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] w-full max-w-3xl relative max-h-[88vh] overflow-y-auto">
             <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -1033,7 +1033,7 @@
 
     <!-- Modal: Help Detail (single article) -->
     <div id="help-detail-modal" class="modal-overlay">
-        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-2xl relative max-h-[85vh] overflow-y-auto">
+        <div class="modal-content glass-card p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] w-full max-w-2xl relative max-h-[85vh] overflow-y-auto">
             <button onclick="closeHelpDetail()" title="Retour" class="absolute top-6 left-6 text-[var(--text-muted)] hover:text-indigo-500 transition-colors flex items-center gap-1 text-sm font-bold">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 Retour
@@ -1094,7 +1094,7 @@
 
     <!-- Modal: Legal -->
     <div id="legal-modal" class="modal-overlay">
-        <div class="modal-content glass-card p-8 rounded-[3rem] w-full max-w-2xl relative max-h-[80vh] overflow-y-auto">
+        <div class="modal-content glass-card p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] w-full max-w-2xl relative max-h-[80vh] overflow-y-auto">
             <button onclick="closeModals()" title="Fermer" class="absolute top-6 right-6 text-[var(--text-muted)] hover:text-rose-500 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
