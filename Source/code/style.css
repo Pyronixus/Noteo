@@ -433,6 +433,34 @@ body.modal-open {
   -webkit-transform: translateZ(0);
 }
 
+/* Help center cards */
+.help-card {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  font-weight: 700;
+  color: var(--text-main);
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.help-card:hover {
+  background: var(--bg-card);
+  color: var(--primary);
+  transform: scale(1.01);
+}
+.help-card:active { transform: scale(0.98); }
+
+/* Tutorial overlay transitions */
+#tuto-tooltip {
+  transition: top 0.3s ease, left 0.3s ease;
+}
+#tuto-arrow {
+  transition: top 0.3s ease, left 0.3s ease;
+}
+
 /* @media prefers-reduced-motion: honour OS-level accessibility setting */
 @media (prefers-reduced-motion: reduce) {
   .blob, .pulse-logo { animation: none !important; }
