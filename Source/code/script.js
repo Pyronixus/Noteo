@@ -1,6 +1,10 @@
 // --- AUDIO ENGINE (ASMR) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioContext();
+  return audioCtx;
+}
 
 function playSoftTone(
   freq,
@@ -10,67 +14,68 @@ function playSoftTone(
   attackTime = 0.05,
   releaseTime = 0.3,
 ) {
-  if (audioCtx.state === "suspended") audioCtx.resume();
+  const ctx = getAudioCtx();
+  if (ctx.state === "suspended") ctx.resume();
   const finalVolume =
     vol *
     (appSettings.soundVolume !== undefined
       ? parseFloat(appSettings.soundVolume)
       : 0.5);
-  const osc = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
+  const osc = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
 
   osc.type = type;
-  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
   filter.type = "lowpass";
   filter.frequency.value = 1500;
   filter.Q.value = 1;
-  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+  gainNode.gain.setValueAtTime(0, ctx.currentTime);
   gainNode.gain.linearRampToValueAtTime(
     finalVolume,
-    audioCtx.currentTime + attackTime,
+    ctx.currentTime + attackTime,
   );
   gainNode.gain.exponentialRampToValueAtTime(
     0.001,
-    audioCtx.currentTime + attackTime + releaseTime,
+    ctx.currentTime + attackTime + releaseTime,
   );
 
   osc.connect(filter);
   filter.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-  osc.start(audioCtx.currentTime);
-  osc.stop(audioCtx.currentTime + attackTime + releaseTime + 0.1);
+  gainNode.connect(ctx.destination);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + attackTime + releaseTime + 0.1);
 }
 
 const sounds = {
   click: () => playSoftTone(600, "sine", 0.1, 0.06, 0.01, 0.1),
-  swoosh: () => playSoftTone(400, "sine", 0.2, 0.04, 0.1, 0.2), // Nouveau son pour les menus
+  swoosh: () => playSoftTone(400, "sine", 0.2, 0.04, 0.1, 0.2),
   success: () => {
-    const t = audioCtx.currentTime;
     playSoftTone(523.25, "sine", 0.6, 0.04, 0.05, 0.4);
     setTimeout(() => playSoftTone(659.25, "sine", 0.6, 0.04, 0.05, 0.4), 60);
     setTimeout(() => playSoftTone(783.99, "sine", 0.8, 0.05, 0.05, 0.5), 120);
     setTimeout(() => playSoftTone(1046.5, "sine", 1.0, 0.06, 0.05, 0.6), 180);
   },
   delete: () => {
-    if (audioCtx.state === "suspended") audioCtx.resume();
+    const ctx = getAudioCtx();
+    if (ctx.state === "suspended") ctx.resume();
     const finalVolume =
       0.04 *
       (appSettings.soundVolume !== undefined
         ? parseFloat(appSettings.soundVolume)
         : 0.5);
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
     osc.type = "sine";
-    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(finalVolume, audioCtx.currentTime + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc.frequency.setValueAtTime(300, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(finalVolume, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(ctx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + 0.3);
   },
   error: () => {
     playSoftTone(200, "sine", 0.3, 0.1, 0.05, 0.2);
@@ -90,10 +95,14 @@ function playSound(soundName, ...args) {
 }
 
 // --- UTILITY FUNCTIONS ---
+const _hex2rgbaCache = new Map();
 const hex2rgba = (hex, alpha) => {
   if (!hex || typeof hex !== "string" || !hex.startsWith("#")) {
-    return `rgba(99, 102, 241, ${alpha})`; // Fallback color
+    return `rgba(99, 102, 241, ${alpha})`;
   }
+  const key = hex + alpha;
+  const cached = _hex2rgbaCache.get(key);
+  if (cached) return cached;
   const hexValue = hex.slice(1);
   const [r, g, b] = (
     hexValue.length === 3
@@ -107,7 +116,9 @@ const hex2rgba = (hex, alpha) => {
         ]
       : hexValue.match(/\w\w/g)
   ).map((x) => parseInt(x, 16));
-  return `rgba(${r},${g},${b},${alpha})`;
+  const result = `rgba(${r},${g},${b},${alpha})`;
+  _hex2rgbaCache.set(key, result);
+  return result;
 };
 
 const stdDev = (arr) => {
@@ -334,9 +345,9 @@ window.onload = () => {
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (user) renderGrades();
-    }, 200);
-  });
+      if (user) scheduleRenderGrades();
+    }, 250);
+  }, { passive: true });
 
   // Use a timeout to ensure the loading animation is visible for a minimum duration
   setTimeout(() => {
@@ -1432,6 +1443,18 @@ function closeModals() {
   }
 }
 
+// --- Close modals by clicking outside modal-content (on the overlay backdrop) ---
+document.addEventListener("click", function (e) {
+  // Only handle direct clicks on a modal-overlay (the backdrop), not on its children
+  if (!e.target.classList.contains("modal-overlay")) return;
+  if (!e.target.classList.contains("open")) return;
+  // Never close pin-modal by clicking outside (security-sensitive)
+  if (e.target.id === "pin-modal") return;
+  // Never close recovery-modal by clicking outside
+  if (e.target.id === "recovery-modal") return;
+  closeModals();
+});
+
 function switchSettingsTab(tabName) {
   playSound("click");
   document
@@ -1971,6 +1994,8 @@ function scheduleRenderGrades() {
 
 // DOM cache and tag memoization
 const DOM_CACHE = {};
+const _mediaQueryLg = window.matchMedia("(min-width: 1024px)");
+const _mediaQueryMd = window.matchMedia("(min-width: 768px)");
 function cacheDom() {
   DOM_CACHE.gradesContainer = document.getElementById("grades-container");
   DOM_CACHE.gradesActions = document.getElementById("grades-actions");
@@ -1980,6 +2005,8 @@ function cacheDom() {
   DOM_CACHE.modalOverlays = document.querySelectorAll(".modal-overlay");
   DOM_CACHE.tabCharts = document.getElementById("tab-charts");
   DOM_CACHE.chartsGrid = document.getElementById("charts-grid");
+  DOM_CACHE.moyenneGen = document.getElementById("moyenne-gen");
+  DOM_CACHE.mainCard = document.getElementById("main-card");
 }
 
 // Tag cache to avoid recomputing tags repeatedly during sorting/rendering
@@ -2778,7 +2805,13 @@ function loadUserData() {
   subjects = currentSemester.subjects;
 }
 
+let _saveTimer = null;
 function save() {
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_saveNow, 80);
+}
+function _saveNow() {
+  _saveTimer = null;
   const semesterIndex = academicData.semesters.findIndex(
     (s) => s.id === academicData.currentSemesterId,
   );
@@ -2952,8 +2985,8 @@ function renderGrades() {
     cont.className = "flex items-start gap-8";
 
     // Configuration des colonnes (Masonry JS)
-    const isLg = window.matchMedia("(min-width: 1024px)").matches;
-    const isMd = window.matchMedia("(min-width: 768px)").matches;
+    const isLg = _mediaQueryLg.matches;
+    const isMd = _mediaQueryMd.matches;
     const colCount = isLg ? 3 : isMd ? 2 : 1;
     const cols = [];
 
@@ -4618,6 +4651,8 @@ window.addEventListener("keydown", (e) => {
       classes: [],
       safari: false,
       label: "Desktop Windows",
+      os: "windows",
+      viewport: null,
     },
     "desktop-mac": {
       ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
@@ -4626,6 +4661,8 @@ window.addEventListener("keydown", (e) => {
       classes: ["is-safari"],
       safari: true,
       label: "Desktop macOS (Safari)",
+      os: "macos",
+      viewport: null,
     },
     "desktop-linux": {
       ua: "Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0",
@@ -4634,6 +4671,8 @@ window.addEventListener("keydown", (e) => {
       classes: [],
       safari: false,
       label: "Desktop Linux",
+      os: "linux",
+      viewport: null,
     },
     "phone-android": {
       ua: "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36",
@@ -4642,6 +4681,8 @@ window.addEventListener("keydown", (e) => {
       classes: ["is-mobile", "phone-xp"],
       safari: false,
       label: "Phone Android",
+      os: "android",
+      viewport: { w: 412, h: 915 },
     },
     "phone-ios": {
       ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
@@ -4650,6 +4691,8 @@ window.addEventListener("keydown", (e) => {
       classes: ["is-mobile", "phone-xp", "is-safari"],
       safari: true,
       label: "iPhone (Safari)",
+      os: "ios",
+      viewport: { w: 393, h: 852 },
     },
     "tablet-ipad": {
       ua: "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
@@ -4658,6 +4701,8 @@ window.addEventListener("keydown", (e) => {
       classes: ["is-mobile", "is-safari"],
       safari: true,
       label: "iPad (Safari)",
+      os: "ipados",
+      viewport: { w: 820, h: 1180 },
     },
     "tablet-android": {
       ua: "Mozilla/5.0 (Linux; Android 14; SM-X810) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
@@ -4666,6 +4711,8 @@ window.addEventListener("keydown", (e) => {
       classes: ["is-mobile"],
       safari: false,
       label: "Tablette Android",
+      os: "android",
+      viewport: { w: 800, h: 1280 },
     },
   };
 
@@ -5137,10 +5184,11 @@ window.addEventListener("keydown", (e) => {
     const body = document.body;
     const html = document.documentElement;
 
-    // 1. Clean slate: remove all simulation classes
+    // 1. Clean slate: remove all simulation classes + device chrome
     body.classList.remove("phone-xp", "is-mobile", "is-safari");
     html.classList.remove("phone-xp");
     _undoPhoneExperience();
+    _removeDeviceChrome();
 
     if (plat === "reset") {
       _devCurrentPlatform = null;
@@ -5199,6 +5247,9 @@ window.addEventListener("keydown", (e) => {
 
     // 6. Safari class → disables backdrop-filter via CSS
     // (is-safari already added above if in preset.classes)
+
+    // 7. Apply device chrome overlays (status bar, home bar, etc.)
+    _applyDeviceChrome(plat);
 
     _updateSimBadge();
     _updatePlatButtons();
@@ -5320,4 +5371,199 @@ window.addEventListener("keydown", (e) => {
     d.textContent = str;
     return d.innerHTML;
   }
+
+  // ============================================================
+  // DEVICE CHROME SIMULATION — Show realistic OS overlays
+  // ============================================================
+
+  function _getTimeStr() {
+    const now = new Date();
+    return now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
+  }
+
+  function _createIOSChrome() {
+    // Status bar
+    const statusBar = document.createElement("div");
+    statusBar.id = "dev-ios-statusbar";
+    statusBar.className = "dev-device-statusbar dev-device-ios-statusbar";
+    statusBar.innerHTML =
+      '<div class="dev-ios-sb-left"><span class="dev-ios-sb-time">' + _getTimeStr() + '</span></div>' +
+      '<div class="dev-ios-sb-notch"><div class="dev-ios-dynamic-island"></div></div>' +
+      '<div class="dev-ios-sb-right">' +
+        '<svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M1 8.5h1.5v3H1zM4 6h1.5v5.5H4zM7 3.5h1.5V12H7zM10 1h1.5v10.5H10z"/></svg>' +
+        '<svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 3.6a6 6 0 014.24 1.76l1.06-1.06A7.5 7.5 0 008 1.5a7.5 7.5 0 00-5.3 2.8l1.06 1.06A6 6 0 018 3.6zm0 3a3 3 0 012.12.88l1.06-1.06A4.5 4.5 0 008 4.6a4.5 4.5 0 00-3.18 1.82l1.06 1.06A3 3 0 018 6.6zm0 3a1 1 0 100 2 1 1 0 000-2z"/></svg>' +
+        '<div class="dev-ios-battery"><div class="dev-ios-battery-fill"></div></div>' +
+      '</div>';
+    document.body.appendChild(statusBar);
+
+    // Home indicator
+    const homeBar = document.createElement("div");
+    homeBar.id = "dev-ios-homebar";
+    homeBar.className = "dev-device-homebar dev-device-ios-homebar";
+    homeBar.innerHTML = '<div class="dev-ios-home-indicator"></div>';
+    document.body.appendChild(homeBar);
+
+    // Update time every minute
+    statusBar._timeInterval = setInterval(() => {
+      const timeEl = statusBar.querySelector(".dev-ios-sb-time");
+      if (timeEl) timeEl.textContent = _getTimeStr();
+    }, 30000);
+  }
+
+  function _createAndroidChrome() {
+    // Status bar
+    const statusBar = document.createElement("div");
+    statusBar.id = "dev-android-statusbar";
+    statusBar.className = "dev-device-statusbar dev-device-android-statusbar";
+    statusBar.innerHTML =
+      '<div class="dev-android-sb-left">' +
+        '<span class="dev-android-sb-time">' + _getTimeStr() + '</span>' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.7"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12z"/></svg>' +
+      '</div>' +
+      '<div class="dev-android-sb-right">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.8"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.8"><path d="M2 22h20V2L2 22zm18-2H6.83L20 6.83V20z"/></svg>' +
+        '<div class="dev-android-battery"><div class="dev-android-battery-fill"></div></div>' +
+      '</div>';
+    document.body.appendChild(statusBar);
+
+    // Navigation bar (gesture bar)
+    const navBar = document.createElement("div");
+    navBar.id = "dev-android-navbar";
+    navBar.className = "dev-device-navbar dev-device-android-navbar";
+    navBar.innerHTML = '<div class="dev-android-gesture-bar"></div>';
+    document.body.appendChild(navBar);
+
+    statusBar._timeInterval = setInterval(() => {
+      const timeEl = statusBar.querySelector(".dev-android-sb-time");
+      if (timeEl) timeEl.textContent = _getTimeStr();
+    }, 30000);
+  }
+
+  function _removeDeviceChrome() {
+    const ids = ["dev-ios-statusbar", "dev-ios-homebar", "dev-android-statusbar", "dev-android-navbar"];
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (el._timeInterval) clearInterval(el._timeInterval);
+        el.remove();
+      }
+    });
+    document.body.classList.remove("dev-sim-ios", "dev-sim-android", "dev-sim-ipados");
+  }
+
+  function _applyDeviceChrome(plat) {
+    _removeDeviceChrome();
+    if (!plat || plat === "reset") return;
+    const preset = PLATFORMS[plat];
+    if (!preset) return;
+
+    const os = preset.os;
+    if (os === "ios") {
+      document.body.classList.add("dev-sim-ios");
+      _createIOSChrome();
+    } else if (os === "ipados") {
+      document.body.classList.add("dev-sim-ipados");
+      _createIOSChrome();
+    } else if (os === "android") {
+      document.body.classList.add("dev-sim-android");
+      _createAndroidChrome();
+    }
+    // Desktop platforms: no device chrome
+  }
+
+  // ============================================================
+  // QUICK ACTIONS — accessible from the App tab
+  // ============================================================
+
+  window.devQuickAction = function (action) {
+    switch (action) {
+      case "toggle-theme":
+        if (typeof cycleTheme === "function") cycleTheme();
+        break;
+      case "clear-cache":
+        if (typeof cacheDom === "function") cacheDom();
+        _origConsole.log("[Dev] DOM cache rechargé");
+        break;
+      case "reload":
+        window.location.reload();
+        break;
+      case "force-render":
+        if (typeof renderGrades === "function" && user) renderGrades();
+        _origConsole.log("[Dev] Rendu forcé des notes");
+        break;
+      case "toggle-animations":
+        if (typeof updateSetting === "function") {
+          updateSetting("animations", !appSettings.animations);
+          _origConsole.log("[Dev] Animations: " + appSettings.animations);
+        }
+        break;
+      case "toggle-blur":
+        if (typeof updateSetting === "function") {
+          updateSetting("blur", !appSettings.blur);
+          _origConsole.log("[Dev] Blur: " + appSettings.blur);
+        }
+        break;
+      case "toggle-blobs":
+        if (typeof updateSetting === "function") {
+          updateSetting("blobs", !appSettings.blobs);
+          _origConsole.log("[Dev] Blobs: " + appSettings.blobs);
+        }
+        break;
+      case "perf-snapshot":
+        _capturePerformanceSnapshot();
+        break;
+    }
+    if (_devOpen) _renderActiveTab();
+  };
+
+  function _capturePerformanceSnapshot() {
+    const snap = {
+      timestamp: new Date().toISOString(),
+      dom: document.querySelectorAll("*").length,
+      memory: performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + " Mo" : "N/A",
+      viewport: window.innerWidth + "×" + window.innerHeight,
+      platform: _devCurrentPlatform || "réelle",
+    };
+    _origConsole.log("[Dev] Performance snapshot:", snap);
+  }
+
+  // --- App Info with Quick Actions ---
+  const _origRenderAppInfo = _renderAppInfo;
+  _renderAppInfo = function () {
+    _origRenderAppInfo();
+    const el = document.getElementById("dev-app-info");
+    if (!el) return;
+    // Append quick actions card
+    el.innerHTML += '<div class="dev-card" style="grid-column: 1 / -1;">' +
+      '<div class="dev-card-title">Actions rapides</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-top:4px;">' +
+        '<button onclick="devQuickAction(\'toggle-theme\')" class="dev-btn" style="padding:8px;">🎨 Changer thème</button>' +
+        '<button onclick="devQuickAction(\'force-render\')" class="dev-btn" style="padding:8px;">🔄 Re-render notes</button>' +
+        '<button onclick="devQuickAction(\'toggle-animations\')" class="dev-btn" style="padding:8px;">✨ Toggle animations</button>' +
+        '<button onclick="devQuickAction(\'toggle-blur\')" class="dev-btn" style="padding:8px;">💎 Toggle blur</button>' +
+        '<button onclick="devQuickAction(\'toggle-blobs\')" class="dev-btn" style="padding:8px;">🫧 Toggle blobs</button>' +
+        '<button onclick="devQuickAction(\'perf-snapshot\')" class="dev-btn dev-btn-accent" style="padding:8px;">📊 Snapshot perf</button>' +
+        '<button onclick="devQuickAction(\'clear-cache\')" class="dev-btn" style="padding:8px;">🗑️ Recharger cache DOM</button>' +
+        '<button onclick="devQuickAction(\'reload\')" class="dev-btn" style="padding:8px;border-color:#f8514940;color:#f85149;">♻️ Recharger la page</button>' +
+      '</div>' +
+    '</div>';
+  };
+
+  // --- Viewport indicator for platform tab ---
+  const _origRenderPlatformStatus = _renderPlatformStatus;
+  _renderPlatformStatus = function () {
+    _origRenderPlatformStatus();
+    const el = document.getElementById("dev-platform-status");
+    if (!el) return;
+    // Add viewport info
+    const vp = _devCurrentPlatform && PLATFORMS[_devCurrentPlatform] && PLATFORMS[_devCurrentPlatform].viewport;
+    const vpInfo = vp ? vp.w + " × " + vp.h + " (simulé)" : window.innerWidth + " × " + window.innerHeight + " (réel)";
+    el.innerHTML +=
+      '<div class="dev-card-row"><span class="dev-card-key">Viewport cible</span><span class="dev-card-val">' + vpInfo + '</span></div>' +
+      '<div class="dev-card-row"><span class="dev-card-key">Device chrome</span><span class="dev-card-val' +
+      (_devCurrentPlatform && PLATFORMS[_devCurrentPlatform] && PLATFORMS[_devCurrentPlatform].os !== "windows" && PLATFORMS[_devCurrentPlatform].os !== "macos" && PLATFORMS[_devCurrentPlatform].os !== "linux" ? ' good">✓ Actif' : ' warn">✗ Inactif') +
+      '</span></div>';
+  };
+
 })();

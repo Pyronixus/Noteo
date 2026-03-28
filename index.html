@@ -36,6 +36,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://ui-avatars.com">
 
     <!-- Tailwind (blocking — required for first paint) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,6 +48,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 
     <!-- Fonts -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/antijingo/open-dyslexic@1.0/src/open-dyslexic.css" rel="stylesheet">
 
@@ -405,7 +407,7 @@
 
         <footer class="mt-auto p-4 text-center text-[var(--text-muted)] text-sm">
             <div class="flex items-center justify-center gap-6">
-                <span>Noteo <button onclick="openVersionModal()" class="hover:text-indigo-500 transition-colors font-bold">v2.1</button></span>
+                <span>Noteo <button onclick="openVersionModal()" class="hover:text-indigo-500 transition-colors font-bold">v2.2</button></span>
                 <button onclick="openOpenSourceModal()" class="hover:text-green-500 transition-colors">Open Source</button>
                 <span>Copyright © <button onclick="openPyroModal()" class="hover:text-purple-500 transition-colors"><strong>Pyro</strong></button></span>
                 <button onclick="openLegalModal()" class="hover:text-blue-500 transition-colors">Légal</button>
@@ -877,7 +879,7 @@
             <div class="space-y-4">
                 <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                     <h3 class="text-lg font-bold text-[var(--text-main)] mb-2">Version actuelle</h3>
-                    <p class="text-[var(--text-muted)]">2.1 (améliorations mobile et open source)</p>
+                    <p class="text-[var(--text-muted)]">2.2 (mode dev avancé et simulation d'appareils)</p>
                 </div>
                 <div class="p-4 bg-[var(--input-bg)] rounded-2xl border border-[var(--border)]">
                     <h3 class="text-lg font-bold text-[var(--text-main)] mb-4">Changelog</h3>
@@ -902,6 +904,16 @@
                 Historique des mises à jour
             </h2>
             <div class="space-y-6">
+                <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
+                    <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 2.2 (mode dev avancé)</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">
+                        <li>Mode développeur enrichi avec actions rapides et infos détaillées.</li>
+                        <li>Simulation réaliste d'appareils iOS et Android (barre de statut, Dynamic Island, navigation gestuelle).</li>
+                        <li>Fermeture des modals en cliquant en dehors.</li>
+                        <li>Optimisation des performances du terminal développeur (zéro coût quand fermé).</li>
+                    </ul>
+                </article>
+
                 <article class="bg-[var(--input-bg)] p-6 rounded-2xl border border-[var(--border)]">
                     <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Version 2.0 (mise à jour majeure)</h3>
                     <ul class="list-disc list-inside space-y-1 text-[var(--text-muted)]">

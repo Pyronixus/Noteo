@@ -34,7 +34,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-body); 
             color: var(--text-main);
-            transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1), color 0.8s ease;
+            transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.35s ease;
             overflow-x: hidden; 
             min-height: 100vh;
         }
@@ -58,9 +58,10 @@
             overflow: hidden; z-index: -1; pointer-events: none;
         }
         .blob {
-            position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6;
+            position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.6;
             animation: floatBlob 20s infinite alternate cubic-bezier(0.45, 0, 0.55, 1);
-            will-change: transform;
+            will-change: transform; transform: translateZ(0); backface-visibility: hidden;
+            contain: strict;
         }
         .blob-1 { width: 60vw; height: 60vw; background: rgba(99, 102, 241, 0.15); top: -10%; left: -10%; animation-duration: 25s; }
         .blob-2 { width: 50vw; height: 50vw; background: rgba(168, 85, 247, 0.15); bottom: -20%; right: -10%; animation-duration: 28s; animation-delay: -5s; }
@@ -76,10 +77,11 @@
         .glass-card {
             background: var(--bg-card); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
             border: 1px solid var(--card-border); box-shadow: var(--shadow);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+            contain: layout style;
         }
-        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.6) inset; }
-        .dark-theme .glass-card:hover { box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.04) inset; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 0 15px rgba(255, 255, 255, 0.5) inset; }
+        .dark-theme .glass-card:hover { box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.03) inset; }
 
         /* Safari-specific overrides (no blur) */
         .is-safari .glass-card {
@@ -112,8 +114,8 @@
         }
 
         /* Animations Utils */
-        .animate-entrance { animation: fadeUpSoft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
-        @keyframes fadeUpSoft { from { opacity: 0; transform: translateY(30px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+        .animate-entrance { animation: fadeUpSoft 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
+        @keyframes fadeUpSoft { from { opacity: 0; transform: translateY(20px) translateZ(0); } to { opacity: 1; transform: translateY(0) translateZ(0); } }
 
         .dropdown-menu {
             transform: scale(0.95) translateY(-10px); opacity: 0; pointer-events: none;
@@ -123,13 +125,14 @@
 
         /* Modals */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.4); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-            z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+            z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
             display: flex; align-items: center; justify-content: center;
+            contain: layout style;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
         .modal-content {
-            transform: scale(0.9) translateY(20px); opacity: 0; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: scale(0.9) translateY(20px); opacity: 0; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
             will-change: transform, opacity;
         }
         .modal-overlay.open .modal-content { transform: scale(1) translateY(0); opacity: 1; }
@@ -141,7 +144,7 @@
         .color-dot:hover { transform: scale(1.1); }
         .color-dot.active { transform: scale(1.3); border: 2px solid var(--bg-body); box-shadow: 0 0 20px currentColor; }
 
-        .history-content { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease; opacity: 0; }
+        .history-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease; opacity: 0; will-change: max-height, opacity; }
         .history-content.open { max-height: 5000px; opacity: 1; }
         canvas { width: 100% !important; height: 100% !important; }
 
@@ -206,6 +209,9 @@
             }
             .color-dot:hover {
                 transform: scale(1);
+            }
+            .blob {
+                animation-play-state: paused;
             }
         }
     .pin-btn { height: 4.5rem; font-size: 1.5rem; font-weight: 800; border-radius: 1.5rem; background: var(--input-bg); border: 1px solid var(--border); transition: all 0.2s; }
@@ -868,3 +874,195 @@ body.modal-open {
   flex-shrink: 0;
 }
 .dev-statusbar span { white-space: nowrap; }
+
+/* ====== DEVICE CHROME SIMULATION ====== */
+
+/* --- iOS Status Bar --- */
+.dev-device-ios-statusbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  background: var(--bg-body);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 24px 6px 24px;
+  z-index: 99998;
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  border-bottom: 0.5px solid var(--border);
+}
+.dev-ios-sb-left { flex: 1; display: flex; align-items: center; }
+.dev-ios-sb-time { font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
+.dev-ios-sb-notch { flex: 1; display: flex; justify-content: center; }
+.dev-ios-dynamic-island {
+  width: 126px;
+  height: 36px;
+  background: #000;
+  border-radius: 22px;
+  margin-bottom: -4px;
+}
+.dark-theme .dev-ios-dynamic-island { background: #1a1a1a; box-shadow: 0 0 0 1px rgba(255,255,255,0.08); }
+.dev-ios-sb-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: var(--text-main);
+}
+.dev-ios-battery {
+  width: 27px;
+  height: 12px;
+  border: 1.5px solid var(--text-main);
+  border-radius: 3px;
+  position: relative;
+  opacity: 0.8;
+}
+.dev-ios-battery::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 2.5px;
+  width: 2px;
+  height: 5px;
+  background: var(--text-main);
+  border-radius: 0 1px 1px 0;
+  opacity: 0.5;
+}
+.dev-ios-battery-fill {
+  width: 80%;
+  height: 100%;
+  background: #34c759;
+  border-radius: 1.5px;
+}
+
+/* iOS Home Indicator */
+.dev-device-ios-homebar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 34px;
+  background: var(--bg-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99998;
+  border-top: 0.5px solid var(--border);
+}
+.dev-ios-home-indicator {
+  width: 134px;
+  height: 5px;
+  background: var(--text-main);
+  border-radius: 100px;
+  opacity: 0.25;
+}
+
+/* Push content when iOS chrome is active */
+body.dev-sim-ios, body.dev-sim-ipados {
+  padding-top: 54px !important;
+  padding-bottom: 34px !important;
+}
+body.dev-sim-ios header, body.dev-sim-ipados header { top: 54px !important; }
+
+/* --- Android Status Bar --- */
+.dev-device-android-statusbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: var(--bg-body);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 99998;
+  font-family: 'Roboto', 'Google Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-main);
+  border-bottom: 0.5px solid var(--border);
+}
+.dev-android-sb-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dev-android-sb-time { font-size: 12px; font-weight: 500; }
+.dev-android-sb-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-main);
+}
+.dev-android-battery {
+  width: 22px;
+  height: 10px;
+  border: 1.5px solid var(--text-main);
+  border-radius: 2px;
+  position: relative;
+  opacity: 0.7;
+}
+.dev-android-battery::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 1.5px;
+  width: 2px;
+  height: 5px;
+  background: var(--text-main);
+  border-radius: 0 1px 1px 0;
+  opacity: 0.5;
+}
+.dev-android-battery-fill {
+  width: 75%;
+  height: 100%;
+  background: var(--text-main);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* Android Navigation Bar */
+.dev-device-android-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: var(--bg-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99998;
+  border-top: 0.5px solid var(--border);
+}
+.dev-android-gesture-bar {
+  width: 96px;
+  height: 4px;
+  background: var(--text-main);
+  border-radius: 100px;
+  opacity: 0.3;
+}
+
+/* Push content when Android chrome is active */
+body.dev-sim-android {
+  padding-top: 28px !important;
+  padding-bottom: 20px !important;
+}
+body.dev-sim-android header { top: 28px !important; }
+
+/* Device chrome is always above modals but below dev terminal */
+.dev-device-statusbar, .dev-device-homebar, .dev-device-navbar {
+  pointer-events: none;
+}
+
+/* No device chrome resources until simulation is active */
+#dev-ios-statusbar, #dev-ios-homebar, #dev-android-statusbar, #dev-android-navbar {
+  will-change: auto;
+}

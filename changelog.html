@@ -112,12 +112,64 @@
     <script>
         const versionsData = [
             {
+                number: "2.2",
+                type: "important",
+                color: "cyan",
+                label: "Mise à jour importante",
+                icon: "⭐",
+                current: true,
+                content: `
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-cyan-500 mb-3">🛠️ Mode Développeur Avancé</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3">
+                                <span class="text-cyan-500 font-bold">→</span>
+                                <span><strong>Actions Rapides</strong> - Basculer le thème, vider le cache, forcer le rendu, etc. en un clic</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-cyan-500 font-bold">→</span>
+                                <span><strong>Informations App Enrichies</strong> - Détails complets sur l'état de l'application et du viewport</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-cyan-500 mb-3">📱 Simulation d'Appareils Réaliste</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3">
+                                <span class="text-cyan-500 font-bold">→</span>
+                                <span><strong>Chrome iOS</strong> - Barre de statut avec Dynamic Island, indicateur d'accueil et batterie simulés</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-cyan-500 font-bold">→</span>
+                                <span><strong>Chrome Android</strong> - Barre de statut et barre de navigation gestuelle réalistes</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-cyan-500 font-bold">→</span>
+                                <span><strong>Viewports Précis</strong> - Dimensions exactes de chaque appareil simulé</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3 mb-6 text-[var(--text-main)]">
+                        <h4 class="font-bold text-lg text-cyan-500 mb-3">✨ Améliorations UX</h4>
+                        <ul class="space-y-2 ml-4">
+                            <li class="flex gap-3">
+                                <span class="text-cyan-500 font-bold">→</span>
+                                <span><strong>Fermeture des Modals</strong> - Cliquer en dehors d'une modal la ferme automatiquement</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-cyan-500 font-bold">→</span>
+                                <span><strong>Optimisation Performances</strong> - Chargement paresseux du terminal développeur (zéro coût quand fermé)</span>
+                            </li>
+                        </ul>
+                    </div>
+                `
+            },
+            {
                 number: "2.1",
                 type: "important",
                 color: "emerald",
                 label: "Mise à jour importante",
                 icon: "⭐",
-                current: true,
                 content: `
                     <div class="space-y-3 mb-6 text-[var(--text-main)]">
                         <h4 class="font-bold text-lg text-emerald-500 mb-3">📱 Améliorations Mobile</h4>
