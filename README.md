@@ -17,7 +17,7 @@ Version actuelle : Noteo 2.0
 - [**1.7**] : Amélioration du mode mobile restreint et stabilisation de la sauvegarde locale.
 - [**1.6**] : Ajout d'un footer, option de tri, correction d'une multitude de bugs
 
-**[📋 Voir le changelog complet →](changelog.html)**
+**[📋 Voir le changelog complet →](https://pyronixus.github.io/Noteo/changelog.html)**
 ## Fonctionnalités Principales
 
 - **Gestion des matières:** 📚
